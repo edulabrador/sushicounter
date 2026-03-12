@@ -1,8 +1,8 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:uuid/uuid.dart';
-import '../../core/models/session.dart';
-import '../../core/providers/storage_provider.dart';
-import '../../global/providers/global_provider.dart';
+import 'package:sushiscore/core/models/session.dart';
+import 'package:sushiscore/core/providers/storage_provider.dart';
+import 'package:sushiscore/features/global/providers/global_provider.dart';
 
 class CounterState {
   final int count;

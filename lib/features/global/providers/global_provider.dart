@@ -1,7 +1,7 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import '../../core/storage/hive_repository.dart';
-import '../../core/models/global_state.dart';
-import '../../core/providers/storage_provider.dart';
+import '../../../core/storage/hive_repository.dart';
+import '../../../core/models/global_state.dart';
+import '../../../core/providers/storage_provider.dart';
 
 class GlobalStateNotifier extends StateNotifier<GlobalState> {
   final HiveRepository repository;

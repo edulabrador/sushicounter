@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import '../providers/counter_provider.dart';
-import '../../global/providers/global_provider.dart';
-import '../../settings/views/settings_view.dart';
+import 'package:sushiscore/features/counter/providers/counter_provider.dart';
+import 'package:sushiscore/features/global/providers/global_provider.dart';
+import 'package:sushiscore/features/settings/views/settings_view.dart';
 
 class CounterView extends ConsumerWidget {
   const CounterView({super.key});

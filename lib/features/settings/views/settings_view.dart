@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import '../../counter/providers/counter_provider.dart';
-import '../../global/providers/global_provider.dart';
+import 'package:sushiscore/features/counter/providers/counter_provider.dart';
+import 'package:sushiscore/features/global/providers/global_provider.dart';
 
 class SettingsView extends ConsumerStatefulWidget {
   const SettingsView({super.key});

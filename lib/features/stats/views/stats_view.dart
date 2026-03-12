@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:fl_chart/fl_chart.dart';
-import '../../core/providers/storage_provider.dart';
-import '../../global/providers/global_provider.dart';
+import 'package:sushiscore/core/providers/storage_provider.dart';
+import 'package:sushiscore/features/global/providers/global_provider.dart';
 
 class StatsView extends ConsumerStatefulWidget {
   const StatsView({super.key});
@@ -84,8 +84,8 @@ class _StatsViewState extends ConsumerState<StatsView> {
                   padding: const EdgeInsets.only(right: 16.0),
                   child: LineChart(
                     LineChartData(
-                      gridData: FlGridData(show: true, drawVerticalLine: false),
-                      titlesData: FlTitlesData(
+                      gridData: const FlGridData(show: true, drawVerticalLine: false),
+                      titlesData: const FlTitlesData(
                         rightTitles: AxisTitles(sideTitles: SideTitles(showTitles: false)),
                         topTitles: AxisTitles(sideTitles: SideTitles(showTitles: false)),
                       ),
@@ -98,7 +98,7 @@ class _StatsViewState extends ConsumerState<StatsView> {
                           isCurved: true,
                           color: Colors.orange,
                           barWidth: 4,
-                          dotData: FlDotData(show: true),
+                          dotData: const FlDotData(show: true),
                         ),
                       ],
                     ),
