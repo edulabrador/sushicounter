@@ -1,52 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:sushiscore/core/providers/storage_provider.dart';
-import 'package:sushiscore/core/models/session.dart';
+import 'package:sushiscore/features/history/providers/session_provider.dart';
 import 'package:intl/intl.dart';
 
-class HistoryView extends ConsumerStatefulWidget {
+class HistoryView extends ConsumerWidget {
   const HistoryView({super.key});
 
   @override
-  ConsumerState<HistoryView> createState() => _HistoryViewState();
-}
+  Widget build(BuildContext context, WidgetRef ref) {
+    final sessions = ref.watch(sessionListProvider);
 
-class _HistoryViewState extends ConsumerState<HistoryView> {
-  List<Session> sessions = [];
-
-  @override
-  void initState() {
-    super.initState();
-    _loadSessions();
-  }
-
-  void _loadSessions() {
-    setState(() {
-      sessions = ref.read(storageProvider).getAllSessions();
-    });
-  }
-
-  void _deleteSession(String id) async {
-    final confirm = await showDialog<bool>(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('Delete Session?'),
-        content: const Text('This will remove it from history but not affect Global Totals.'),
-        actions: [
-          TextButton(onPressed: () => Navigator.pop(context, false), child: const Text('Cancel')),
-          TextButton(onPressed: () => Navigator.pop(context, true), child: const Text('Delete', style: TextStyle(color: Colors.red))),
-        ],
-      ),
-    );
-
-    if (confirm == true) {
-      await ref.read(storageProvider).deleteSession(id);
-      _loadSessions();
-    }
-  }
-
-  @override
-  Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(title: const Text('SESSION HISTORY')),
       body: sessions.isEmpty
@@ -66,7 +29,7 @@ class _HistoryViewState extends ConsumerState<HistoryView> {
                       Text('${session.count}', style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
                       IconButton(
                         icon: const Icon(Icons.delete_outline, color: Colors.redAccent),
-                        onPressed: () => _deleteSession(session.id),
+                        onPressed: () => _deleteSession(context, ref, session.id),
                       ),
                     ],
                   ),
@@ -96,5 +59,23 @@ class _HistoryViewState extends ConsumerState<HistoryView> {
               },
             ),
     );
+  }
+
+  void _deleteSession(BuildContext context, WidgetRef ref, String id) async {
+    final confirm = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Delete Session?'),
+        content: const Text('This will remove it from history but not affect Global Totals.'),
+        actions: [
+          TextButton(onPressed: () => Navigator.pop(context, false), child: const Text('Cancel')),
+          TextButton(onPressed: () => Navigator.pop(context, true), child: const Text('Delete', style: TextStyle(color: Colors.red))),
+        ],
+      ),
+    );
+
+    if (confirm == true) {
+      await ref.read(sessionListProvider.notifier).deleteSession(id);
+    }
   }
 }

@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:fl_chart/fl_chart.dart';
-import 'package:sushiscore/core/providers/storage_provider.dart';
+import 'package:sushiscore/features/history/providers/session_provider.dart';
 import 'package:sushiscore/features/global/providers/global_provider.dart';
 
 class StatsView extends ConsumerStatefulWidget {
@@ -17,9 +17,8 @@ class _StatsViewState extends ConsumerState<StatsView> {
   @override
   Widget build(BuildContext context) {
     final globalState = ref.watch(globalStateProvider);
-    final repo = ref.read(storageProvider);
-    var sessions = repo.getAllSessions();
-    sessions = sessions.reversed.toList(); // chronological for chart
+    final allSessions = ref.watch(sessionListProvider);
+    var sessions = allSessions.reversed.toList(); // chronological for chart
 
     int maxCount = 0;
     double avgTaps = 0;

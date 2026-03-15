@@ -3,6 +3,7 @@ import 'package:uuid/uuid.dart';
 import 'package:sushiscore/core/models/session.dart';
 import 'package:sushiscore/core/providers/storage_provider.dart';
 import 'package:sushiscore/features/global/providers/global_provider.dart';
+import 'package:sushiscore/features/history/providers/session_provider.dart';
 
 class CounterState {
   final int count;
@@ -10,10 +11,10 @@ class CounterState {
 
   CounterState({required this.count, this.startedAt});
 
-  CounterState copyWith({int? count, DateTime? startedAt}) {
+  CounterState copyWith({int? count, DateTime? Function()? startedAt}) {
     return CounterState(
       count: count ?? this.count,
-      startedAt: startedAt ?? this.startedAt,
+      startedAt: startedAt != null ? startedAt() : this.startedAt,
     );
   }
 }
@@ -64,6 +65,9 @@ class CounterNotifier extends StateNotifier<CounterState> {
     // Update global lifetime stats via its provider
     await ref.read(globalStateProvider.notifier).updateGlobal(state.count);
 
+    // Notify session list provider to reload
+    ref.read(sessionListProvider.notifier).reload();
+
     // Reset local counter state
     resetCurrent();
   }
@@ -72,3 +76,4 @@ class CounterNotifier extends StateNotifier<CounterState> {
 final counterProvider = StateNotifierProvider<CounterNotifier, CounterState>((ref) {
   return CounterNotifier(ref);
 });
+
