@@ -6,7 +6,7 @@ import 'package:flutter/material.dart';
 ///
 /// Recreated in vector (CustomPaint) rather than embedding a bitmap so it
 /// scales crisply at any size and carries no asset weight. Each tap fires a
-/// little jump-and-flip animation.
+/// little jump-and-flip animation plus a burst of fireworks.
 class SushiButton extends StatefulWidget {
   const SushiButton({
     super.key,
@@ -26,6 +26,18 @@ class SushiButton extends StatefulWidget {
 class _SushiButtonState extends State<SushiButton>
     with SingleTickerProviderStateMixin {
   late final AnimationController _controller;
+  final math.Random _rnd = math.Random();
+  List<_Spark> _sparks = const [];
+
+  static const _sparkColors = [
+    Color(0xFFFF6B6B), // red
+    Color(0xFFFFD93D), // yellow
+    Color(0xFFFF9F43), // orange
+    Color(0xFF6BCB77), // green
+    Color(0xFF4D96FF), // blue
+    Color(0xFFB983FF), // purple
+    Color(0xFFFF7BAC), // pink
+  ];
 
   @override
   void initState() {
@@ -42,10 +54,27 @@ class _SushiButtonState extends State<SushiButton>
     super.dispose();
   }
 
+  void _spawnSparks() {
+    const count = 16;
+    _sparks = List.generate(count, (i) {
+      final angle = (i / count) * 2 * math.pi + _rnd.nextDouble() * 0.4;
+      final distance = widget.size * (0.48 + _rnd.nextDouble() * 0.38);
+      final radius = widget.size * (0.012 + _rnd.nextDouble() * 0.02);
+      final color = _sparkColors[_rnd.nextInt(_sparkColors.length)];
+      return _Spark(
+        angle: angle,
+        distance: distance,
+        radius: radius,
+        color: color,
+      );
+    });
+  }
+
   void _handleTap() {
     widget.onTap();
+    _spawnSparks();
     // Replay from the start on every tap, even mid-flight, so rapid tapping
-    // keeps hopping.
+    // keeps hopping and sparking.
     _controller.forward(from: 0);
   }
 
@@ -65,11 +94,27 @@ class _SushiButtonState extends State<SushiButton>
           final spin = v * 2 * math.pi;
           // A touch of squash-and-stretch for bounce.
           final scale = 1 + math.sin(math.pi * v) * 0.06;
-          return Transform.translate(
-            offset: Offset(0, jump),
-            child: Transform.rotate(
-              angle: spin,
-              child: Transform.scale(scale: scale, child: child),
+          return SizedBox(
+            width: widget.size,
+            height: widget.size,
+            child: Stack(
+              clipBehavior: Clip.none,
+              alignment: Alignment.center,
+              children: [
+                // Fireworks burst radiating from behind the sushi.
+                Positioned.fill(
+                  child: CustomPaint(
+                    painter: _FireworksPainter(v, _sparks),
+                  ),
+                ),
+                Transform.translate(
+                  offset: Offset(0, jump),
+                  child: Transform.rotate(
+                    angle: spin,
+                    child: Transform.scale(scale: scale, child: child),
+                  ),
+                ),
+              ],
             ),
           );
         },
@@ -81,6 +126,65 @@ class _SushiButtonState extends State<SushiButton>
       ),
     );
   }
+}
+
+/// A single firework particle.
+class _Spark {
+  const _Spark({
+    required this.angle,
+    required this.distance,
+    required this.radius,
+    required this.color,
+  });
+
+  final double angle;
+  final double distance;
+  final double radius;
+  final Color color;
+}
+
+class _FireworksPainter extends CustomPainter {
+  _FireworksPainter(this.progress, this.sparks);
+
+  final double progress;
+  final List<_Spark> sparks;
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    if (progress <= 0 || progress >= 1 || sparks.isEmpty) return;
+
+    final center = Offset(size.width / 2, size.height / 2);
+    final eased = Curves.easeOut.transform(progress);
+    final fade = (1 - Curves.easeIn.transform(progress)).clamp(0.0, 1.0);
+    final gravity = size.height * 0.22 * progress * progress;
+
+    for (final s in sparks) {
+      final dx = math.cos(s.angle) * s.distance * eased;
+      final dy = math.sin(s.angle) * s.distance * eased + gravity;
+      final pos = center + Offset(dx, dy);
+      final tail = Offset.lerp(center, pos, 0.72)!;
+
+      // Streak trailing the spark.
+      canvas.drawLine(
+        tail,
+        pos,
+        Paint()
+          ..color = s.color.withAlpha((fade * 130).round())
+          ..strokeWidth = s.radius * 0.9
+          ..strokeCap = StrokeCap.round,
+      );
+      // The spark head.
+      canvas.drawCircle(
+        pos,
+        s.radius * (1 - progress * 0.35),
+        Paint()..color = s.color.withAlpha((fade * 255).round()),
+      );
+    }
+  }
+
+  @override
+  bool shouldRepaint(covariant _FireworksPainter old) =>
+      old.progress != progress || old.sparks != sparks;
 }
 
 class _SushiPainter extends CustomPainter {
