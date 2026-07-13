@@ -27,7 +27,7 @@ This project is built using a feature-first clean architecture pattern to remain
 1. Ensure you have the Flutter SDK installed on your machine.
 2. Clone this repository:
    ```bash
-   git clone https://github.com/your-username/sushi-score-flutter.git
+   git clone https://github.com/edulabrador/sushicounter.git
    ```
 3. Fetch dependencies:
    ```bash

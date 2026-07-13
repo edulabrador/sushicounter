@@ -10,25 +10,34 @@ class CounterState {
   final DateTime? startedAt;
 
   CounterState({required this.count, this.startedAt});
-
-  CounterState copyWith({int? count, DateTime? Function()? startedAt}) {
-    return CounterState(
-      count: count ?? this.count,
-      startedAt: startedAt != null ? startedAt() : this.startedAt,
-    );
-  }
 }
 
 class CounterNotifier extends StateNotifier<CounterState> {
   final Ref ref;
 
-  CounterNotifier(this.ref) : super(CounterState(count: 0));
+  CounterNotifier(this.ref) : super(CounterState(count: 0)) {
+    _restoreOngoing();
+  }
+
+  // Restore any unsaved session persisted before the app was closed.
+  void _restoreOngoing() {
+    final repo = ref.read(storageProvider);
+    final count = repo.getOngoingCount();
+    if (count > 0) {
+      state = CounterState(count: count, startedAt: repo.getOngoingStartedAt());
+    }
+  }
+
+  void _persistOngoing() {
+    ref.read(storageProvider).saveOngoingSession(state.count, state.startedAt);
+  }
 
   void increment() {
     state = CounterState(
       count: state.count + 1,
       startedAt: state.startedAt ?? DateTime.now(),
     );
+    _persistOngoing();
   }
 
   void decrement() {
@@ -37,23 +46,26 @@ class CounterNotifier extends StateNotifier<CounterState> {
         count: state.count - 1,
         startedAt: state.startedAt,
       );
+      _persistOngoing();
     }
   }
 
   void resetCurrent() {
     state = CounterState(count: 0, startedAt: null);
+    _persistOngoing();
   }
 
   Future<void> endSession() async {
-    if (state.count == 0 || state.startedAt == null) return;
+    if (state.count == 0) return;
 
     final repo = ref.read(storageProvider);
     final endedAt = DateTime.now();
-    final duration = endedAt.difference(state.startedAt!).inSeconds;
+    final startedAt = state.startedAt ?? endedAt;
+    final duration = endedAt.difference(startedAt).inSeconds;
 
     final session = Session(
       id: const Uuid().v4(),
-      startedAt: state.startedAt!,
+      startedAt: startedAt,
       endedAt: endedAt,
       count: state.count,
       durationSeconds: duration,

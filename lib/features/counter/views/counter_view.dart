@@ -28,80 +28,90 @@ class CounterView extends ConsumerWidget {
       body: SafeArea(
         child: Column(
           children: [
-            const Spacer(),
-            // Giant Counter Number
-            Text(
-              '${counterState.count}',
-              style: Theme.of(context).textTheme.displayLarge,
-            ),
-            const SizedBox(height: 16),
-            const Text(
-              'Tap the sushi to begin!',
-              style: TextStyle(color: Colors.white54, fontSize: 16),
-            ),
-            const SizedBox(height: 48),
+            // Scales down gracefully on short viewports (landscape/desktop)
+            // instead of overflowing.
+            Expanded(
+              child: FittedBox(
+                fit: BoxFit.scaleDown,
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    // Giant Counter Number
+                    Text(
+                      '${counterState.count}',
+                      style: Theme.of(context).textTheme.displayLarge,
+                    ),
+                    const SizedBox(height: 16),
+                    const Text(
+                      'Tap the sushi to begin!',
+                      style: TextStyle(color: Colors.white54, fontSize: 16),
+                    ),
+                    const SizedBox(height: 48),
 
-            // Sushi Button
-            GestureDetector(
+                    // Sushi Button
+                    GestureDetector(
               onTap: () {
                 ref.read(counterProvider.notifier).increment();
               },
               onLongPress: () {
                 ref.read(counterProvider.notifier).decrement();
               },
-              child: Container(
-                width: 200,
-                height: 200,
-                decoration: const BoxDecoration(
-                  shape: BoxShape.circle,
-                  color: Colors.transparent, // Invisible hit area expanded
-                ),
-                child: Center(
-                  child: Stack(
-                    alignment: Alignment.center,
-                    children: [
-                      // Nori
-                      Container(
-                        width: 140,
-                        height: 100,
-                        decoration: BoxDecoration(
-                          color: Colors.black87,
-                          borderRadius: BorderRadius.circular(20),
+                      child: Container(
+                        width: 200,
+                        height: 200,
+                        decoration: const BoxDecoration(
+                          shape: BoxShape.circle,
+                          color: Colors.transparent, // Invisible hit area expanded
+                        ),
+                        child: Center(
+                          child: Stack(
+                            alignment: Alignment.center,
+                            children: [
+                              // Nori
+                              Container(
+                                width: 140,
+                                height: 100,
+                                decoration: BoxDecoration(
+                                  color: Colors.black87,
+                                  borderRadius: BorderRadius.circular(20),
+                                ),
+                              ),
+                              // Rice
+                              Container(
+                                width: 120,
+                                height: 80,
+                                decoration: BoxDecoration(
+                                  color: Colors.white,
+                                  borderRadius: BorderRadius.circular(16),
+                                ),
+                              ),
+                              // Salmon / Orange center
+                              Container(
+                                width: 100,
+                                height: 60,
+                                decoration: BoxDecoration(
+                                  color: Colors.orangeAccent,
+                                  borderRadius: BorderRadius.circular(12),
+                                ),
+                                child: Row(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  children: [
+                                    // Eyes
+                                    Container(width: 8, height: 8, decoration: const BoxDecoration(color: Colors.black87, shape: BoxShape.circle)),
+                                    const SizedBox(width: 24),
+                                    Container(width: 8, height: 8, decoration: const BoxDecoration(color: Colors.black87, shape: BoxShape.circle)),
+                                  ],
+                                ),
+                              ),
+                            ],
+                          ),
                         ),
                       ),
-                      // Rice
-                      Container(
-                        width: 120,
-                        height: 80,
-                        decoration: BoxDecoration(
-                          color: Colors.white,
-                          borderRadius: BorderRadius.circular(16),
-                        ),
-                      ),
-                      // Salmon / Orange center
-                      Container(
-                        width: 100,
-                        height: 60,
-                        decoration: BoxDecoration(
-                          color: Colors.orangeAccent,
-                          borderRadius: BorderRadius.circular(12),
-                        ),
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            // Eyes
-                            Container(width: 8, height: 8, decoration: const BoxDecoration(color: Colors.black87, shape: BoxShape.circle)),
-                            const SizedBox(width: 24),
-                            Container(width: 8, height: 8, decoration: const BoxDecoration(color: Colors.black87, shape: BoxShape.circle)),
-                          ],
-                        ),
-                      ),
-                    ],
-                  ),
+                    ),
+                  ],
                 ),
               ),
             ),
-            const Spacer(),
 
             // Bottom Rounded Card
             Padding(

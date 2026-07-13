@@ -5,9 +5,11 @@ import '../models/global_state.dart';
 class HiveRepository {
   static const String sessionBoxName = 'sessions';
   static const String globalStateBoxName = 'global_state';
+  static const String appStateBoxName = 'app_state';
 
   late Box<Session> _sessionBox;
   late Box<GlobalState> _globalStateBox;
+  late Box _appStateBox;
 
   Future<void> init() async {
     await Hive.initFlutter();
@@ -16,6 +18,7 @@ class HiveRepository {
 
     _sessionBox = await Hive.openBox<Session>(sessionBoxName);
     _globalStateBox = await Hive.openBox<GlobalState>(globalStateBoxName);
+    _appStateBox = await Hive.openBox(appStateBoxName);
 
     // Initialize global state if it doesn't exist
     if (_globalStateBox.isEmpty) {
@@ -40,21 +43,45 @@ class HiveRepository {
   }
 
   // Global State Methods
+  // Returns a fresh copy: Hive caches and returns the same object instance,
+  // and Riverpod's identity check would otherwise never notify listeners.
   GlobalState getGlobalState() {
-    return _globalStateBox.get('state')!;
+    final stored = _globalStateBox.get('state');
+    return GlobalState(
+      lifetimeTotalTaps: stored?.lifetimeTotalTaps ?? 0,
+      lifetimeTotalSessions: stored?.lifetimeTotalSessions ?? 0,
+    );
   }
 
   Future<void> updateGlobalState(int additionalTaps) async {
-    final state = getGlobalState();
-    state.lifetimeTotalTaps += additionalTaps;
-    state.lifetimeTotalSessions += 1;
-    await state.save();
+    final current = getGlobalState();
+    await _globalStateBox.put(
+      'state',
+      GlobalState(
+        lifetimeTotalTaps: current.lifetimeTotalTaps + additionalTaps,
+        lifetimeTotalSessions: current.lifetimeTotalSessions + 1,
+      ),
+    );
   }
 
   Future<void> resetGlobalState() async {
-    final state = getGlobalState();
-    state.lifetimeTotalTaps = 0;
-    state.lifetimeTotalSessions = 0;
-    await state.save();
+    await _globalStateBox.put(
+      'state',
+      GlobalState(lifetimeTotalTaps: 0, lifetimeTotalSessions: 0),
+    );
+  }
+
+  // Ongoing (unsaved) session persistence, so taps survive an app restart.
+  int getOngoingCount() {
+    return _appStateBox.get('ongoingCount', defaultValue: 0) as int;
+  }
+
+  DateTime? getOngoingStartedAt() {
+    return _appStateBox.get('ongoingStartedAt') as DateTime?;
+  }
+
+  Future<void> saveOngoingSession(int count, DateTime? startedAt) async {
+    await _appStateBox.put('ongoingCount', count);
+    await _appStateBox.put('ongoingStartedAt', startedAt);
   }
 }
