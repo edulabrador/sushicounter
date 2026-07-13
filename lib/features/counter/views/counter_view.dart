@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:sushiscore/features/counter/providers/counter_provider.dart';
+import 'package:sushiscore/features/counter/widgets/sushi_button.dart';
 import 'package:sushiscore/features/global/providers/global_provider.dart';
 import 'package:sushiscore/features/settings/views/settings_view.dart';
 
@@ -48,65 +49,12 @@ class CounterView extends ConsumerWidget {
                     ),
                     const SizedBox(height: 48),
 
-                    // Sushi Button
-                    GestureDetector(
-              onTap: () {
-                ref.read(counterProvider.notifier).increment();
-              },
-              onLongPress: () {
-                ref.read(counterProvider.notifier).decrement();
-              },
-                      child: Container(
-                        width: 200,
-                        height: 200,
-                        decoration: const BoxDecoration(
-                          shape: BoxShape.circle,
-                          color: Colors.transparent, // Invisible hit area expanded
-                        ),
-                        child: Center(
-                          child: Stack(
-                            alignment: Alignment.center,
-                            children: [
-                              // Nori
-                              Container(
-                                width: 140,
-                                height: 100,
-                                decoration: BoxDecoration(
-                                  color: Colors.black87,
-                                  borderRadius: BorderRadius.circular(20),
-                                ),
-                              ),
-                              // Rice
-                              Container(
-                                width: 120,
-                                height: 80,
-                                decoration: BoxDecoration(
-                                  color: Colors.white,
-                                  borderRadius: BorderRadius.circular(16),
-                                ),
-                              ),
-                              // Salmon / Orange center
-                              Container(
-                                width: 100,
-                                height: 60,
-                                decoration: BoxDecoration(
-                                  color: Colors.orangeAccent,
-                                  borderRadius: BorderRadius.circular(12),
-                                ),
-                                child: Row(
-                                  mainAxisAlignment: MainAxisAlignment.center,
-                                  children: [
-                                    // Eyes
-                                    Container(width: 8, height: 8, decoration: const BoxDecoration(color: Colors.black87, shape: BoxShape.circle)),
-                                    const SizedBox(width: 24),
-                                    Container(width: 8, height: 8, decoration: const BoxDecoration(color: Colors.black87, shape: BoxShape.circle)),
-                                  ],
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                      ),
+                    // Sushi Button — tap to count, long-press to decrement.
+                    SushiButton(
+                      onTap: () =>
+                          ref.read(counterProvider.notifier).increment(),
+                      onLongPress: () =>
+                          ref.read(counterProvider.notifier).decrement(),
                     ),
                   ],
                 ),
