@@ -1,52 +1,53 @@
-# Sushi Score Flutter App
+# 🍣 Sushi Score
 
-A minimalist Flutter application built with a dark theme to track session taps ("Sushi Score") and aggregate lifetime global taps.
+A tiny, dark-themed Flutter app for one purpose: tapping a button and watching the number go up.
 
-## Features
+I built this as a no-frills tally counter — the kind of thing you reach for when you just need to count *something* (reps, drinks, snacks, whatever "sushi" means to you that day) without opening an app packed with ads and permissions it doesn't need. Tap to add, long-press to undo a mistake, and end the session when you're done. Everything is saved locally on your device — there's no account, no backend, no tracking.
 
-- **Counter Screen**: A dark minimal UI with a giant centered counter and a customizable sushi graphic for hit detection. Tapping the sushi increments the current session; long-pressing decrements it. Includes optimistic UI updates.
-- **History Screen**: A reverse-chronological list of all saved sessions. Includes duration tracking, timestamps, and tap counts per session. Allows for session deletion.
-- **Stats Screen**: Key performance indicators (KPIs) showing lifetime total taps, total sessions, average taps per session, and the best session record. Includes a trend line chart (powered by `fl_chart`) to visualize taps over time, with filters for 'All', 'Last 7', and 'Last 30' sessions.
-- **Settings Screen**: Options to reset the current ongoing session or securely wipe the global lifetime counter.
-  - *Note on Global Reset*: Resetting the global lifetime counter requires strong confirmation (typing "RESET"). This action wipes `lifetimeTotalTaps` and `lifetimeTotalSessions` but intentionally **preserves your session history**.
+## What it does
 
-## Architecture
+**Counter** — the home screen. A big number, a sushi graphic you tap to increment, and a long-press to decrement if you miscount. Your current session count and your all-time global count sit right below it, so you always know where you stand.
 
-This project is built using a feature-first clean architecture pattern to remain beginner-friendly yet scalable:
+**History** — every past session, newest first, with how many taps it had, how long it lasted, and when it happened. Made a mistake or just want to clean up? You can delete individual sessions.
 
-- **State Management**: `flutter_riverpod`
-- **Local Storage**: `hive` and `hive_flutter` for fast, synchronous NoSQL persistence.
-- **Charting**: `fl_chart`
-- **Structure**:
-  - `lib/core/` (Models, Theme, Storage repository)
-  - `lib/features/` (Counter, History, Stats, Settings, Global views and providers)
-  - `lib/shared/` (Common UI widgets like Bottom Nav)
+**Stats** — the bigger picture: total taps ever, total sessions, your average per session, and your best session on record, plus a trend chart (via `fl_chart`) so you can see whether you're trending up or down over your last 7, last 30, or all sessions.
 
-## How to Run
+**Settings** — reset your current session if you want a fresh start, or wipe your global lifetime stats entirely. That second one is intentionally hard to trigger by accident: you have to type "RESET" to confirm. Even then, it only clears the lifetime totals — your session history stays intact, so you never lose the log of what actually happened.
 
-1. Ensure you have the Flutter SDK installed on your machine.
-2. Clone this repository:
-   ```bash
-   git clone https://github.com/edulabrador/sushicounter.git
-   ```
-3. Fetch dependencies:
-   ```bash
-   flutter pub get
-   ```
-4. Run on your desired device or emulator:
-   ```bash
-   flutter run
-   ```
+## Under the hood
 
-## How to Build Android Release
+Nothing fancy, just a clean, feature-first structure so it's easy to find your way around:
 
-To generate an optimized APK for Android:
+- **State management** — [`flutter_riverpod`](https://pub.dev/packages/flutter_riverpod)
+- **Local storage** — [`hive`](https://pub.dev/packages/hive) / `hive_flutter`, so everything persists instantly with no server round-trip
+- **Charts** — [`fl_chart`](https://pub.dev/packages/fl_chart) for the trend line on the Stats screen
+
+```
+lib/
+├── core/       # models, theme, storage repository
+├── features/   # counter, history, stats, settings — each with its own views/providers
+└── shared/     # widgets used across features (bottom nav, etc.)
+```
+
+## Running it locally
+
+You'll need the [Flutter SDK](https://docs.flutter.dev/get-started/install) installed.
+
+```bash
+git clone https://github.com/edulabrador/sushicounter.git
+cd sushicounter
+flutter pub get
+flutter run
+```
+
+## Building an Android release
 
 ```bash
 flutter build apk --release
 ```
-The output file will be located at `build/app/outputs/flutter-apk/app-release.apk`.
+
+The APK shows up at `build/app/outputs/flutter-apk/app-release.apk`.
 
 ## License
 
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+MIT — see [LICENSE](LICENSE). Use it, fork it, tap it as much as you want.
