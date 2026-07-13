@@ -50,4 +50,4 @@ The APK shows up at `build/app/outputs/flutter-apk/app-release.apk`.
 
 ## License
 
-MIT — see [LICENSE](LICENSE). Use it, fork it, tap it as much as you want.
+All rights reserved — see [LICENSE](LICENSE). You're welcome to read the code, but reuse or redistribution requires my permission.
