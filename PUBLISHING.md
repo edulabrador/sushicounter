@@ -14,6 +14,10 @@ Progress checklist for getting Sushi Tracker onto Google Play.
       safe** — losing either means you can never push an update to this app again.
 - [x] **App icon** — `assets/icon/app_icon.png` (the sushi tray icon), wired through
       `flutter_launcher_icons` in `pubspec.yaml`. Regenerate anytime with `dart run flutter_launcher_icons`.
+- [x] **Privacy policy page written** — `docs/privacy-policy.html` (collects nothing, all data
+      local, no network). To get the public URL Play requires: in the GitHub repo go to
+      **Settings → Pages → Source: Deploy from a branch → main / `/docs`**. The URL will then be
+      `https://edulabrador.github.io/sushicounter/privacy-policy.html`.
 
 ### Play Store listing copy (use when filling out the Play Console form — not code)
 - **App name:** Sushi Tracker
@@ -22,6 +26,9 @@ Progress checklist for getting Sushi Tracker onto Google Play.
 ## To do
 
 ### 1. Build the release bundle (Play wants an AAB, not an APK)
+On **Windows**, first enable Developer Mode (Flutter needs symlink support to build
+with plugins): Settings → Privacy & security → For developers → Developer Mode = On
+(or run `start ms-settings:developers`). Then:
 ```bash
 flutter build appbundle --release
 # output: build/app/outputs/bundle/release/app-release.aab
@@ -34,9 +41,8 @@ reused versionCode).
 ### 3. Play Console setup (not code)
 - [ ] Google Play developer account (one-time $25).
 - [ ] Store listing: 512×512 icon, 1024×500 feature graphic, ≥2 phone screenshots, short + full description.
-- [ ] **Privacy policy URL** — required even though the app collects nothing. A single
-      GitHub Pages page stating "all data is stored locally on your device, nothing is
-      collected or transmitted" is enough.
+- [ ] **Privacy policy URL** — page already written (`docs/privacy-policy.html`); just enable
+      GitHub Pages (see the Done section) and use the resulting URL.
 - [ ] Data safety form: declare no data collected / no data shared.
 - [ ] Content rating questionnaire.
 - [ ] Target audience + content declarations.
