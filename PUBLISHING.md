@@ -14,10 +14,10 @@ Progress checklist for getting Sushi Tracker onto Google Play.
       safe** — losing either means you can never push an update to this app again.
 - [x] **App icon** — `assets/icon/app_icon.png` (the sushi tray icon), wired through
       `flutter_launcher_icons` in `pubspec.yaml`. Regenerate anytime with `dart run flutter_launcher_icons`.
-- [x] **Privacy policy page written** — `docs/privacy-policy.html` (collects nothing, all data
-      local, no network). To get the public URL Play requires: in the GitHub repo go to
-      **Settings → Pages → Source: Deploy from a branch → main / `/docs`**. The URL will then be
-      `https://edulabrador.github.io/sushicounter/privacy-policy.html`.
+- [x] **Privacy policy published** — `docs/privacy-policy.html`, served live via GitHub Pages
+      (main / `/docs`) at
+      **https://edulabrador.github.io/sushicounter/privacy-policy.html** — paste this into the
+      Play Console "Privacy policy" field.
 
 ### Play Store listing copy (use when filling out the Play Console form — not code)
 - **App name:** Sushi Tracker
@@ -41,8 +41,7 @@ reused versionCode).
 ### 3. Play Console setup (not code)
 - [ ] Google Play developer account (one-time $25).
 - [ ] Store listing: 512×512 icon, 1024×500 feature graphic, ≥2 phone screenshots, short + full description.
-- [ ] **Privacy policy URL** — page already written (`docs/privacy-policy.html`); just enable
-      GitHub Pages (see the Done section) and use the resulting URL.
+- [x] **Privacy policy URL** — live at https://edulabrador.github.io/sushicounter/privacy-policy.html
 - [ ] Data safety form: declare no data collected / no data shared.
 - [ ] Content rating questionnaire.
 - [ ] Target audience + content declarations.
