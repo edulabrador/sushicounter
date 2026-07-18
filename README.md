@@ -1,4 +1,4 @@
-# 🍣 Sushi Score
+# 🍣 Sushi Tracker
 
 A tiny, dark-themed Flutter app for one purpose: tapping a button and watching the number go up.
 
