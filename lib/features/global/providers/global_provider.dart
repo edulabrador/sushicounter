@@ -13,6 +13,16 @@ class GlobalStateNotifier extends StateNotifier<GlobalState> {
     state = repository.getGlobalState(); // Update state to trigger rebuilds
   }
 
+  // Applies signed deltas — used when deleting a session (negative) and when
+  // undoing that deletion (positive).
+  Future<void> applyDelta(int tapsDelta, int sessionsDelta) async {
+    await repository.adjustGlobalState(
+      tapsDelta: tapsDelta,
+      sessionsDelta: sessionsDelta,
+    );
+    state = repository.getGlobalState();
+  }
+
   Future<void> resetGlobal() async {
     await repository.resetGlobalState();
     state = repository.getGlobalState();

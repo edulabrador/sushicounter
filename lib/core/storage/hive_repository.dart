@@ -54,12 +54,24 @@ class HiveRepository {
   }
 
   Future<void> updateGlobalState(int additionalTaps) async {
+    await adjustGlobalState(tapsDelta: additionalTaps, sessionsDelta: 1);
+  }
+
+  // Applies signed deltas to the lifetime totals. Used both when a session ends
+  // (+taps, +1 session) and when a session is deleted (-taps, -1 session).
+  // Clamped at 0 so deleting a session after a global reset can't go negative.
+  Future<void> adjustGlobalState({
+    required int tapsDelta,
+    required int sessionsDelta,
+  }) async {
     final current = getGlobalState();
+    final taps = current.lifetimeTotalTaps + tapsDelta;
+    final sessions = current.lifetimeTotalSessions + sessionsDelta;
     await _globalStateBox.put(
       'state',
       GlobalState(
-        lifetimeTotalTaps: current.lifetimeTotalTaps + additionalTaps,
-        lifetimeTotalSessions: current.lifetimeTotalSessions + 1,
+        lifetimeTotalTaps: taps < 0 ? 0 : taps,
+        lifetimeTotalSessions: sessions < 0 ? 0 : sessions,
       ),
     );
   }

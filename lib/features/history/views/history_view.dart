@@ -66,7 +66,9 @@ class HistoryView extends ConsumerWidget {
       context: context,
       builder: (context) => AlertDialog(
         title: const Text('Delete Session?'),
-        content: const Text('This will remove it from history but not affect Global Totals.'),
+        content: const Text(
+          'This will remove it from history and subtract its taps from your Global total.',
+        ),
         actions: [
           TextButton(onPressed: () => Navigator.pop(context, false), child: const Text('Cancel')),
           TextButton(onPressed: () => Navigator.pop(context, true), child: const Text('Delete', style: TextStyle(color: Colors.red))),
@@ -74,8 +76,23 @@ class HistoryView extends ConsumerWidget {
       ),
     );
 
-    if (confirm == true) {
-      await ref.read(sessionListProvider.notifier).deleteSession(id);
-    }
+    if (confirm != true) return;
+
+    final deleted = await ref.read(sessionListProvider.notifier).deleteSession(id);
+    if (deleted == null || !context.mounted) return;
+
+    ScaffoldMessenger.of(context)
+      ..hideCurrentSnackBar()
+      ..showSnackBar(
+        SnackBar(
+          content: const Text('Session deleted'),
+          action: SnackBarAction(
+            label: 'Undo',
+            onPressed: () {
+              ref.read(sessionListProvider.notifier).restoreSession(deleted);
+            },
+          ),
+        ),
+      );
   }
 }

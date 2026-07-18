@@ -37,9 +37,19 @@ class FakeRepository extends HiveRepository {
 
   @override
   Future<void> updateGlobalState(int additionalTaps) async {
+    await adjustGlobalState(tapsDelta: additionalTaps, sessionsDelta: 1);
+  }
+
+  @override
+  Future<void> adjustGlobalState({
+    required int tapsDelta,
+    required int sessionsDelta,
+  }) async {
+    final taps = _global.lifetimeTotalTaps + tapsDelta;
+    final sessions = _global.lifetimeTotalSessions + sessionsDelta;
     _global = GlobalState(
-      lifetimeTotalTaps: _global.lifetimeTotalTaps + additionalTaps,
-      lifetimeTotalSessions: _global.lifetimeTotalSessions + 1,
+      lifetimeTotalTaps: taps < 0 ? 0 : taps,
+      lifetimeTotalSessions: sessions < 0 ? 0 : sessions,
     );
   }
 
@@ -182,6 +192,72 @@ void main() {
       expect(container.read(sessionListProvider), hasLength(1));
       await container.read(sessionListProvider.notifier).deleteSession('a');
       expect(container.read(sessionListProvider), isEmpty);
+    });
+
+    test('deleteSession subtracts its taps from the global total', () async {
+      final repo = FakeRepository();
+      final container = makeContainer(repo);
+      // Two sessions of 3 and 2 taps -> global 5 taps / 2 sessions.
+      final now = DateTime.now();
+      repo.sessions['a'] = Session(
+          id: 'a', startedAt: now, endedAt: now, count: 3, durationSeconds: 0);
+      repo.sessions['b'] = Session(
+          id: 'b', startedAt: now, endedAt: now, count: 2, durationSeconds: 0);
+      await container.read(globalStateProvider.notifier).updateGlobal(3);
+      await container.read(globalStateProvider.notifier).updateGlobal(2);
+      container.read(sessionListProvider.notifier).reload();
+
+      final deleted =
+          await container.read(sessionListProvider.notifier).deleteSession('a');
+
+      expect(deleted, isNotNull);
+      final global = container.read(globalStateProvider);
+      expect(global.lifetimeTotalTaps, 2); // 5 - 3
+      expect(global.lifetimeTotalSessions, 1); // 2 - 1
+    });
+
+    test('restoreSession re-adds the session and its taps to the global',
+        () async {
+      final repo = FakeRepository();
+      final container = makeContainer(repo);
+      final now = DateTime.now();
+      repo.sessions['a'] = Session(
+          id: 'a', startedAt: now, endedAt: now, count: 3, durationSeconds: 0);
+      await container.read(globalStateProvider.notifier).updateGlobal(3);
+      container.read(sessionListProvider.notifier).reload();
+
+      final deleted =
+          await container.read(sessionListProvider.notifier).deleteSession('a');
+      expect(container.read(sessionListProvider), isEmpty);
+      expect(container.read(globalStateProvider).lifetimeTotalTaps, 0);
+
+      await container
+          .read(sessionListProvider.notifier)
+          .restoreSession(deleted!);
+
+      expect(container.read(sessionListProvider), hasLength(1));
+      final global = container.read(globalStateProvider);
+      expect(global.lifetimeTotalTaps, 3);
+      expect(global.lifetimeTotalSessions, 1);
+    });
+
+    test('deleting after a global reset never drives the total negative',
+        () async {
+      final repo = FakeRepository();
+      final container = makeContainer(repo);
+      final now = DateTime.now();
+      repo.sessions['a'] = Session(
+          id: 'a', startedAt: now, endedAt: now, count: 5, durationSeconds: 0);
+      await container.read(globalStateProvider.notifier).updateGlobal(5);
+      // Global reset preserves history but zeroes lifetime totals.
+      await container.read(globalStateProvider.notifier).resetGlobal();
+      container.read(sessionListProvider.notifier).reload();
+
+      await container.read(sessionListProvider.notifier).deleteSession('a');
+
+      final global = container.read(globalStateProvider);
+      expect(global.lifetimeTotalTaps, 0);
+      expect(global.lifetimeTotalSessions, 0);
     });
   });
 }
