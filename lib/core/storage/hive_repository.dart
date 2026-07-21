@@ -76,6 +76,19 @@ class HiveRepository {
     );
   }
 
+  // Overwrites the lifetime totals with exact values. Used to restore the global
+  // state to a captured snapshot when an undo needs to be lossless (the clamp in
+  // adjustGlobalState makes the inverse delta lossy, so undo restores instead).
+  Future<void> setGlobalState(int taps, int sessions) async {
+    await _globalStateBox.put(
+      'state',
+      GlobalState(
+        lifetimeTotalTaps: taps < 0 ? 0 : taps,
+        lifetimeTotalSessions: sessions < 0 ? 0 : sessions,
+      ),
+    );
+  }
+
   Future<void> resetGlobalState() async {
     await _globalStateBox.put(
       'state',
