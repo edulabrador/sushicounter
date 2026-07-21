@@ -32,4 +32,10 @@ migrate_working_dir/
 
 # Web related
 
+# Release artifacts and local Play Store assets (never version these binaries)
+*.apk
+*.aab
+SushiTracker-PlayStore/
+Icono SushiCounter.png
+
 # Exceptions to above rules.
