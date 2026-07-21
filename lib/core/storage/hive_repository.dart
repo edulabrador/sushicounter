@@ -89,12 +89,7 @@ class HiveRepository {
     );
   }
 
-  Future<void> resetGlobalState() async {
-    await _globalStateBox.put(
-      'state',
-      GlobalState(lifetimeTotalTaps: 0, lifetimeTotalSessions: 0),
-    );
-  }
+  Future<void> resetGlobalState() => setGlobalState(0, 0);
 
   // Ongoing (unsaved) session persistence, so taps survive an app restart.
   int getOngoingCount() {

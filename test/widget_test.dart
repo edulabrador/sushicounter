@@ -62,9 +62,7 @@ class FakeRepository extends HiveRepository {
   }
 
   @override
-  Future<void> resetGlobalState() async {
-    _global = GlobalState(lifetimeTotalTaps: 0, lifetimeTotalSessions: 0);
-  }
+  Future<void> resetGlobalState() => setGlobalState(0, 0);
 
   @override
   int getOngoingCount() => _ongoingCount;
