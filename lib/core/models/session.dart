@@ -50,14 +50,4 @@ class SessionAdapter extends TypeAdapter<Session> {
       ..writeByte(4)
       ..write(obj.durationSeconds);
   }
-
-  @override
-  int get hashCode => typeId.hashCode;
-
-  @override
-  bool operator ==(Object other) =>
-      identical(this, other) ||
-      other is SessionAdapter &&
-          runtimeType == other.runtimeType &&
-          typeId == other.typeId;
 }
