@@ -35,7 +35,7 @@ flutter build appbundle --release
 ```
 
 ### 2. Bump the version before each upload
-`pubspec.yaml` → `version: 0.1.0+1` (the `+1` is the versionCode; Play rejects a
+Current release: `pubspec.yaml` → `version: 0.2.3+5`. The `+5` is the versionCode; Play rejects a
 reused versionCode).
 
 ### 3. Play Console setup (not code)
