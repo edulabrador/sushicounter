@@ -1,52 +1,38 @@
-# Publishing to the Play Store
+# Publishing Sushi Tracker to Google Play
 
-Progress checklist for getting Sushi Tracker onto Google Play.
+## Prepared in this repository
 
-## Done (in the repo)
+- Android application ID: `dev.edulabrador.sushiscore`; app name: **Sushi Tracker**.
+- Flutter 3.47.5 targets Android API 36, meeting the current Play requirement for new phone apps.
+- Launcher icon: `assets/icon/app_icon.png`.
+- Store icon: `assets/play-store/store-icon.png` (512×512); feature graphic: `assets/play-store/feature-graphic.png` (1024×500).
+- Privacy policy text: `docs/privacy-policy.html`, with an offline copy accessible from Settings.
+- Release builds require an upload keystore. They no longer silently use the debug key.
+- CI checks Dart, tests, web release, and an Android debug build.
 
-- [x] **Application ID** set to `dev.edulabrador.sushiscore` (no more `com.example.*`, which Play rejects).
-- [x] **App display name** set to "Sushi Tracker" (`android:label`) — matches the Play Store listing name below.
-- [x] **Release signing wired up** — `android/app/build.gradle.kts` reads an upload key from
-      `android/key.properties`. Without that file it falls back to the debug key so local
-      `flutter run --release` still works. Template: `android/key.properties.example`.
-- [x] **Upload keystore generated** — `sushiscore-upload.jks` (kept outside the repo, path in
-      `android/key.properties`, both gitignored). **Back up the `.jks` and its password somewhere
-      safe** — losing either means you can never push an update to this app again.
-- [x] **App icon** — `assets/icon/app_icon.png` (the sushi tray icon), wired through
-      `flutter_launcher_icons` in `pubspec.yaml`. Regenerate anytime with `dart run flutter_launcher_icons`.
-- [x] **Privacy policy published** — `docs/privacy-policy.html`, served live via GitHub Pages
-      (main / `/docs`) at
-      **https://edulabrador.github.io/sushicounter/privacy-policy.html** — paste this into the
-      Play Console "Privacy policy" field.
+## Before uploading a release
 
-### Play Store listing copy (use when filling out the Play Console form — not code)
-- **App name:** Sushi Tracker
-- **Subtitle / short description:** Buffet Counter
+1. Check whether this package already exists in your Play Console account. If it does, use its existing upload key. Do not create a replacement key without following Play Console's upload-key reset process.
+2. Obtain the upload keystore and fill in `android/key.properties` using `android/key.properties.example`. Both the properties file and `.jks` files are ignored by Git. Store an independent backup of the keystore and passwords.
+3. Run `flutter pub get` and `flutter build appbundle --release`. The upload file is `build/app/outputs/bundle/release/app-release.aab`. Check its signing certificate before upload. This checkout has no upload keystore, so the release command is expected to stop until step 2 is done.
+4. Confirm that `version: 0.2.3+5` in `pubspec.yaml` has a version code greater than every build previously uploaded for this package. Increase it for each subsequent upload.
+5. Publish `docs/privacy-policy.html` at a stable public URL and verify that it opens without authentication. GitHub Pages is not enabled for this repository; enabling it currently requires renewing the `gh` CLI login. The intended URL is `https://edulabrador.github.io/sushicounter/privacy-policy.html`. Enter it in Play Console only after it works.
+6. Complete the Play Console store listing: use the prepared icon and feature graphic, add at least two genuine phone screenshots, the descriptions below, category and contact details. Review the graphic and icon in the Play Console preview.
+7. Complete Data safety, target audience, content rating, and other requested Play Console declarations. The app currently stores counts locally and requests no special permissions; verify the final Android manifest and the declarations against the built AAB.
+8. If the account is a personal developer account created after 13 November 2023, complete the required closed test with at least 12 opted-in testers for 14 continuous days before applying for production access.
 
-## To do
+Flutter's Android artifacts are cached, but this machine has no Android SDK or Java toolchain. The Android AAB has not been built here. The CI Android debug build will check compilation after the changes are pushed; a signed AAB still requires the upload key.
 
-### 1. Build the release bundle (Play wants an AAB, not an APK)
-On **Windows**, first enable Developer Mode (Flutter needs symlink support to build
-with plugins): Settings → Privacy & security → For developers → Developer Mode = On
-(or run `start ms-settings:developers`). Then:
-```bash
-flutter build appbundle --release
-# output: build/app/outputs/bundle/release/app-release.aab
-```
+## Store listing draft
 
-### 2. Bump the version before each upload
-Current release: `pubspec.yaml` → `version: 0.2.3+5`. The `+5` is the versionCode; Play rejects a
-reused versionCode).
+**App name:** Sushi Tracker
 
-### 3. Play Console setup (not code)
-- [ ] Google Play developer account (one-time $25).
-- [ ] Store listing: 512×512 icon, 1024×500 feature graphic, ≥2 phone screenshots, short + full description.
-- [x] **Privacy policy URL** — live at https://edulabrador.github.io/sushicounter/privacy-policy.html
-- [ ] Data safety form: declare no data collected / no data shared.
-- [ ] Content rating questionnaire.
-- [ ] Target audience + content declarations.
+**Short description:** Count sushi with one tap. Save sessions and track your progress offline.
 
-### 4. Closed testing requirement (new personal accounts)
-Google requires a **closed test with 12+ testers opted in for 14 continuous days**
-before a personal developer account can promote an app to production. Plan for this
-lead time.
+**Full description:**
+
+Sushi Tracker is a simple, offline counter for sushi and anything else you want to count.
+
+Tap the sushi to add one. Long press to correct a mistake. End a session to save its count and duration.
+
+Review past sessions in your history, see your lifetime totals, and explore your recent trend in Statistics. Your counts stay on your device. No account, ads, or internet connection is required.

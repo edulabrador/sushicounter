@@ -1,6 +1,5 @@
 import com.android.build.api.dsl.ApplicationExtension
 import java.util.Properties
-import java.io.FileInputStream
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 
 plugins {
@@ -14,7 +13,20 @@ plugins {
 val keystoreProperties = Properties()
 val keystorePropertiesFile = rootProject.file("key.properties")
 if (keystorePropertiesFile.exists()) {
-    keystoreProperties.load(FileInputStream(keystorePropertiesFile))
+    keystorePropertiesFile.inputStream().use { keystoreProperties.load(it) }
+}
+if (gradle.startParameter.taskNames.any { it.contains("Release", ignoreCase = true) }) {
+    require(keystorePropertiesFile.isFile) {
+        "Release signing requires android/key.properties and an upload keystore."
+    }
+    listOf("keyAlias", "keyPassword", "storeFile", "storePassword").forEach { key ->
+        require(!keystoreProperties.getProperty(key).isNullOrBlank()) {
+            "Release signing requires '$key' in android/key.properties."
+        }
+    }
+    require(file(keystoreProperties.getProperty("storeFile")).isFile) {
+        "Upload keystore not found; check 'storeFile' in android/key.properties."
+    }
 }
 
 extensions.configure<ApplicationExtension>("android") {
@@ -50,13 +62,7 @@ extensions.configure<ApplicationExtension>("android") {
 
     buildTypes {
         release {
-            // Uses the real upload key when key.properties is present,
-            // otherwise falls back to debug so `flutter run --release` still works locally.
-            signingConfig = if (keystorePropertiesFile.exists()) {
-                signingConfigs.getByName("release")
-            } else {
-                signingConfigs.getByName("debug")
-            }
+            signingConfig = signingConfigs.getByName("release")
         }
     }
 }

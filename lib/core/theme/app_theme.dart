@@ -5,6 +5,11 @@ class AppTheme {
     return ThemeData(
       brightness: Brightness.dark,
       primaryColor: Colors.orange,
+      colorScheme: const ColorScheme.dark(
+        primary: Color(0xFFFFA726),
+        secondary: Color(0xFFFFCC80),
+        surface: Color(0xFF1E293B),
+      ),
       scaffoldBackgroundColor: const Color(0xFF0F172A), // Dark navy
       appBarTheme: const AppBarTheme(
         backgroundColor: Colors.transparent,
@@ -17,12 +22,6 @@ class AppTheme {
           fontWeight: FontWeight.w600,
           letterSpacing: 1.5,
         ),
-      ),
-      bottomNavigationBarTheme: const BottomNavigationBarThemeData(
-        backgroundColor: Color(0xFF1E293B),
-        selectedItemColor: Colors.orange,
-        unselectedItemColor: Colors.white54,
-        elevation: 10,
       ),
       cardTheme: CardThemeData(
         color: const Color(0xFF1E293B),
@@ -40,6 +39,16 @@ class AppTheme {
         ),
         bodyLarge: TextStyle(color: Colors.white70, fontSize: 18),
         bodyMedium: TextStyle(color: Colors.white54, fontSize: 14),
+        titleLarge: TextStyle(
+          color: Colors.white,
+          fontSize: 20,
+          fontWeight: FontWeight.w600,
+        ),
+        headlineMedium: TextStyle(
+          color: Color(0xFFFFA726),
+          fontSize: 28,
+          fontWeight: FontWeight.bold,
+        ),
       ),
     );
   }

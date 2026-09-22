@@ -6,6 +6,7 @@ class Session extends HiveObject {
   final DateTime endedAt;
   final int count;
   final int durationSeconds;
+  final int contributionEpoch;
 
   Session({
     required this.id,
@@ -13,6 +14,7 @@ class Session extends HiveObject {
     required this.endedAt,
     required this.count,
     required this.durationSeconds,
+    this.contributionEpoch = 0,
   });
 }
 
@@ -32,13 +34,14 @@ class SessionAdapter extends TypeAdapter<Session> {
       endedAt: fields[2] as DateTime,
       count: fields[3] as int,
       durationSeconds: fields[4] as int,
+      contributionEpoch: fields[5] as int? ?? 0,
     );
   }
 
   @override
   void write(BinaryWriter writer, Session obj) {
     writer
-      ..writeByte(5)
+      ..writeByte(6)
       ..writeByte(0)
       ..write(obj.id)
       ..writeByte(1)
@@ -48,6 +51,8 @@ class SessionAdapter extends TypeAdapter<Session> {
       ..writeByte(3)
       ..write(obj.count)
       ..writeByte(4)
-      ..write(obj.durationSeconds);
+      ..write(obj.durationSeconds)
+      ..writeByte(5)
+      ..write(obj.contributionEpoch);
   }
 }

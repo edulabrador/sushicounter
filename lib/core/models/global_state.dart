@@ -3,10 +3,12 @@ import 'package:hive/hive.dart';
 class GlobalState extends HiveObject {
   int lifetimeTotalTaps;
   int lifetimeTotalSessions;
+  final int epoch;
 
   GlobalState({
     required this.lifetimeTotalTaps,
     required this.lifetimeTotalSessions,
+    this.epoch = 0,
   });
 }
 
@@ -23,16 +25,19 @@ class GlobalStateAdapter extends TypeAdapter<GlobalState> {
     return GlobalState(
       lifetimeTotalTaps: fields[0] as int,
       lifetimeTotalSessions: fields[1] as int,
+      epoch: fields[2] as int? ?? 0,
     );
   }
 
   @override
   void write(BinaryWriter writer, GlobalState obj) {
     writer
-      ..writeByte(2)
+      ..writeByte(3)
       ..writeByte(0)
       ..write(obj.lifetimeTotalTaps)
       ..writeByte(1)
-      ..write(obj.lifetimeTotalSessions);
+      ..write(obj.lifetimeTotalSessions)
+      ..writeByte(2)
+      ..write(obj.epoch);
   }
 }

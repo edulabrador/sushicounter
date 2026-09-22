@@ -8,37 +8,17 @@ class GlobalStateNotifier extends StateNotifier<GlobalState> {
 
   GlobalStateNotifier(this.repository) : super(repository.getGlobalState());
 
-  Future<void> updateGlobal(int additionalTaps) async {
-    await repository.updateGlobalState(additionalTaps);
-    state = repository.getGlobalState(); // Update state to trigger rebuilds
-  }
-
-  // Applies signed deltas — used when deleting a session (negative delta).
-  Future<void> applyDelta(int tapsDelta, int sessionsDelta) async {
-    await repository.adjustGlobalState(
-      tapsDelta: tapsDelta,
-      sessionsDelta: sessionsDelta,
-    );
-    state = repository.getGlobalState();
-  }
-
-  // Restores the totals to an exact captured snapshot. Used to undo a deletion
-  // losslessly (idempotent, so a repeated undo is harmless).
-  Future<void> restoreState(GlobalState snapshot) async {
-    await repository.setGlobalState(
-      snapshot.lifetimeTotalTaps,
-      snapshot.lifetimeTotalSessions,
-    );
-    state = repository.getGlobalState();
-  }
-
   Future<void> resetGlobal() async {
     await repository.resetGlobalState();
+    if (!mounted) return;
     state = repository.getGlobalState();
   }
+
+  void reload() => state = repository.getGlobalState();
 }
 
-final globalStateProvider = StateNotifierProvider<GlobalStateNotifier, GlobalState>((ref) {
-  final repository = ref.watch(storageProvider);
-  return GlobalStateNotifier(repository);
-});
+final globalStateProvider =
+    StateNotifierProvider<GlobalStateNotifier, GlobalState>((ref) {
+      final repository = ref.watch(storageProvider);
+      return GlobalStateNotifier(repository);
+    });

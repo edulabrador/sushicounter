@@ -1,6 +1,7 @@
 import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 
 /// A tappable kawaii salmon-nigiri character.
 ///
@@ -13,11 +14,13 @@ class SushiButton extends StatefulWidget {
     required this.onTap,
     required this.onLongPress,
     this.size = 200,
+    this.enabled = true,
   });
 
   final VoidCallback onTap;
   final VoidCallback onLongPress;
   final double size;
+  final bool enabled;
 
   @override
   State<SushiButton> createState() => _SushiButtonState();
@@ -26,8 +29,10 @@ class SushiButton extends StatefulWidget {
 class _SushiButtonState extends State<SushiButton>
     with SingleTickerProviderStateMixin {
   late final AnimationController _controller;
+  final FocusNode _focusNode = FocusNode(debugLabel: 'Sushi counter button');
   final math.Random _rnd = math.Random();
   List<_Spark> _sparks = const [];
+  bool _showFocus = false;
 
   static const _sparkColors = [
     Color(0xFFFF6B6B), // red
@@ -51,7 +56,18 @@ class _SushiButtonState extends State<SushiButton>
   @override
   void dispose() {
     _controller.dispose();
+    _focusNode.dispose();
     super.dispose();
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    if (MediaQuery.disableAnimationsOf(context) && _controller.isAnimating) {
+      _controller.stop();
+      _controller.value = 0;
+      _sparks = const [];
+    }
   }
 
   void _spawnSparks() {
@@ -71,7 +87,11 @@ class _SushiButtonState extends State<SushiButton>
   }
 
   void _handleTap() {
+    if (!widget.enabled) return;
     widget.onTap();
+    // Honour the platform's accessibility preference. The counter still works;
+    // only the non-essential celebratory motion is skipped.
+    if (MediaQuery.disableAnimationsOf(context)) return;
     _spawnSparks();
     // Replay from the start on every tap, even mid-flight, so rapid tapping
     // keeps hopping and sparking.
@@ -80,48 +100,91 @@ class _SushiButtonState extends State<SushiButton>
 
   @override
   Widget build(BuildContext context) {
-    return GestureDetector(
-      behavior: HitTestBehavior.opaque,
-      onTap: _handleTap,
-      onLongPress: widget.onLongPress,
-      child: AnimatedBuilder(
-        animation: _controller,
-        builder: (context, child) {
-          final v = _controller.value;
-          // Parabolic hop: 0 -> up -> 0.
-          final jump = -math.sin(math.pi * v) * (widget.size * 0.18);
-          // One full somersault over the hop.
-          final spin = v * 2 * math.pi;
-          // A touch of squash-and-stretch for bounce.
-          final scale = 1 + math.sin(math.pi * v) * 0.06;
-          return SizedBox(
-            width: widget.size,
-            height: widget.size,
-            child: Stack(
-              clipBehavior: Clip.none,
-              alignment: Alignment.center,
-              children: [
-                // Fireworks burst radiating from behind the sushi.
-                Positioned.fill(
-                  child: CustomPaint(
-                    painter: _FireworksPainter(v, _sparks),
-                  ),
-                ),
-                Transform.translate(
-                  offset: Offset(0, jump),
-                  child: Transform.rotate(
-                    angle: spin,
-                    child: Transform.scale(scale: scale, child: child),
-                  ),
-                ),
-              ],
-            ),
-          );
+    return Semantics(
+      button: true,
+      excludeSemantics: true,
+      enabled: widget.enabled,
+      label: 'Add one sushi',
+      hint: 'Double tap to add one. Long press to remove one.',
+      onTap: widget.enabled ? _handleTap : null,
+      onLongPress: widget.enabled ? widget.onLongPress : null,
+      child: FocusableActionDetector(
+        focusNode: _focusNode,
+        enabled: widget.enabled,
+        mouseCursor: widget.enabled
+            ? SystemMouseCursors.click
+            : SystemMouseCursors.forbidden,
+        shortcuts: const <ShortcutActivator, Intent>{
+          SingleActivator(LogicalKeyboardKey.enter): ActivateIntent(),
+          SingleActivator(LogicalKeyboardKey.space): ActivateIntent(),
         },
-        child: SizedBox(
-          width: widget.size,
-          height: widget.size,
-          child: CustomPaint(painter: _SushiPainter()),
+        actions: <Type, Action<Intent>>{
+          ActivateIntent: CallbackAction<ActivateIntent>(
+            onInvoke: (_) {
+              _handleTap();
+              return null;
+            },
+          ),
+        },
+        onShowFocusHighlight: (showFocus) =>
+            setState(() => _showFocus = showFocus),
+        child: DecoratedBox(
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(widget.size / 2),
+            border: _showFocus
+                ? Border.all(color: Colors.white, width: 3)
+                : null,
+          ),
+          child: GestureDetector(
+            behavior: HitTestBehavior.opaque,
+            onTap: widget.enabled
+                ? () {
+                    _focusNode.requestFocus();
+                    _handleTap();
+                  }
+                : null,
+            onLongPress: widget.enabled ? widget.onLongPress : null,
+            child: AnimatedBuilder(
+              animation: _controller,
+              builder: (context, child) {
+                final v = _controller.value;
+                // Parabolic hop: 0 -> up -> 0.
+                final jump = -math.sin(math.pi * v) * (widget.size * 0.18);
+                // One full somersault over the hop.
+                final spin = v * 2 * math.pi;
+                // A touch of squash-and-stretch for bounce.
+                final scale = 1 + math.sin(math.pi * v) * 0.06;
+                return SizedBox(
+                  width: widget.size,
+                  height: widget.size,
+                  child: Stack(
+                    clipBehavior: Clip.none,
+                    alignment: Alignment.center,
+                    children: [
+                      // Fireworks burst radiating from behind the sushi.
+                      Positioned.fill(
+                        child: CustomPaint(
+                          painter: _FireworksPainter(v, _sparks),
+                        ),
+                      ),
+                      Transform.translate(
+                        offset: Offset(0, jump),
+                        child: Transform.rotate(
+                          angle: spin,
+                          child: Transform.scale(scale: scale, child: child),
+                        ),
+                      ),
+                    ],
+                  ),
+                );
+              },
+              child: SizedBox(
+                width: widget.size,
+                height: widget.size,
+                child: CustomPaint(painter: _SushiPainter()),
+              ),
+            ),
+          ),
         ),
       ),
     );
@@ -279,8 +342,10 @@ class _SushiPainter extends CustomPainter {
     canvas.drawCircle(Offset(s * 0.505, s * 0.685), s * 0.028, cheekPaint);
 
     // Open happy mouth with a little tongue.
-    final mouthRect =
-        Rect.fromCircle(center: Offset(s * 0.375, s * 0.675), radius: s * 0.05);
+    final mouthRect = Rect.fromCircle(
+      center: Offset(s * 0.375, s * 0.675),
+      radius: s * 0.05,
+    );
     final mouthPath = Path()
       ..addArc(mouthRect, 0, math.pi)
       ..close();

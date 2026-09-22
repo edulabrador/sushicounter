@@ -14,6 +14,10 @@ I built this as a no-frills tally counter — the kind of thing you reach for wh
 
 **Settings** — reset your current session if you want a fresh start, or wipe your global lifetime stats entirely. That second one is intentionally hard to trigger by accident: you have to type "RESET" to confirm. Even then, it only clears the lifetime totals — your session history stays intact, so you never lose the log of what actually happened.
 
+### Updating from an older version
+
+Existing history is preserved. When upgrading, Sushi Tracker only links legacy history to lifetime totals if the old totals exactly match the saved sessions; otherwise it leaves the totals unchanged so deleting old history cannot accidentally change a later reset total.
+
 ## Under the hood
 
 Nothing fancy, just a clean, feature-first structure so it's easy to find your way around:
@@ -40,13 +44,14 @@ flutter pub get
 flutter run
 ```
 
-## Building an Android release
+## Building for Android
 
 ```bash
-flutter build apk --release
+flutter build apk --debug
 ```
 
-The APK shows up at `build/app/outputs/flutter-apk/app-release.apk`.
+The local debug APK appears at `build/app/outputs/flutter-apk/app-debug.apk`.
+For a signed Play Store app bundle, see [PUBLISHING.md](PUBLISHING.md).
 
 ## License
 

@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_riverpod/legacy.dart';
 import 'package:uuid/uuid.dart';
@@ -9,12 +11,26 @@ import 'package:sushiscore/features/history/providers/session_provider.dart';
 class CounterState {
   final int count;
   final DateTime? startedAt;
+  final bool isEnding;
+  final bool isPersisting;
+  final bool isCompletionPending;
+  final String? persistenceError;
 
-  CounterState({required this.count, this.startedAt});
+  CounterState({
+    required this.count,
+    this.startedAt,
+    this.isEnding = false,
+    this.isPersisting = false,
+    this.isCompletionPending = false,
+    this.persistenceError,
+  });
+
+  bool get canEdit => !isEnding && !isPersisting && !isCompletionPending;
 }
 
 class CounterNotifier extends StateNotifier<CounterState> {
   final Ref ref;
+  Session? _pendingSession;
 
   CounterNotifier(this.ref) : super(CounterState(count: 0)) {
     _restoreOngoing();
@@ -30,10 +46,30 @@ class CounterNotifier extends StateNotifier<CounterState> {
   }
 
   void _persistOngoing() {
-    ref.read(storageProvider).saveOngoingSession(state.count, state.startedAt);
+    final count = state.count;
+    final startedAt = state.startedAt;
+    unawaited(_saveOngoing(count, startedAt));
+  }
+
+  Future<void> _saveOngoing(int count, DateTime? startedAt) async {
+    try {
+      await ref.read(storageProvider).saveOngoingSession(count, startedAt);
+    } catch (_) {
+      if (mounted &&
+          state.canEdit &&
+          state.count == count &&
+          state.startedAt == startedAt) {
+        state = CounterState(
+          count: count,
+          startedAt: startedAt,
+          persistenceError: 'Could not save the current session.',
+        );
+      }
+    }
   }
 
   void increment() {
+    if (!state.canEdit) return;
     state = CounterState(
       count: state.count + 1,
       startedAt: state.startedAt ?? DateTime.now(),
@@ -42,51 +78,81 @@ class CounterNotifier extends StateNotifier<CounterState> {
   }
 
   void decrement() {
-    if (state.count > 0) {
+    if (state.canEdit && state.count > 0) {
+      final count = state.count - 1;
       state = CounterState(
-        count: state.count - 1,
-        startedAt: state.startedAt,
+        count: count,
+        startedAt: count == 0 ? null : state.startedAt,
       );
       _persistOngoing();
     }
   }
 
-  void resetCurrent() {
-    state = CounterState(count: 0, startedAt: null);
-    _persistOngoing();
+  Future<void> resetCurrent() async {
+    if (!state.canEdit) return;
+    final previous = state;
+    state = CounterState(
+      count: previous.count,
+      startedAt: previous.startedAt,
+      isPersisting: true,
+    );
+    try {
+      await ref.read(storageProvider).saveOngoingSession(0, null);
+      if (mounted) state = CounterState(count: 0);
+    } catch (_) {
+      if (mounted) {
+        state = CounterState(
+          count: previous.count,
+          startedAt: previous.startedAt,
+          persistenceError: 'Could not reset the current session.',
+        );
+      }
+      rethrow;
+    }
   }
 
   Future<void> endSession() async {
-    if (state.count == 0) return;
-
-    final repo = ref.read(storageProvider);
-    final endedAt = DateTime.now();
-    final startedAt = state.startedAt ?? endedAt;
-    final duration = endedAt.difference(startedAt).inSeconds;
-
-    final session = Session(
-      id: const Uuid().v4(),
-      startedAt: startedAt,
-      endedAt: endedAt,
+    if (state.isEnding || state.isPersisting || state.count == 0) return;
+    state = CounterState(
       count: state.count,
-      durationSeconds: duration,
+      startedAt: state.startedAt,
+      isEnding: true,
     );
+    try {
+      final endedAt = DateTime.now();
+      final startedAt = state.startedAt ?? endedAt;
+      final rawDuration = endedAt.difference(startedAt).inSeconds;
+      final duration = rawDuration < 0 ? 0 : rawDuration;
+      final session = _pendingSession ??= Session(
+        id: const Uuid().v4(),
+        startedAt: startedAt,
+        endedAt: endedAt,
+        count: state.count,
+        durationSeconds: duration,
+      );
 
-    // Save session via repository
-    await repo.saveSession(session);
-
-    // Update global lifetime stats via its provider
-    await ref.read(globalStateProvider.notifier).updateGlobal(state.count);
-
-    // Notify session list provider to reload
-    ref.read(sessionListProvider.notifier).reload();
-
-    // Reset local counter state
-    resetCurrent();
+      await ref.read(storageProvider).completeSession(session);
+      if (!mounted) return;
+      ref.read(globalStateProvider.notifier).reload();
+      ref.read(sessionListProvider.notifier).reload();
+      state = CounterState(count: 0);
+      _pendingSession = null;
+    } catch (_) {
+      if (mounted) {
+        state = CounterState(
+          count: state.count,
+          startedAt: state.startedAt,
+          isCompletionPending: true,
+          persistenceError: 'Could not save this session. Please try again.',
+        );
+      }
+      rethrow;
+    }
   }
 }
 
-final counterProvider = StateNotifierProvider<CounterNotifier, CounterState>((ref) {
+final counterProvider = StateNotifierProvider<CounterNotifier, CounterState>((
+  ref,
+) {
   return CounterNotifier(ref);
 });
-
