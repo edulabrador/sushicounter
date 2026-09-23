@@ -97,7 +97,8 @@ class CounterView extends ConsumerWidget {
                           width: double.infinity,
                           child: FilledButton.icon(
                             key: counterEndSessionButtonKey,
-                            onPressed: counterState.count > 0 &&
+                            onPressed:
+                                counterState.count > 0 &&
                                     !counterState.isEnding &&
                                     !counterState.isPersisting
                                 ? () => _endSession(ref)
@@ -173,11 +174,7 @@ class CounterView extends ConsumerWidget {
 }
 
 class _Metric extends StatelessWidget {
-  const _Metric({
-    required this.label,
-    required this.value,
-    this.valueKey,
-  });
+  const _Metric({required this.label, required this.value, this.valueKey});
   final String label;
   final String value;
   final Key? valueKey;

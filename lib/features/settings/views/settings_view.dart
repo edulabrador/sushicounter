@@ -95,7 +95,8 @@ class _SettingsViewState extends ConsumerState<SettingsView> {
       },
     );
 
-    if (strongConfirm == true && mounted &&
+    if (strongConfirm == true &&
+        mounted &&
         ref.read(counterProvider).canResetLifetime) {
       setState(() => _resetting = true);
       try {
@@ -149,9 +150,7 @@ class _SettingsViewState extends ConsumerState<SettingsView> {
                   ? 'Permanently reset all-time taps and sessions to 0'
                   : 'End or reset the current session first.',
             ),
-            onTap: _resetting || !canResetLifetime
-                ? null
-                : _resetGlobalCounter,
+            onTap: _resetting || !canResetLifetime ? null : _resetGlobalCounter,
           ),
           const Divider(),
           ListTile(

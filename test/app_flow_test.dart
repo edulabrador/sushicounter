@@ -127,7 +127,9 @@ void main() {
     expect(_textValue(tester, counterCurrentCountKey), '1');
   });
 
-  testWidgets('End Session remains retryable with the same session ID', (tester) async {
+  testWidgets('End Session remains retryable with the same session ID', (
+    tester,
+  ) async {
     final repo = FailsOnceCompletionRepository();
     await tester.pumpWidget(
       ProviderScope(
@@ -150,7 +152,9 @@ void main() {
       isNull,
     );
     expect(
-      tester.widget<FilledButton>(find.byKey(counterEndSessionButtonKey)).onPressed,
+      tester
+          .widget<FilledButton>(find.byKey(counterEndSessionButtonKey))
+          .onPressed,
       isNotNull,
     );
 
@@ -163,7 +167,9 @@ void main() {
     expect(repo.getGlobalState().lifetimeTotalSessions, 1);
   });
 
-  testWidgets('visible Undo decrements once and is disabled at zero', (tester) async {
+  testWidgets('visible Undo decrements once and is disabled at zero', (
+    tester,
+  ) async {
     await tester.pumpWidget(
       ProviderScope(
         overrides: [storageProvider.overrideWithValue(FakeRepository())],
@@ -182,35 +188,43 @@ void main() {
     expect(find.bySemanticsLabel('Undo'), findsOneWidget);
   });
 
-  testWidgets('lifetime total includes the active count without double counting', (tester) async {
+  testWidgets(
+    'lifetime total includes the active count without double counting',
+    (tester) async {
+      final repo = FakeRepository();
+      await repo.adjustGlobalState(tapsDelta: 10, sessionsDelta: 1);
+      await tester.pumpWidget(
+        ProviderScope(
+          overrides: [storageProvider.overrideWithValue(repo)],
+          child: const SushiScoreApp(),
+        ),
+      );
+      final sushi = find.byType(SushiButton);
+      await tester.tap(sushi);
+      await tester.tap(sushi);
+      await tester.tap(sushi);
+      await tester.pump();
+      expect(_textValue(tester, counterLifetimeTotalKey), '13');
+      expect(_textValue(tester, counterSessionTotalKey), '3');
+      expect(repo.getGlobalState().lifetimeTotalTaps, 10);
+
+      await tester.tap(find.byKey(counterEndSessionButtonKey));
+      await tester.pumpAndSettle();
+      expect(_textValue(tester, counterLifetimeTotalKey), '13');
+      expect(repo.getGlobalState().lifetimeTotalTaps, 13);
+      expect(_textValue(tester, counterCurrentCountKey), '0');
+      expect(_textValue(tester, counterSessionTotalKey), '0');
+    },
+  );
+
+  testWidgets('restored timer advances and clears when session ends', (
+    tester,
+  ) async {
     final repo = FakeRepository();
-    await repo.adjustGlobalState(tapsDelta: 10, sessionsDelta: 1);
-    await tester.pumpWidget(
-      ProviderScope(
-        overrides: [storageProvider.overrideWithValue(repo)],
-        child: const SushiScoreApp(),
-      ),
+    await repo.saveOngoingSession(
+      2,
+      DateTime.now().subtract(const Duration(seconds: 5)),
     );
-    final sushi = find.byType(SushiButton);
-    await tester.tap(sushi);
-    await tester.tap(sushi);
-    await tester.tap(sushi);
-    await tester.pump();
-    expect(_textValue(tester, counterLifetimeTotalKey), '13');
-    expect(_textValue(tester, counterSessionTotalKey), '3');
-    expect(repo.getGlobalState().lifetimeTotalTaps, 10);
-
-    await tester.tap(find.byKey(counterEndSessionButtonKey));
-    await tester.pumpAndSettle();
-    expect(_textValue(tester, counterLifetimeTotalKey), '13');
-    expect(repo.getGlobalState().lifetimeTotalTaps, 13);
-    expect(_textValue(tester, counterCurrentCountKey), '0');
-    expect(_textValue(tester, counterSessionTotalKey), '0');
-  });
-
-  testWidgets('restored timer advances and clears when session ends', (tester) async {
-    final repo = FakeRepository();
-    await repo.saveOngoingSession(2, DateTime.now().subtract(const Duration(seconds: 5)));
     await tester.pumpWidget(
       ProviderScope(
         overrides: [storageProvider.overrideWithValue(repo)],
@@ -226,7 +240,9 @@ void main() {
     expect(find.byKey(counterElapsedTimeKey), findsNothing);
   });
 
-  testWidgets('timer recalculates elapsed time after app resume', (tester) async {
+  testWidgets('timer recalculates elapsed time after app resume', (
+    tester,
+  ) async {
     var now = DateTime(2026, 9, 23, 12);
     final startedAt = now.subtract(const Duration(seconds: 5));
     await tester.pumpWidget(
@@ -245,24 +261,27 @@ void main() {
     expect(_textValue(tester, counterElapsedTimeKey), '00:13');
   });
 
-  testWidgets('Undo to zero clears the timer and starts the next session fresh', (tester) async {
-    final repo = FakeRepository();
-    await repo.saveOngoingSession(
-      1,
-      DateTime.now().subtract(const Duration(minutes: 1)),
-    );
-    await tester.pumpWidget(
-      ProviderScope(
-        overrides: [storageProvider.overrideWithValue(repo)],
-        child: const SushiScoreApp(),
-      ),
-    );
-    expect(find.byKey(counterElapsedTimeKey), findsOneWidget);
-    await tester.tap(find.byKey(counterUndoButtonKey));
-    await tester.pump();
-    expect(find.byKey(counterElapsedTimeKey), findsNothing);
-    expect(_textValue(tester, counterCurrentCountKey), '0');
-  });
+  testWidgets(
+    'Undo to zero clears the timer and starts the next session fresh',
+    (tester) async {
+      final repo = FakeRepository();
+      await repo.saveOngoingSession(
+        1,
+        DateTime.now().subtract(const Duration(minutes: 1)),
+      );
+      await tester.pumpWidget(
+        ProviderScope(
+          overrides: [storageProvider.overrideWithValue(repo)],
+          child: const SushiScoreApp(),
+        ),
+      );
+      expect(find.byKey(counterElapsedTimeKey), findsOneWidget);
+      await tester.tap(find.byKey(counterUndoButtonKey));
+      await tester.pump();
+      expect(find.byKey(counterElapsedTimeKey), findsNothing);
+      expect(_textValue(tester, counterCurrentCountKey), '0');
+    },
+  );
 
   testWidgets('resetting the current session clears the timer', (tester) async {
     final repo = FakeRepository();
@@ -339,7 +358,9 @@ void main() {
     expect(_textValue(tester, counterCurrentCountKey), '1');
   });
 
-  testWidgets('primary session controls fit common phone layouts', (tester) async {
+  testWidgets('primary session controls fit common phone layouts', (
+    tester,
+  ) async {
     const sizes = [
       Size(320, 568),
       Size(360, 640),
@@ -369,7 +390,9 @@ void main() {
     }
   });
 
-  testWidgets('primary controls remain scrollable with large text', (tester) async {
+  testWidgets('primary controls remain scrollable with large text', (
+    tester,
+  ) async {
     await tester.binding.setSurfaceSize(const Size(320, 568));
     tester.binding.platformDispatcher.textScaleFactorTestValue = 2;
     addTearDown(() {
@@ -426,15 +449,21 @@ void main() {
     );
     expect(_textValue(tester, counterCurrentCountKey), '1');
     expect(
-      tester.widget<FilledButton>(find.byKey(counterEndSessionButtonKey)).onPressed,
+      tester
+          .widget<FilledButton>(find.byKey(counterEndSessionButtonKey))
+          .onPressed,
       isNotNull,
     );
   });
 
-  testWidgets('ongoing storage failure preserves the active count', (tester) async {
+  testWidgets('ongoing storage failure preserves the active count', (
+    tester,
+  ) async {
     await tester.pumpWidget(
       ProviderScope(
-        overrides: [storageProvider.overrideWithValue(FailingOngoingRepository())],
+        overrides: [
+          storageProvider.overrideWithValue(FailingOngoingRepository()),
+        ],
         child: const SushiScoreApp(),
       ),
     );
@@ -443,10 +472,7 @@ void main() {
     await tester.pump();
 
     expect(_textValue(tester, counterCurrentCountKey), '1');
-    expect(
-      find.text('Could not save the current session.'),
-      findsOneWidget,
-    );
+    expect(find.text('Could not save the current session.'), findsOneWidget);
   });
 
   testWidgets('a later ongoing save clears the storage error', (tester) async {

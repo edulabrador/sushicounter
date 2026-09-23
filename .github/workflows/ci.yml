@@ -17,8 +17,143 @@ jobs:
           flutter-version: '3.47.5'
           channel: stable
           cache: true
+      - name: Check Dart formatting
+        shell: bash
+        run: |
+          if dart format --output=none --set-exit-if-changed .; then
+            exit 0
+          fi
+          dart format .
+          git diff -- '*.dart'
+          exit 1
       - run: flutter pub get
       - run: flutter analyze
+      - name: Check Android toolchain compatibility
+        run: flutter analyze --suggestions
+      - name: Inspect resolved Android Flutter plugins
+        shell: bash
+        run: |
+          python3 - <<'PY'
+          import json
+          import re
+          from pathlib import Path
+
+          metadata = json.loads(Path('.flutter-plugins-dependencies').read_text())
+          plugins = metadata.get('plugins', {}).get('android', [])
+          for plugin in plugins:
+              root = Path(plugin['path']) / 'android'
+              gradle_files = [root / name for name in ('build.gradle', 'build.gradle.kts')]
+              gradle_files = [path for path in gradle_files if path.is_file()]
+              declarations = []
+              for path in gradle_files:
+                  content = path.read_text(errors='replace')
+                  if re.search(r'org\.jetbrains\.kotlin\.android|kotlin-android', content):
+                      declarations.append(path.name)
+              print(f"{plugin['name']}: Android Gradle files={len(gradle_files)}, applies KGP={bool(declarations)}")
+              if declarations:
+                  print(f"  KGP declarations: {', '.join(declarations)}")
+          PY
       - run: flutter test
       - run: flutter build web --release
       - run: flutter build apk --debug
+      - name: Create disposable CI signing key
+        shell: bash
+        run: |
+          set -euo pipefail
+          ci_keystore="$RUNNER_TEMP/sushicounter-ci-upload.jks"
+          ci_key_password="$(openssl rand -hex 32)"
+          keytool -genkeypair -noprompt -storetype JKS \
+            -keystore "$ci_keystore" \
+            -storepass "$ci_key_password" \
+            -keypass "$ci_key_password" \
+            -alias ci-upload -keyalg RSA -keysize 2048 -validity 2 \
+            -dname "CN=CI Release Validation, OU=Temporary, O=NonProduction, L=CI, ST=CI, C=US"
+          umask 077
+          printf 'storePassword=%s\nkeyPassword=%s\nkeyAlias=ci-upload\nstoreFile=%s\n' \
+            "$ci_key_password" "$ci_key_password" "$ci_keystore" > android/key.properties
+      - name: Build and validate disposable release AAB
+        shell: bash
+        run: |
+          set -euo pipefail
+          flutter build appbundle --release
+          aab="build/app/outputs/bundle/release/app-release.aab"
+          test -s "$aab"
+          echo "AAB size: $(stat -c '%s bytes' "$aab")"
+
+          bundletool_version=1.18.3
+          bundletool="$RUNNER_TEMP/bundletool-all-${bundletool_version}.jar"
+          curl --fail --location --silent --show-error \
+            "https://github.com/google/bundletool/releases/download/${bundletool_version}/bundletool-all-${bundletool_version}.jar" \
+            --output "$bundletool"
+
+          manifest="$RUNNER_TEMP/sushicounter-release-manifest.xml"
+          java -jar "$bundletool" dump manifest --bundle="$aab" --module=base > "$manifest"
+          python3 - "$manifest" "$aab" <<'PY'
+          import sys
+          import zipfile
+          import xml.etree.ElementTree as ET
+
+          manifest_path, aab_path = sys.argv[1:]
+          android = '{http://schemas.android.com/apk/res/android}'
+          root = ET.parse(manifest_path).getroot()
+          actual = {
+              'applicationId': root.attrib.get('package'),
+              'versionName': root.attrib.get(android + 'versionName'),
+              'versionCode': root.attrib.get(android + 'versionCode'),
+              'targetSdk': root.find('uses-sdk').attrib.get(android + 'targetSdkVersion'),
+          }
+          expected = {'applicationId': 'dev.edulabrador.sushiscore', 'versionName': '0.2.4', 'versionCode': '6', 'targetSdk': '36'}
+          print('Release manifest:', actual)
+          assert actual == expected, f'Expected {expected}, got {actual}'
+          permissions = [node.attrib.get(android + 'name') for node in root if node.tag.rsplit('}', 1)[-1].startswith('uses-permission')]
+          print('Release permissions:', permissions)
+          assert not permissions, f'Unexpected release permissions: {permissions}'
+
+          with zipfile.ZipFile(aab_path) as bundle:
+              members = set(bundle.namelist())
+          for abi in ('arm64-v8a', 'x86_64'):
+              for library in ('libapp.so', 'libflutter.so'):
+                  entry = f'base/lib/{abi}/{library}'
+                  assert entry in members, f'Missing 64-bit native library: {entry}'
+          print('AAB contains arm64-v8a and x86_64 Flutter libraries.')
+          PY
+
+          ci_key_password="$(sed -n 's/^storePassword=//p' android/key.properties)"
+          apks="$RUNNER_TEMP/sushicounter-validation.apks"
+          java -jar "$bundletool" build-apks \
+            --bundle="$aab" --output="$apks" --mode=universal \
+            --ks="$RUNNER_TEMP/sushicounter-ci-upload.jks" \
+            --ks-key-alias=ci-upload \
+            --ks-pass="pass:$ci_key_password" --key-pass="pass:$ci_key_password"
+          universal_apk="$RUNNER_TEMP/sushicounter-universal.apk"
+          unzip -p "$apks" universal.apk > "$universal_apk"
+          test -s "$universal_apk"
+
+          sdk_root="${ANDROID_SDK_ROOT:-${ANDROID_HOME:-/usr/local/lib/android/sdk}}"
+          build_tools="$(find "$sdk_root/build-tools" -mindepth 1 -maxdepth 1 -type d -printf '%f\n' | sort -V | tail -n 1)"
+          "$sdk_root/build-tools/$build_tools/zipalign" -c -P 16 4 "$universal_apk"
+
+          elf_dir="$RUNNER_TEMP/sushicounter-elf-libs"
+          mkdir -p "$elf_dir"
+          unzip -q "$universal_apk" 'lib/arm64-v8a/*.so' 'lib/x86_64/*.so' -d "$elf_dir"
+          for abi in arm64-v8a x86_64; do
+            shopt -s nullglob
+            libs=("$elf_dir/lib/$abi"/*.so)
+            test "${#libs[@]}" -gt 0
+            for lib in "${libs[@]}"; do
+              load_count=0
+              while IFS= read -r alignment; do
+                load_count=$((load_count + 1))
+                if (( alignment < 0x4000 )); then
+                  echo "Unaligned 16 KB ELF LOAD segment: $lib ($alignment)" >&2
+                  exit 1
+                fi
+              done < <(readelf -lW "$lib" | awk '$1 == "LOAD" { print $NF }')
+              test "$load_count" -gt 0
+              echo "16 KB ELF aligned: $abi/$(basename "$lib")"
+            done
+          done
+      - name: Remove disposable signing key
+        if: always()
+        shell: bash
+        run: rm -f android/key.properties "$RUNNER_TEMP/sushicounter-ci-upload.jks"

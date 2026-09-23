@@ -1,4 +1,5 @@
 import 'package:flutter_riverpod/legacy.dart';
+
 import '../../../core/storage/hive_repository.dart';
 import '../../../core/models/global_state.dart';
 import '../../../core/providers/storage_provider.dart';

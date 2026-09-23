@@ -18,32 +18,35 @@ void main() {
     await directory.delete(recursive: true);
   });
 
-  test('serialized rapid ongoing writes restore the latest count and start', () async {
-    final repository = HiveRepository();
-    await repository.init(path: directory.path);
-    final startedAt = DateTime.utc(2026, 9, 23, 12);
-    await Future.wait([
-      repository.saveOngoingSession(1, startedAt),
-      repository.saveOngoingSession(2, startedAt),
-      repository.saveOngoingSession(3, startedAt),
-      repository.saveOngoingSession(2, startedAt),
-      repository.saveOngoingSession(3, startedAt),
-    ]);
-    expect(repository.getOngoingCount(), 3);
-    expect(
-      repository.getOngoingStartedAt()!.millisecondsSinceEpoch,
-      startedAt.millisecondsSinceEpoch,
-    );
+  test(
+    'serialized rapid ongoing writes restore the latest count and start',
+    () async {
+      final repository = HiveRepository();
+      await repository.init(path: directory.path);
+      final startedAt = DateTime.utc(2026, 9, 23, 12);
+      await Future.wait([
+        repository.saveOngoingSession(1, startedAt),
+        repository.saveOngoingSession(2, startedAt),
+        repository.saveOngoingSession(3, startedAt),
+        repository.saveOngoingSession(2, startedAt),
+        repository.saveOngoingSession(3, startedAt),
+      ]);
+      expect(repository.getOngoingCount(), 3);
+      expect(
+        repository.getOngoingStartedAt()!.millisecondsSinceEpoch,
+        startedAt.millisecondsSinceEpoch,
+      );
 
-    await Hive.close();
-    final restored = HiveRepository();
-    await restored.init(path: directory.path);
-    expect(restored.getOngoingCount(), 3);
-    expect(
-      restored.getOngoingStartedAt()!.millisecondsSinceEpoch,
-      startedAt.millisecondsSinceEpoch,
-    );
-  });
+      await Hive.close();
+      final restored = HiveRepository();
+      await restored.init(path: directory.path);
+      expect(restored.getOngoingCount(), 3);
+      expect(
+        restored.getOngoingStartedAt()!.millisecondsSinceEpoch,
+        startedAt.millisecondsSinceEpoch,
+      );
+    },
+  );
 
   test('replays an interrupted completion journal on restart', () async {
     final first = HiveRepository();

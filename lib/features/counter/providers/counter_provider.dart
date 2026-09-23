@@ -137,10 +137,7 @@ class CounterNotifier extends StateNotifier<CounterState> {
     try {
       await ref.read(storageProvider).saveOngoingSession(0, null);
       if (mounted) {
-        state = CounterState(
-          count: 0,
-          isSavingOngoing: _ongoingWrites > 0,
-        );
+        state = CounterState(count: 0, isSavingOngoing: _ongoingWrites > 0);
       }
     } catch (_) {
       if (mounted) {
@@ -180,10 +177,7 @@ class CounterNotifier extends StateNotifier<CounterState> {
       if (!mounted) return;
       ref.read(globalStateProvider.notifier).reload();
       ref.read(sessionListProvider.notifier).reload();
-      state = CounterState(
-        count: 0,
-        isSavingOngoing: _ongoingWrites > 0,
-      );
+      state = CounterState(count: 0, isSavingOngoing: _ongoingWrites > 0);
       _pendingSession = null;
     } catch (_) {
       if (mounted) {

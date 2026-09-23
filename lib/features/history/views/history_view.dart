@@ -31,9 +31,8 @@ class _HistoryViewState extends ConsumerState<HistoryView> {
               itemCount: sessions.length,
               itemBuilder: (context, index) {
                 final session = sessions[index];
-                final dateStr = DateFormat(
-                  'MMM dd, yyyy - HH:mm',
-                ).format(session.endedAt);
+                final dateStr = DateFormat('MMM dd, yyyy - HH:mm')
+                    .format(session.endedAt);
                 return ListTile(
                   leading: const Icon(Icons.history, color: Colors.orange),
                   title: Text(

@@ -37,7 +37,9 @@ class FailingOngoingRepository extends FakeRepository {
 }
 
 void main() {
-  testWidgets('lifetime reset is disabled with an active session', (tester) async {
+  testWidgets('lifetime reset is disabled with an active session', (
+    tester,
+  ) async {
     final repository = FakeRepository();
     await repository.saveOngoingSession(2, DateTime.now());
     await tester.pumpWidget(_settings(repository));
@@ -46,10 +48,15 @@ void main() {
       find.widgetWithText(ListTile, 'Reset Lifetime Global'),
     );
     expect(tile.onTap, isNull);
-    expect(find.text('End or reset the current session first.'), findsOneWidget);
+    expect(
+      find.text('End or reset the current session first.'),
+      findsOneWidget,
+    );
   });
 
-  testWidgets('lifetime reset is available with no active session', (tester) async {
+  testWidgets('lifetime reset is available with no active session', (
+    tester,
+  ) async {
     await tester.pumpWidget(_settings(FakeRepository()));
 
     final tile = tester.widget<ListTile>(
@@ -58,7 +65,9 @@ void main() {
     expect(tile.onTap, isNotNull);
   });
 
-  testWidgets('lifetime reset becomes available after ending a session', (tester) async {
+  testWidgets('lifetime reset becomes available after ending a session', (
+    tester,
+  ) async {
     final repository = DelayedCompletionRepository();
     await tester.pumpWidget(_settings(repository));
     final container = ProviderScope.containerOf(
@@ -71,7 +80,11 @@ void main() {
 
     expect(container.read(counterProvider).isEnding, isTrue);
     expect(
-      tester.widget<ListTile>(find.widgetWithText(ListTile, 'Reset Lifetime Global')).onTap,
+      tester
+          .widget<ListTile>(
+            find.widgetWithText(ListTile, 'Reset Lifetime Global'),
+          )
+          .onTap,
       isNull,
     );
 
@@ -79,12 +92,18 @@ void main() {
     await completion;
     await tester.pump();
     expect(
-      tester.widget<ListTile>(find.widgetWithText(ListTile, 'Reset Lifetime Global')).onTap,
+      tester
+          .widget<ListTile>(
+            find.widgetWithText(ListTile, 'Reset Lifetime Global'),
+          )
+          .onTap,
       isNotNull,
     );
   });
 
-  testWidgets('typing RESET is still required and history remains', (tester) async {
+  testWidgets('typing RESET is still required and history remains', (
+    tester,
+  ) async {
     final repository = FakeRepository();
     final now = DateTime.now();
     await repository.completeSession(
@@ -110,10 +129,14 @@ void main() {
 
     expect(repository.getGlobalState().lifetimeTotalTaps, 0);
     expect(repository.getGlobalState().lifetimeTotalSessions, 0);
-    expect(repository.getAllSessions().map((item) => item.id), ['kept-history']);
+    expect(repository.getAllSessions().map((item) => item.id), [
+      'kept-history',
+    ]);
   });
 
-  testWidgets('lifetime reset is disabled while session reset is persisting', (tester) async {
+  testWidgets('lifetime reset is disabled while session reset is persisting', (
+    tester,
+  ) async {
     final repository = DelayedOngoingRepository();
     await tester.pumpWidget(_settings(repository));
     final container = ProviderScope.containerOf(
@@ -133,7 +156,9 @@ void main() {
     await tester.pump();
   });
 
-  testWidgets('lifetime reset is disabled while ongoing writes are pending', (tester) async {
+  testWidgets('lifetime reset is disabled while ongoing writes are pending', (
+    tester,
+  ) async {
     final repository = DelayedOngoingRepository();
     await tester.pumpWidget(_settings(repository));
     final container = ProviderScope.containerOf(
@@ -156,7 +181,9 @@ void main() {
     await tester.pump();
   });
 
-  testWidgets('lifetime reset stays disabled when an ongoing write fails', (tester) async {
+  testWidgets('lifetime reset stays disabled when an ongoing write fails', (
+    tester,
+  ) async {
     await tester.pumpWidget(_settings(FailingOngoingRepository()));
     final container = ProviderScope.containerOf(
       tester.element(find.byType(SettingsView)),
@@ -170,7 +197,11 @@ void main() {
     expect(container.read(counterProvider).count, 0);
     expect(container.read(counterProvider).persistenceError, isNotNull);
     expect(
-      tester.widget<ListTile>(find.widgetWithText(ListTile, 'Reset Lifetime Global')).onTap,
+      tester
+          .widget<ListTile>(
+            find.widgetWithText(ListTile, 'Reset Lifetime Global'),
+          )
+          .onTap,
       isNull,
     );
   });

@@ -54,7 +54,9 @@ class _SessionElapsedTimerState extends State<SessionElapsedTimer>
   void didChangeAppLifecycleState(AppLifecycleState state) {
     _isForeground = state == AppLifecycleState.resumed;
     if (_isForeground) {
-      setState(() => _elapsed = elapsedSince(widget.startedAt, now: widget.now()));
+      setState(
+        () => _elapsed = elapsedSince(widget.startedAt, now: widget.now()),
+      );
       _startTimer();
     } else {
       _timer?.cancel();
