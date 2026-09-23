@@ -6,13 +6,13 @@ I built this as a no-frills tally counter — the kind of thing you reach for wh
 
 ## What it does
 
-**Counter** — the home screen. A big number, a sushi graphic you tap to increment, and a long-press to decrement if you miscount. Your current session count and your all-time global count sit right below it, so you always know where you stand.
+**Counter** - the home screen. A big number, a sushi graphic you tap to increment, and visible Undo plus long-press controls to decrement. It shows this session, the lifetime total including the active session, and a live elapsed timer.
 
 **History** — every past session, newest first, with how many taps it had, how long it lasted, and when it happened. Made a mistake or just want to clean up? You can delete individual sessions.
 
-**Stats** — the bigger picture: total taps ever, total sessions, your average per session, and your best session on record, plus a trend chart (via `fl_chart`) so you can see whether you're trending up or down over your last 7, last 30, or all sessions.
+**Stats** - the bigger picture: total taps ever, total sessions, your average per session, and your best session on record, plus a trend chart (via `fl_chart`) so you can see whether you're trending up or down over your latest 7 sessions, 30 sessions, or all sessions.
 
-**Settings** — reset your current session if you want a fresh start, or wipe your global lifetime stats entirely. That second one is intentionally hard to trigger by accident: you have to type "RESET" to confirm. Even then, it only clears the lifetime totals — your session history stays intact, so you never lose the log of what actually happened.
+**Settings** - reset your current session if you want a fresh start, or wipe your global lifetime stats entirely. Lifetime reset is unavailable until the active session has been ended or reset, and still requires typing "RESET" to confirm. It only clears lifetime totals; session history stays intact.
 
 ### Updating from an older version
 

@@ -3,7 +3,16 @@
 All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
+### Added
+- A visible Undo control and live elapsed timer on the Counter screen.
+
+### Fixed
+- Lifetime reset is blocked during an active session or while session persistence/completion is busy, preventing pre-reset taps from being counted in a new lifetime.
+- Counter lifetime total includes active session taps without persisting them early or double-counting on completion.
+
 ### Changed
+- Counter helper text and session metrics are clearer, and Stats filters explicitly refer to session counts.
+- Flutter UI branding now consistently says Sushi Tracker.
 - The Statistics screen now sorts sessions by completion time, uses integer tap labels, and remains useful for empty and single-session histories.
 - Display names and web metadata now consistently use Sushi Tracker; application identifiers and signing remain unchanged.
 

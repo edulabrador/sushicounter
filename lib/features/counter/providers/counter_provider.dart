@@ -14,6 +14,7 @@ class CounterState {
   final bool isEnding;
   final bool isPersisting;
   final bool isCompletionPending;
+  final bool isSavingOngoing;
   final String? persistenceError;
 
   CounterState({
@@ -22,15 +23,18 @@ class CounterState {
     this.isEnding = false,
     this.isPersisting = false,
     this.isCompletionPending = false,
+    this.isSavingOngoing = false,
     this.persistenceError,
   });
 
   bool get canEdit => !isEnding && !isPersisting && !isCompletionPending;
+  bool get canResetLifetime => count == 0 && canEdit && !isSavingOngoing;
 }
 
 class CounterNotifier extends StateNotifier<CounterState> {
   final Ref ref;
   Session? _pendingSession;
+  int _ongoingWrites = 0;
 
   CounterNotifier(this.ref) : super(CounterState(count: 0)) {
     _restoreOngoing();
@@ -52,6 +56,8 @@ class CounterNotifier extends StateNotifier<CounterState> {
   }
 
   Future<void> _saveOngoing(int count, DateTime? startedAt) async {
+    _ongoingWrites++;
+    _setSavingOngoing(true);
     try {
       await ref.read(storageProvider).saveOngoingSession(count, startedAt);
     } catch (_) {
@@ -65,7 +71,23 @@ class CounterNotifier extends StateNotifier<CounterState> {
           persistenceError: 'Could not save the current session.',
         );
       }
+    } finally {
+      _ongoingWrites--;
+      _setSavingOngoing(_ongoingWrites > 0);
     }
+  }
+
+  void _setSavingOngoing(bool value) {
+    if (!mounted) return;
+    state = CounterState(
+      count: state.count,
+      startedAt: state.startedAt,
+      isEnding: state.isEnding,
+      isPersisting: state.isPersisting,
+      isCompletionPending: state.isCompletionPending,
+      isSavingOngoing: value,
+      persistenceError: state.persistenceError,
+    );
   }
 
   void increment() {

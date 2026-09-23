@@ -51,6 +51,7 @@ class _SettingsViewState extends ConsumerState<SettingsView> {
   }
 
   void _resetGlobalCounter() async {
+    if (!ref.read(counterProvider).canResetLifetime) return;
     final strongConfirm = await showDialog<bool>(
       context: context,
       builder: (context) {
@@ -94,7 +95,8 @@ class _SettingsViewState extends ConsumerState<SettingsView> {
       },
     );
 
-    if (strongConfirm == true && mounted) {
+    if (strongConfirm == true && mounted &&
+        ref.read(counterProvider).canResetLifetime) {
       setState(() => _resetting = true);
       try {
         await ref.read(globalStateProvider.notifier).resetGlobal();
@@ -122,6 +124,7 @@ class _SettingsViewState extends ConsumerState<SettingsView> {
   @override
   Widget build(BuildContext context) {
     final counterState = ref.watch(counterProvider);
+    final canResetLifetime = counterState.canResetLifetime;
     return Scaffold(
       appBar: AppBar(title: const Text('SETTINGS')),
       body: ListView(
@@ -141,10 +144,14 @@ class _SettingsViewState extends ConsumerState<SettingsView> {
               'Reset Lifetime Global',
               style: TextStyle(color: Colors.red),
             ),
-            subtitle: const Text(
-              'Permanently reset all-time taps and sessions to 0',
+            subtitle: Text(
+              canResetLifetime
+                  ? 'Permanently reset all-time taps and sessions to 0'
+                  : 'End or reset the current session first.',
             ),
-            onTap: _resetting ? null : _resetGlobalCounter,
+            onTap: _resetting || !canResetLifetime
+                ? null
+                : _resetGlobalCounter,
           ),
           const Divider(),
           ListTile(

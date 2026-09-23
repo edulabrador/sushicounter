@@ -89,7 +89,7 @@ class SushiScoreApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Sushi Score',
+      title: 'Sushi Tracker',
       theme: AppTheme.darkTheme,
       home: const RootNavigation(),
       debugShowCheckedModeBanner: false,

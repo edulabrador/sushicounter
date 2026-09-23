@@ -78,6 +78,9 @@ void main() {
 
     expect(find.text('Complete a session to see your trend.'), findsOneWidget);
     expect(tester.takeException(), isNull);
+    expect(find.text('7 sessions'), findsOneWidget);
+    expect(find.text('30 sessions'), findsOneWidget);
+    expect(find.text('All sessions'), findsOneWidget);
   });
 
   testWidgets('a single session renders a chart without an error', (

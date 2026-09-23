@@ -12,9 +12,9 @@ enum StatsFilter { last7, last30, all }
 
 extension on StatsFilter {
   String get label => switch (this) {
-    StatsFilter.last7 => 'Last 7',
-    StatsFilter.last30 => 'Last 30',
-    StatsFilter.all => 'All',
+    StatsFilter.last7 => '7 sessions',
+    StatsFilter.last30 => '30 sessions',
+    StatsFilter.all => 'All sessions',
   };
 
   int? get limit => switch (this) {

@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:sushiscore/features/counter/providers/counter_provider.dart';
@@ -5,8 +7,40 @@ import 'package:sushiscore/features/counter/widgets/sushi_button.dart';
 import 'package:sushiscore/features/global/providers/global_provider.dart';
 import 'package:sushiscore/features/settings/views/settings_view.dart';
 
-class CounterView extends ConsumerWidget {
+class CounterView extends ConsumerStatefulWidget {
   const CounterView({super.key});
+
+  @override
+  ConsumerState<CounterView> createState() => _CounterViewState();
+}
+
+class _CounterViewState extends ConsumerState<CounterView> {
+  Timer? _timer;
+  DateTime? _startedAt;
+  Duration _elapsed = Duration.zero;
+
+  void _syncTimer(int count, DateTime? startedAt) {
+    if (count == 0 || startedAt == null) {
+      _timer?.cancel();
+      _timer = null;
+      _startedAt = null;
+      _elapsed = Duration.zero;
+    } else if (_timer == null || _startedAt != startedAt) {
+      _timer?.cancel();
+      _startedAt = startedAt;
+      _elapsed = _elapsedSince(startedAt);
+      _timer = Timer.periodic(const Duration(seconds: 1), (_) {
+        if (!mounted || _startedAt == null) return;
+        setState(() => _elapsed = _elapsedSince(_startedAt!));
+      });
+    }
+  }
+
+  @override
+  void dispose() {
+    _timer?.cancel();
+    super.dispose();
+  }
 
   Future<void> _endSession(WidgetRef ref) async {
     try {
@@ -17,9 +51,11 @@ class CounterView extends ConsumerWidget {
   }
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  Widget build(BuildContext context) {
     final counterState = ref.watch(counterProvider);
     final globalState = ref.watch(globalStateProvider);
+    _syncTimer(counterState.count, counterState.startedAt);
+    final elapsed = _formatDuration(_elapsed);
     return Scaffold(
       appBar: AppBar(
         leading: IconButton(
@@ -29,7 +65,7 @@ class CounterView extends ConsumerWidget {
             context,
           ).push(MaterialPageRoute<void>(builder: (_) => const SettingsView())),
         ),
-        title: const Text('SUSHI SCORE'),
+        title: const Text('Sushi Tracker'),
       ),
       body: SafeArea(
         child: LayoutBuilder(
@@ -53,8 +89,10 @@ class CounterView extends ConsumerWidget {
                           ),
                         ),
                         const SizedBox(height: 16),
-                        const Text(
-                          'Tap the sushi to begin!',
+                        Text(
+                          counterState.count == 0
+                              ? 'Tap the sushi to start'
+                              : 'Tap to add · Long press or Undo to remove',
                           textAlign: TextAlign.center,
                           style: TextStyle(color: Colors.white54, fontSize: 16),
                         ),
@@ -66,6 +104,20 @@ class CounterView extends ConsumerWidget {
                               ref.read(counterProvider.notifier).decrement(),
                           size: sushiSize,
                           enabled: counterState.canEdit,
+                        ),
+                        const SizedBox(height: 8),
+                        TextButton.icon(
+                          onPressed:
+                              counterState.count > 0 && counterState.canEdit
+                              ? () => ref
+                                    .read(counterProvider.notifier)
+                                    .decrement()
+                              : null,
+                          icon: const Icon(Icons.undo, size: 18),
+                          label: const Text('Undo'),
+                          style: TextButton.styleFrom(
+                            foregroundColor: Colors.white70,
+                          ),
                         ),
                       ],
                     ),
@@ -85,13 +137,16 @@ class CounterView extends ConsumerWidget {
                           runSpacing: 12,
                           children: [
                             _Metric(
-                              label: 'Session',
+                              label: 'This session',
                               value: '${counterState.count}',
                             ),
                             _Metric(
-                              label: 'Global',
-                              value: '${globalState.lifetimeTotalTaps}',
+                              label: 'Lifetime total',
+                              value:
+                                  '${globalState.lifetimeTotalTaps + counterState.count}',
                             ),
+                            if (counterState.count > 0)
+                              _Metric(label: 'Elapsed', value: elapsed),
                             ElevatedButton(
                               style: ElevatedButton.styleFrom(
                                 backgroundColor: Colors.white12,
@@ -141,6 +196,20 @@ class CounterView extends ConsumerWidget {
       ),
     );
   }
+}
+
+String _formatDuration(Duration duration) {
+  final hours = duration.inHours;
+  final minutes = duration.inMinutes.remainder(60).toString().padLeft(2, '0');
+  final seconds = duration.inSeconds.remainder(60).toString().padLeft(2, '0');
+  return hours > 0
+      ? '$hours:$minutes:$seconds'
+      : '${duration.inMinutes.toString().padLeft(2, '0')}:$seconds';
+}
+
+Duration _elapsedSince(DateTime startedAt) {
+  final elapsed = DateTime.now().difference(startedAt);
+  return elapsed.isNegative ? Duration.zero : elapsed;
 }
 
 class _Metric extends StatelessWidget {

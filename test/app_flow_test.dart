@@ -35,22 +35,26 @@ void main() {
       );
 
       // Tap the sushi 3 times (hit the tappable area around the graphic).
+      expect(find.text('Sushi Tracker'), findsOneWidget);
+      expect(find.text('SUSHI SCORE'), findsNothing);
       final sushi = find.byType(GestureDetector).first;
       await tester.tap(sushi);
       await tester.tap(sushi);
       await tester.tap(sushi);
       await tester.pump();
 
-      // Counter and session card both show 3.
+      // Counter and session metric both show 3. Lifetime includes the active
+      // session without mutating the saved total.
       expect(find.text('3'), findsNWidgets(2));
+      expect(find.text('Lifetime total'), findsOneWidget);
 
       // End the session.
       await tester.tap(find.text('End Session'));
       await tester.pumpAndSettle();
 
-      // Counter is back to 0 and Global shows 3.
-      expect(find.text('0'), findsNWidgets(2)); // giant counter + session card
-      expect(find.text('3'), findsOneWidget); // global total
+      // Counter is back to 0 and Lifetime total remains 3.
+      expect(find.text('0'), findsNWidgets(2));
+      expect(find.text('3'), findsOneWidget);
       expect(repo.sessions.length, 1);
 
       // History tab shows the saved session.
@@ -84,6 +88,67 @@ void main() {
     await tester.longPress(sushi);
     await tester.pump();
     expect(find.text('1'), findsNWidgets(2));
+  });
+
+  testWidgets('visible Undo decrements once and is disabled at zero', (tester) async {
+    await tester.pumpWidget(
+      ProviderScope(
+        overrides: [storageProvider.overrideWithValue(FakeRepository())],
+        child: const SushiScoreApp(),
+      ),
+    );
+
+    final undo = find.widgetWithText(TextButton, 'Undo');
+    expect(tester.widget<TextButton>(undo).onPressed, isNull);
+    await tester.tap(find.byType(SushiButton));
+    await tester.tap(find.byType(SushiButton));
+    await tester.pump();
+    await tester.tap(undo);
+    await tester.pump();
+    expect(find.text('1'), findsNWidgets(2));
+    expect(find.bySemanticsLabel('Undo'), findsOneWidget);
+  });
+
+  testWidgets('lifetime total includes the active count without double counting', (tester) async {
+    final repo = FakeRepository();
+    await repo.adjustGlobalState(tapsDelta: 10, sessionsDelta: 1);
+    await tester.pumpWidget(
+      ProviderScope(
+        overrides: [storageProvider.overrideWithValue(repo)],
+        child: const SushiScoreApp(),
+      ),
+    );
+    final sushi = find.byType(SushiButton);
+    await tester.tap(sushi);
+    await tester.tap(sushi);
+    await tester.tap(sushi);
+    await tester.pump();
+    expect(find.text('13'), findsOneWidget);
+    expect(repo.getGlobalState().lifetimeTotalTaps, 10);
+
+    await tester.tap(find.text('End Session'));
+    await tester.pumpAndSettle();
+    expect(find.text('13'), findsOneWidget);
+    expect(repo.getGlobalState().lifetimeTotalTaps, 13);
+    expect(find.text('0'), findsNWidgets(2));
+  });
+
+  testWidgets('restored timer advances and clears when session ends', (tester) async {
+    final repo = FakeRepository();
+    await repo.saveOngoingSession(2, DateTime.now().subtract(const Duration(seconds: 5)));
+    await tester.pumpWidget(
+      ProviderScope(
+        overrides: [storageProvider.overrideWithValue(repo)],
+        child: const SushiScoreApp(),
+      ),
+    );
+    expect(find.text('00:05'), findsOneWidget);
+    await tester.pump(const Duration(seconds: 1));
+    expect(find.text('00:06'), findsOneWidget);
+    await tester.tap(find.text('End Session'));
+    await tester.pump();
+    await tester.pump();
+    expect(find.text('00:06'), findsNothing);
   });
 
   testWidgets('ongoing session is restored into the UI after restart', (
