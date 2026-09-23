@@ -116,6 +116,16 @@ class DelayedResetRepository extends FakeRepository {
   }
 }
 
+class DelayedOngoingRepository extends FakeRepository {
+  final writeGate = Completer<void>();
+
+  @override
+  Future<void> saveOngoingSession(int count, DateTime? startedAt) async {
+    await writeGate.future;
+    await super.saveOngoingSession(count, startedAt);
+  }
+}
+
 ProviderContainer makeContainer(FakeRepository repo) {
   final container = ProviderContainer(
     overrides: [storageProvider.overrideWithValue(repo)],
@@ -126,6 +136,29 @@ ProviderContainer makeContainer(FakeRepository repo) {
 
 void main() {
   group('CounterNotifier', () {
+    test('pending writes do not publish an unchanged saving state', () async {
+      final repo = DelayedOngoingRepository();
+      final container = makeContainer(repo);
+      final states = <CounterState>[];
+      final subscription = container.listen(
+        counterProvider,
+        (_, next) => states.add(next),
+      );
+      addTearDown(subscription.close);
+      final notifier = container.read(counterProvider.notifier);
+
+      notifier.increment();
+      notifier.increment();
+
+      expect(states.map((state) => state.count), [1, 1, 2]);
+      expect(states.last.isSavingOngoing, isTrue);
+
+      repo.writeGate.complete();
+      await Future<void>.delayed(Duration.zero);
+      await Future<void>.delayed(Duration.zero);
+      expect(container.read(counterProvider).isSavingOngoing, isFalse);
+    });
+
     test('pending reset blocks edits and completion', () async {
       final repo = DelayedResetRepository();
       final container = makeContainer(repo);

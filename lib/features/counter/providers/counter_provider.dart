@@ -91,7 +91,7 @@ class CounterNotifier extends StateNotifier<CounterState> {
   }
 
   void _setSavingOngoing(bool value) {
-    if (!mounted) return;
+    if (!mounted || state.isSavingOngoing == value) return;
     state = CounterState(
       count: state.count,
       startedAt: state.startedAt,
