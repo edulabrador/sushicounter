@@ -1,4 +1,4 @@
-package com.example.sushiscore
+package dev.edulabrador.sushiscore
 
 import io.flutter.embedding.android.FlutterActivity
 

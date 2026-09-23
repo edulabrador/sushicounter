@@ -95,6 +95,24 @@ void main() {
     expect(find.byType(LineChart), findsOneWidget);
     expect(tester.takeException(), isNull);
   });
+
+  testWidgets('multiple large sessions render within valid chart ranges', (
+    tester,
+  ) async {
+    final repository = FakeRepository();
+    final start = DateTime(2026, 1, 1);
+    for (var index = 0; index < 40; index++) {
+      repository.sessions['$index'] = session(
+        '$index',
+        start.add(Duration(days: index)),
+        index == 39 ? 1000000 : index + 1,
+      );
+    }
+
+    await tester.pumpWidget(_statsApp(repository, const Size(390, 844)));
+    expect(find.byType(LineChart), findsOneWidget);
+    expect(tester.takeException(), isNull);
+  });
 }
 
 Widget _statsApp(

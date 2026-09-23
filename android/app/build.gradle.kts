@@ -30,8 +30,8 @@ if (gradle.startParameter.taskNames.any { it.contains("Release", ignoreCase = tr
 }
 
 extensions.configure<ApplicationExtension>("android") {
-    namespace = "com.example.sushiscore"
-    compileSdk = flutter.compileSdkVersion
+    namespace = "dev.edulabrador.sushiscore"
+    compileSdk = 36
     ndkVersion = flutter.ndkVersion
 
     compileOptions {
@@ -44,7 +44,7 @@ extensions.configure<ApplicationExtension>("android") {
         // You can update the following values to match your application needs.
         // For more information, see: https://flutter.dev/to/review-gradle-config.
         minSdk = flutter.minSdkVersion
-        targetSdk = flutter.targetSdkVersion
+        targetSdk = 36
         versionCode = flutter.versionCode
         versionName = flutter.versionName
     }

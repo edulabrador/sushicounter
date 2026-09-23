@@ -28,7 +28,8 @@ class CounterState {
   });
 
   bool get canEdit => !isEnding && !isPersisting && !isCompletionPending;
-  bool get canResetLifetime => count == 0 && canEdit && !isSavingOngoing;
+  bool get canResetLifetime =>
+      count == 0 && canEdit && !isSavingOngoing && persistenceError == null;
 }
 
 class CounterNotifier extends StateNotifier<CounterState> {
@@ -60,6 +61,17 @@ class CounterNotifier extends StateNotifier<CounterState> {
     _setSavingOngoing(true);
     try {
       await ref.read(storageProvider).saveOngoingSession(count, startedAt);
+      if (mounted &&
+          state.canEdit &&
+          state.count == count &&
+          state.startedAt == startedAt &&
+          state.persistenceError == 'Could not save the current session.') {
+        state = CounterState(
+          count: count,
+          startedAt: startedAt,
+          isSavingOngoing: _ongoingWrites > 1,
+        );
+      }
     } catch (_) {
       if (mounted &&
           state.canEdit &&
@@ -68,6 +80,7 @@ class CounterNotifier extends StateNotifier<CounterState> {
         state = CounterState(
           count: count,
           startedAt: startedAt,
+          isSavingOngoing: _ongoingWrites > 0,
           persistenceError: 'Could not save the current session.',
         );
       }
@@ -95,6 +108,7 @@ class CounterNotifier extends StateNotifier<CounterState> {
     state = CounterState(
       count: state.count + 1,
       startedAt: state.startedAt ?? DateTime.now(),
+      isSavingOngoing: _ongoingWrites > 0,
     );
     _persistOngoing();
   }
@@ -105,6 +119,7 @@ class CounterNotifier extends StateNotifier<CounterState> {
       state = CounterState(
         count: count,
         startedAt: count == 0 ? null : state.startedAt,
+        isSavingOngoing: _ongoingWrites > 0,
       );
       _persistOngoing();
     }
@@ -117,15 +132,22 @@ class CounterNotifier extends StateNotifier<CounterState> {
       count: previous.count,
       startedAt: previous.startedAt,
       isPersisting: true,
+      isSavingOngoing: _ongoingWrites > 0,
     );
     try {
       await ref.read(storageProvider).saveOngoingSession(0, null);
-      if (mounted) state = CounterState(count: 0);
+      if (mounted) {
+        state = CounterState(
+          count: 0,
+          isSavingOngoing: _ongoingWrites > 0,
+        );
+      }
     } catch (_) {
       if (mounted) {
         state = CounterState(
           count: previous.count,
           startedAt: previous.startedAt,
+          isSavingOngoing: _ongoingWrites > 0,
           persistenceError: 'Could not reset the current session.',
         );
       }
@@ -139,6 +161,7 @@ class CounterNotifier extends StateNotifier<CounterState> {
       count: state.count,
       startedAt: state.startedAt,
       isEnding: true,
+      isSavingOngoing: _ongoingWrites > 0,
     );
     try {
       final endedAt = DateTime.now();
@@ -157,7 +180,10 @@ class CounterNotifier extends StateNotifier<CounterState> {
       if (!mounted) return;
       ref.read(globalStateProvider.notifier).reload();
       ref.read(sessionListProvider.notifier).reload();
-      state = CounterState(count: 0);
+      state = CounterState(
+        count: 0,
+        isSavingOngoing: _ongoingWrites > 0,
+      );
       _pendingSession = null;
     } catch (_) {
       if (mounted) {
@@ -165,6 +191,7 @@ class CounterNotifier extends StateNotifier<CounterState> {
           count: state.count,
           startedAt: state.startedAt,
           isCompletionPending: true,
+          isSavingOngoing: _ongoingWrites > 0,
           persistenceError: 'Could not save this session. Please try again.',
         );
       }

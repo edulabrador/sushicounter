@@ -1,18 +1,18 @@
 # 🍣 Sushi Tracker
 
-A tiny, dark-themed Flutter app for one purpose: tapping a button and watching the number go up.
+A tiny, dark-themed, offline-first Flutter app for counting sushi pieces during a buffet.
 
-I built this as a no-frills tally counter — the kind of thing you reach for when you just need to count *something* (reps, drinks, snacks, whatever "sushi" means to you that day) without opening an app packed with ads and permissions it doesn't need. Tap to add, long-press to undo a mistake, and end the session when you're done. Everything is saved locally on your device — there's no account, no backend, no tracking.
+Tap to add a piece, use Undo or long-press to correct a count, and end the session when you're done. A live timer tracks session duration. History and lifetime statistics stay on your device. The app has no account, backend, ads, or analytics.
 
 ## What it does
 
-**Counter** - the home screen. A big number, a sushi graphic you tap to increment, and visible Undo plus long-press controls to decrement. It shows this session, the lifetime total including the active session, and a live elapsed timer.
+**Counter** - the home screen. Tap the sushi graphic to count, use visible Undo or long-press to decrement, and end the session to save it. It shows this session, the lifetime total including the active session, and a live elapsed timer.
 
-**History** — every past session, newest first, with how many taps it had, how long it lasted, and when it happened. Made a mistake or just want to clean up? You can delete individual sessions.
+**History** - every past session, newest first, with its count, duration, and completion time. Individual sessions can be deleted and restored with Undo.
 
-**Stats** - the bigger picture: total taps ever, total sessions, your average per session, and your best session on record, plus a trend chart (via `fl_chart`) so you can see whether you're trending up or down over your latest 7 sessions, 30 sessions, or all sessions.
+**Stats** - lifetime taps and sessions, average and best session counts, plus a trend chart for the latest 7 sessions, 30 sessions, or all sessions.
 
-**Settings** - reset your current session if you want a fresh start, or wipe your global lifetime stats entirely. Lifetime reset is unavailable until the active session has been ended or reset, and still requires typing "RESET" to confirm. It only clears lifetime totals; session history stays intact.
+**Settings** - reset the current session or lifetime totals. Lifetime reset is unavailable while a session is active and requires typing "RESET" to confirm. It clears lifetime totals while preserving session history.
 
 ### Updating from an older version
 
@@ -22,14 +22,14 @@ Existing history is preserved. When upgrading, Sushi Tracker only links legacy h
 
 Nothing fancy, just a clean, feature-first structure so it's easy to find your way around:
 
-- **State management** — [`flutter_riverpod`](https://pub.dev/packages/flutter_riverpod)
-- **Local storage** — [`hive`](https://pub.dev/packages/hive) / `hive_flutter`, so everything persists instantly with no server round-trip
-- **Charts** — [`fl_chart`](https://pub.dev/packages/fl_chart) for the trend line on the Stats screen
+- **State management**, [`flutter_riverpod`](https://pub.dev/packages/flutter_riverpod)
+- **Local storage**, [`hive`](https://pub.dev/packages/hive) / `hive_flutter`, so everything persists instantly with no server round-trip
+- **Charts**, [`fl_chart`](https://pub.dev/packages/fl_chart) for the trend line on the Stats screen
 
 ```
 lib/
 ├── core/       # models, theme, storage repository
-├── features/   # counter, history, stats, settings — each with its own views/providers
+├── features/   # counter, history, stats, and settings, each with its own views/providers
 └── shared/     # widgets used across features (bottom nav, etc.)
 ```
 
@@ -55,4 +55,4 @@ For a signed Play Store app bundle, see [PUBLISHING.md](PUBLISHING.md).
 
 ## License
 
-All rights reserved — see [LICENSE](LICENSE). You're welcome to read the code, but reuse or redistribution requires my permission.
+All rights reserved. See [LICENSE](LICENSE). You're welcome to read the code, but reuse or redistribution requires my permission.

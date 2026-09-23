@@ -2,7 +2,7 @@
 
 All notable changes to this project will be documented in this file.
 
-## [Unreleased]
+## [0.2.4] - 2026-09-23
 ### Added
 - A visible Undo control and live elapsed timer on the Counter screen.
 
@@ -13,6 +13,10 @@ All notable changes to this project will be documented in this file.
 ### Changed
 - Counter helper text and session metrics are clearer, and Stats filters explicitly refer to session counts.
 - Flutter UI branding now consistently says Sushi Tracker.
+- Counter actions are positioned for phone layouts, and widget coverage uses stable keys for repeated values.
+- Session timer advances deterministically, restores from the saved start time, and recalculates after app resume.
+- Android and desktop package metadata no longer uses the Flutter `com.example` placeholder where the release identity is configured.
+- App version is now `0.2.4+6`.
 - The Statistics screen now sorts sessions by completion time, uses integer tap labels, and remains useful for empty and single-session histories.
 - Display names and web metadata now consistently use Sushi Tracker; application identifiers and signing remain unchanged.
 

@@ -30,6 +30,8 @@ migrate_working_dir/
 .pub/
 /build/
 /android/build/
+/android/key.properties
+*.jks
 
 # Web related
 

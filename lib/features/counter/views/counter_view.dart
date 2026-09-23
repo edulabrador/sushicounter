@@ -1,46 +1,19 @@
-import 'dart:async';
-
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:sushiscore/features/counter/providers/counter_provider.dart';
 import 'package:sushiscore/features/counter/widgets/sushi_button.dart';
+import 'package:sushiscore/features/counter/widgets/session_timer.dart';
 import 'package:sushiscore/features/global/providers/global_provider.dart';
 import 'package:sushiscore/features/settings/views/settings_view.dart';
 
-class CounterView extends ConsumerStatefulWidget {
+const counterCurrentCountKey = ValueKey<String>('current-count');
+const counterSessionTotalKey = ValueKey<String>('session-total');
+const counterLifetimeTotalKey = ValueKey<String>('lifetime-total');
+const counterUndoButtonKey = ValueKey<String>('undo-button');
+const counterEndSessionButtonKey = ValueKey<String>('end-session-button');
+
+class CounterView extends ConsumerWidget {
   const CounterView({super.key});
-
-  @override
-  ConsumerState<CounterView> createState() => _CounterViewState();
-}
-
-class _CounterViewState extends ConsumerState<CounterView> {
-  Timer? _timer;
-  DateTime? _startedAt;
-  Duration _elapsed = Duration.zero;
-
-  void _syncTimer(int count, DateTime? startedAt) {
-    if (count == 0 || startedAt == null) {
-      _timer?.cancel();
-      _timer = null;
-      _startedAt = null;
-      _elapsed = Duration.zero;
-    } else if (_timer == null || _startedAt != startedAt) {
-      _timer?.cancel();
-      _startedAt = startedAt;
-      _elapsed = _elapsedSince(startedAt);
-      _timer = Timer.periodic(const Duration(seconds: 1), (_) {
-        if (!mounted || _startedAt == null) return;
-        setState(() => _elapsed = _elapsedSince(_startedAt!));
-      });
-    }
-  }
-
-  @override
-  void dispose() {
-    _timer?.cancel();
-    super.dispose();
-  }
 
   Future<void> _endSession(WidgetRef ref) async {
     try {
@@ -51,11 +24,9 @@ class _CounterViewState extends ConsumerState<CounterView> {
   }
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final counterState = ref.watch(counterProvider);
     final globalState = ref.watch(globalStateProvider);
-    _syncTimer(counterState.count, counterState.startedAt);
-    final elapsed = _formatDuration(_elapsed);
     return Scaffold(
       appBar: AppBar(
         leading: IconButton(
@@ -70,7 +41,7 @@ class _CounterViewState extends ConsumerState<CounterView> {
       body: SafeArea(
         child: LayoutBuilder(
           builder: (context, constraints) {
-            final sushiSize = (constraints.maxHeight * .30).clamp(96.0, 200.0);
+            final sushiSize = (constraints.maxHeight * .23).clamp(96.0, 200.0);
             return SingleChildScrollView(
               padding: const EdgeInsets.fromLTRB(16, 8, 16, 16),
               child: Column(
@@ -83,6 +54,7 @@ class _CounterViewState extends ConsumerState<CounterView> {
                           fit: BoxFit.scaleDown,
                           child: Text(
                             '${counterState.count}',
+                            key: counterCurrentCountKey,
                             semanticsLabel:
                                 'Current session: ${counterState.count} sushi',
                             style: Theme.of(context).textTheme.displayLarge,
@@ -96,7 +68,7 @@ class _CounterViewState extends ConsumerState<CounterView> {
                           textAlign: TextAlign.center,
                           style: TextStyle(color: Colors.white54, fontSize: 16),
                         ),
-                        const SizedBox(height: 32),
+                        const SizedBox(height: 24),
                         SushiButton(
                           onTap: () =>
                               ref.read(counterProvider.notifier).increment(),
@@ -105,8 +77,9 @@ class _CounterViewState extends ConsumerState<CounterView> {
                           size: sushiSize,
                           enabled: counterState.canEdit,
                         ),
-                        const SizedBox(height: 8),
+                        const SizedBox(height: 4),
                         TextButton.icon(
+                          key: counterUndoButtonKey,
                           onPressed:
                               counterState.count > 0 && counterState.canEdit
                               ? () => ref
@@ -117,6 +90,28 @@ class _CounterViewState extends ConsumerState<CounterView> {
                           label: const Text('Undo'),
                           style: TextButton.styleFrom(
                             foregroundColor: Colors.white70,
+                          ),
+                        ),
+                        const SizedBox(height: 4),
+                        SizedBox(
+                          width: double.infinity,
+                          child: FilledButton.icon(
+                            key: counterEndSessionButtonKey,
+                            onPressed: counterState.count > 0 &&
+                                    !counterState.isEnding &&
+                                    !counterState.isPersisting
+                                ? () => _endSession(ref)
+                                : null,
+                            icon: counterState.isEnding
+                                ? const SizedBox(
+                                    width: 18,
+                                    height: 18,
+                                    child: CircularProgressIndicator(
+                                      strokeWidth: 2,
+                                    ),
+                                  )
+                                : const Icon(Icons.check),
+                            label: const Text('End Session'),
                           ),
                         ),
                       ],
@@ -139,39 +134,18 @@ class _CounterViewState extends ConsumerState<CounterView> {
                             _Metric(
                               label: 'This session',
                               value: '${counterState.count}',
+                              valueKey: counterSessionTotalKey,
                             ),
                             _Metric(
                               label: 'Lifetime total',
                               value:
                                   '${globalState.lifetimeTotalTaps + counterState.count}',
+                              valueKey: counterLifetimeTotalKey,
                             ),
                             if (counterState.count > 0)
-                              _Metric(label: 'Elapsed', value: elapsed),
-                            ElevatedButton(
-                              style: ElevatedButton.styleFrom(
-                                backgroundColor: Colors.white12,
-                                foregroundColor: Colors.white,
-                                elevation: 0,
-                                shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(12),
-                                ),
+                              SessionElapsedTimer(
+                                startedAt: counterState.startedAt!,
                               ),
-                              onPressed:
-                                  counterState.count > 0 &&
-                                      !counterState.isEnding &&
-                                      !counterState.isPersisting
-                                  ? () => _endSession(ref)
-                                  : null,
-                              child: counterState.isEnding
-                                  ? const SizedBox(
-                                      width: 20,
-                                      height: 20,
-                                      child: CircularProgressIndicator(
-                                        strokeWidth: 2,
-                                      ),
-                                    )
-                                  : const Text('End Session'),
-                            ),
                             if (counterState.persistenceError != null)
                               Semantics(
                                 liveRegion: true,
@@ -198,24 +172,15 @@ class _CounterViewState extends ConsumerState<CounterView> {
   }
 }
 
-String _formatDuration(Duration duration) {
-  final hours = duration.inHours;
-  final minutes = duration.inMinutes.remainder(60).toString().padLeft(2, '0');
-  final seconds = duration.inSeconds.remainder(60).toString().padLeft(2, '0');
-  return hours > 0
-      ? '$hours:$minutes:$seconds'
-      : '${duration.inMinutes.toString().padLeft(2, '0')}:$seconds';
-}
-
-Duration _elapsedSince(DateTime startedAt) {
-  final elapsed = DateTime.now().difference(startedAt);
-  return elapsed.isNegative ? Duration.zero : elapsed;
-}
-
 class _Metric extends StatelessWidget {
-  const _Metric({required this.label, required this.value});
+  const _Metric({
+    required this.label,
+    required this.value,
+    this.valueKey,
+  });
   final String label;
   final String value;
+  final Key? valueKey;
 
   @override
   Widget build(BuildContext context) => Column(
@@ -224,6 +189,7 @@ class _Metric extends StatelessWidget {
       Text(label, style: const TextStyle(color: Colors.white54)),
       Text(
         value,
+        key: valueKey,
         style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
       ),
     ],
