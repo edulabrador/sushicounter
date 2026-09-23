@@ -111,7 +111,7 @@ jobs:
           private_declaration = next((node for node in declarations if node.attrib.get(android + 'name') == expected_private_permission), None)
           assert private_declaration is not None, 'AndroidX private receiver permission declaration is missing'
           protection_level = private_declaration.attrib.get(android + 'protectionLevel')
-          assert protection_level == 'signature', f'Private receiver permission must be signature-protected, got {protection_level}'
+          assert protection_level in ('signature', '0x00000002'), f'Private receiver permission must be signature-protected, got {protection_level}'
           print('Release permissions:', permissions)
           assert permissions == [expected_private_permission], f'Unexpected release permissions: {permissions}'
 
