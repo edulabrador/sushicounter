@@ -1,25 +1,22 @@
-import 'package:flutter_riverpod/legacy.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../../../core/storage/hive_repository.dart';
 import '../../../core/models/global_state.dart';
 import '../../../core/providers/storage_provider.dart';
 
-class GlobalStateNotifier extends StateNotifier<GlobalState> {
-  final HiveRepository repository;
-
-  GlobalStateNotifier(this.repository) : super(repository.getGlobalState());
+class GlobalStateNotifier extends Notifier<GlobalState> {
+  @override
+  GlobalState build() => ref.watch(storageProvider).getGlobalState();
 
   Future<void> resetGlobal() async {
+    final repository = ref.read(storageProvider);
     await repository.resetGlobalState();
-    if (!mounted) return;
+    if (!ref.mounted) return;
     state = repository.getGlobalState();
   }
 
-  void reload() => state = repository.getGlobalState();
+  void reload() => state = ref.read(storageProvider).getGlobalState();
 }
 
-final globalStateProvider =
-    StateNotifierProvider<GlobalStateNotifier, GlobalState>((ref) {
-      final repository = ref.watch(storageProvider);
-      return GlobalStateNotifier(repository);
-    });
+final globalStateProvider = NotifierProvider<GlobalStateNotifier, GlobalState>(
+  GlobalStateNotifier.new,
+);

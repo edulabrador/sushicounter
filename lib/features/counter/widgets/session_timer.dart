@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 
+import '../../../l10n/l10n.dart';
 import '../views/counter_timer.dart';
 
 const counterElapsedTimeKey = ValueKey<String>('elapsed-time');
@@ -23,45 +24,48 @@ class SessionElapsedTimer extends StatefulWidget {
 class _SessionElapsedTimerState extends State<SessionElapsedTimer>
     with WidgetsBindingObserver {
   Timer? _timer;
+
+  /// Elapsed time when the current timer started; ticks are added to it.
+  late Duration _base;
   late Duration _elapsed;
-  bool _isForeground = true;
+  late bool _isForeground;
 
   @override
   void initState() {
     super.initState();
-    _elapsed = elapsedSince(widget.startedAt, now: widget.now());
+    final lifecycle = WidgetsBinding.instance.lifecycleState;
+    _isForeground = lifecycle == null || lifecycle == AppLifecycleState.resumed;
     WidgetsBinding.instance.addObserver(this);
-    _startTimer();
+    _restart();
   }
 
   @override
   void didUpdateWidget(covariant SessionElapsedTimer oldWidget) {
     super.didUpdateWidget(oldWidget);
-    if (widget.startedAt != oldWidget.startedAt) {
-      _elapsed = elapsedSince(widget.startedAt, now: widget.now());
-    }
+    if (widget.startedAt != oldWidget.startedAt) _restart();
   }
 
-  void _startTimer() {
-    if (!_isForeground || _timer != null) return;
-    _timer = Timer.periodic(const Duration(seconds: 1), (_) {
+  /// Re-anchors to the real start time and restarts the ticker.
+  void _restart() {
+    _timer?.cancel();
+    _timer = null;
+    _base = elapsedSince(widget.startedAt, now: widget.now());
+    _elapsed = _base;
+    if (!_isForeground) return;
+    // Timer.tick counts every elapsed period, including ones skipped while
+    // the UI thread was busy, so the display cannot fall behind.
+    _timer = Timer.periodic(const Duration(seconds: 1), (timer) {
       if (!mounted) return;
-      setState(() => _elapsed += const Duration(seconds: 1));
+      setState(() => _elapsed = _base + Duration(seconds: timer.tick));
     });
   }
 
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
-    _isForeground = state == AppLifecycleState.resumed;
-    if (_isForeground) {
-      setState(
-        () => _elapsed = elapsedSince(widget.startedAt, now: widget.now()),
-      );
-      _startTimer();
-    } else {
-      _timer?.cancel();
-      _timer = null;
-    }
+    final isForeground = state == AppLifecycleState.resumed;
+    if (isForeground == _isForeground) return;
+    _isForeground = isForeground;
+    setState(_restart);
   }
 
   @override
@@ -75,7 +79,7 @@ class _SessionElapsedTimerState extends State<SessionElapsedTimer>
   Widget build(BuildContext context) => Column(
     crossAxisAlignment: CrossAxisAlignment.start,
     children: [
-      const Text('Elapsed', style: TextStyle(color: Colors.white54)),
+      Text(context.l10n.elapsed, style: const TextStyle(color: Colors.white54)),
       Text(
         formatSessionDuration(_elapsed),
         key: counterElapsedTimeKey,

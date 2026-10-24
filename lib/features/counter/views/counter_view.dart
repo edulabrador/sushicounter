@@ -3,14 +3,22 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:sushiscore/features/counter/providers/counter_provider.dart';
 import 'package:sushiscore/features/counter/widgets/sushi_button.dart';
 import 'package:sushiscore/features/counter/widgets/session_timer.dart';
-import 'package:sushiscore/features/global/providers/global_provider.dart';
 import 'package:sushiscore/features/settings/views/settings_view.dart';
+import 'package:sushiscore/l10n/l10n.dart';
 
 const counterCurrentCountKey = ValueKey<String>('current-count');
 const counterSessionTotalKey = ValueKey<String>('session-total');
 const counterLifetimeTotalKey = ValueKey<String>('lifetime-total');
 const counterUndoButtonKey = ValueKey<String>('undo-button');
 const counterEndSessionButtonKey = ValueKey<String>('end-session-button');
+const counterDiscardButtonKey = ValueKey<String>('discard-session-button');
+
+String counterErrorMessage(AppLocalizations l10n, CounterError error) =>
+    switch (error) {
+      CounterError.saveOngoing => l10n.errorSaveOngoing,
+      CounterError.resetCurrent => l10n.errorResetCurrent,
+      CounterError.completeSession => l10n.errorCompleteSession,
+    };
 
 class CounterView extends ConsumerWidget {
   const CounterView({super.key});
@@ -23,20 +31,55 @@ class CounterView extends ConsumerWidget {
     }
   }
 
+  Future<void> _discardSession(BuildContext context, WidgetRef ref) async {
+    final l10n = context.l10n;
+    final confirm = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Text(l10n.discardSessionTitle),
+        content: Text(l10n.discardSessionBody),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context, false),
+            child: Text(l10n.cancel),
+          ),
+          TextButton(
+            onPressed: () => Navigator.pop(context, true),
+            child: Text(
+              l10n.discard,
+              style: const TextStyle(color: Colors.red),
+            ),
+          ),
+        ],
+      ),
+    );
+    if (confirm != true || !context.mounted) return;
+    final messenger = ScaffoldMessenger.of(context);
+    try {
+      await ref.read(counterProvider.notifier).resetCurrent();
+      messenger.showSnackBar(SnackBar(content: Text(l10n.sessionDiscarded)));
+    } catch (_) {
+      // The provider exposes the error on screen.
+    }
+  }
+
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = context.l10n;
     final counterState = ref.watch(counterProvider);
-    final globalState = ref.watch(globalStateProvider);
+    final lifetimeTaps = ref.watch(lifetimeTapsProvider);
+    final startedAt = counterState.startedAt;
+    final error = counterState.persistenceError;
     return Scaffold(
       appBar: AppBar(
         leading: IconButton(
-          tooltip: 'Settings',
+          tooltip: l10n.settingsTooltip,
           icon: const Icon(Icons.settings_outlined),
           onPressed: () => Navigator.of(
             context,
           ).push(MaterialPageRoute<void>(builder: (_) => const SettingsView())),
         ),
-        title: const Text('Sushi Tracker'),
+        title: Text(l10n.appTitle),
       ),
       body: SafeArea(
         child: LayoutBuilder(
@@ -55,16 +98,17 @@ class CounterView extends ConsumerWidget {
                           child: Text(
                             '${counterState.count}',
                             key: counterCurrentCountKey,
-                            semanticsLabel:
-                                'Current session: ${counterState.count} sushi',
+                            semanticsLabel: l10n.currentSessionSemantics(
+                              counterState.count,
+                            ),
                             style: Theme.of(context).textTheme.displayLarge,
                           ),
                         ),
                         const SizedBox(height: 16),
                         Text(
                           counterState.count == 0
-                              ? 'Tap the sushi to start'
-                              : 'Tap to add · Long press or Undo to remove',
+                              ? l10n.tapToStart
+                              : l10n.tapHint,
                           textAlign: TextAlign.center,
                           style: TextStyle(color: Colors.white54, fontSize: 16),
                         ),
@@ -87,7 +131,7 @@ class CounterView extends ConsumerWidget {
                                     .decrement()
                               : null,
                           icon: const Icon(Icons.undo, size: 18),
-                          label: const Text('Undo'),
+                          label: Text(l10n.undo),
                           style: TextButton.styleFrom(
                             foregroundColor: Colors.white70,
                           ),
@@ -112,9 +156,19 @@ class CounterView extends ConsumerWidget {
                                     ),
                                   )
                                 : const Icon(Icons.check),
-                            label: const Text('End Session'),
+                            label: Text(l10n.endSession),
                           ),
                         ),
+                        if (counterState.isCompletionPending)
+                          TextButton.icon(
+                            key: counterDiscardButtonKey,
+                            onPressed: () => _discardSession(context, ref),
+                            icon: const Icon(Icons.delete_outline, size: 18),
+                            label: Text(l10n.discardSession),
+                            style: TextButton.styleFrom(
+                              foregroundColor: Colors.redAccent,
+                            ),
+                          ),
                       ],
                     ),
                   ),
@@ -133,25 +187,22 @@ class CounterView extends ConsumerWidget {
                           runSpacing: 12,
                           children: [
                             _Metric(
-                              label: 'This session',
+                              label: l10n.thisSession,
                               value: '${counterState.count}',
                               valueKey: counterSessionTotalKey,
                             ),
                             _Metric(
-                              label: 'Lifetime total',
-                              value:
-                                  '${globalState.lifetimeTotalTaps + counterState.count}',
+                              label: l10n.lifetimeTotal,
+                              value: '$lifetimeTaps',
                               valueKey: counterLifetimeTotalKey,
                             ),
-                            if (counterState.count > 0)
-                              SessionElapsedTimer(
-                                startedAt: counterState.startedAt!,
-                              ),
-                            if (counterState.persistenceError != null)
+                            if (counterState.count > 0 && startedAt != null)
+                              SessionElapsedTimer(startedAt: startedAt),
+                            if (error != null)
                               Semantics(
                                 liveRegion: true,
                                 child: Text(
-                                  counterState.persistenceError!,
+                                  counterErrorMessage(l10n, error),
                                   textAlign: TextAlign.center,
                                   style: const TextStyle(
                                     color: Colors.redAccent,

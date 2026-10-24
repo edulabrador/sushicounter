@@ -5,6 +5,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:sushiscore/core/models/global_state.dart';
 import 'package:sushiscore/core/models/session.dart';
 import 'package:sushiscore/core/providers/storage_provider.dart';
+import 'package:sushiscore/core/storage/backup.dart';
 import 'package:sushiscore/core/storage/hive_repository.dart';
 import 'package:sushiscore/features/counter/providers/counter_provider.dart';
 import 'package:sushiscore/features/global/providers/global_provider.dart';
@@ -24,11 +25,14 @@ class FakeRepository extends HiveRepository {
   List<Session> getAllSessions() =>
       sessions.values.toList()..sort((a, b) => b.endedAt.compareTo(a.endedAt));
 
+  bool keepScreenOn = true;
+
   @override
   GlobalState getGlobalState() => GlobalState(
     lifetimeTotalTaps: _global.lifetimeTotalTaps,
     lifetimeTotalSessions: _global.lifetimeTotalSessions,
     epoch: _global.epoch,
+    lastResetAt: _global.lastResetAt,
   );
 
   Future<void> adjustGlobalState({
@@ -41,6 +45,7 @@ class FakeRepository extends HiveRepository {
       lifetimeTotalTaps: taps < 0 ? 0 : taps,
       lifetimeTotalSessions: sessions < 0 ? 0 : sessions,
       epoch: _global.epoch,
+      lastResetAt: _global.lastResetAt,
     );
   }
 
@@ -50,6 +55,7 @@ class FakeRepository extends HiveRepository {
       lifetimeTotalTaps: 0,
       lifetimeTotalSessions: 0,
       epoch: _global.epoch + 1,
+      lastResetAt: DateTime.now(),
     );
   }
 
@@ -72,22 +78,48 @@ class FakeRepository extends HiveRepository {
   }
 
   @override
-  Future<Session?> deleteSessionWithTotals(String id) async {
+  Future<DeletedSession?> deleteSessionWithTotals(String id) async {
     final session = sessions.remove(id);
-    if (session != null && session.contributionEpoch == _global.epoch) {
+    if (session == null) return null;
+    final before = _global;
+    if (session.contributionEpoch == _global.epoch) {
       await adjustGlobalState(tapsDelta: -session.count, sessionsDelta: -1);
     }
-    return session;
+    return DeletedSession(
+      session,
+      tapsRemoved: before.lifetimeTotalTaps - _global.lifetimeTotalTaps,
+      sessionsRemoved:
+          before.lifetimeTotalSessions - _global.lifetimeTotalSessions,
+    );
   }
 
   @override
-  Future<void> restoreSessionWithTotals(Session session) async {
+  Future<void> restoreSessionWithTotals(DeletedSession deleted) async {
+    final session = deleted.session;
     if (sessions.containsKey(session.id)) return;
     sessions[session.id] = session;
     if (session.contributionEpoch == _global.epoch) {
-      await adjustGlobalState(tapsDelta: session.count, sessionsDelta: 1);
+      await adjustGlobalState(
+        tapsDelta: deleted.tapsRemoved,
+        sessionsDelta: deleted.sessionsRemoved,
+      );
     }
   }
+
+  @override
+  Future<void> importBackup(BackupData backup) async {
+    sessions
+      ..clear()
+      ..addEntries(backup.sessions.map((s) => MapEntry(s.id, s)));
+    _global = backup.global;
+    await saveOngoingSession(0, null);
+  }
+
+  @override
+  bool getKeepScreenOn() => keepScreenOn;
+
+  @override
+  Future<void> setKeepScreenOn(bool value) async => keepScreenOn = value;
 
   @override
   int getOngoingCount() => _ongoingCount;

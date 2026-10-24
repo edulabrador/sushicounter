@@ -5,16 +5,18 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 import 'package:sushiscore/core/models/session.dart';
+import 'package:sushiscore/features/counter/providers/counter_provider.dart';
 import 'package:sushiscore/features/global/providers/global_provider.dart';
 import 'package:sushiscore/features/history/providers/session_provider.dart';
+import 'package:sushiscore/l10n/l10n.dart';
 
 enum StatsFilter { last7, last30, all }
 
 extension on StatsFilter {
-  String get label => switch (this) {
-    StatsFilter.last7 => '7 sessions',
-    StatsFilter.last30 => '30 sessions',
-    StatsFilter.all => 'All sessions',
+  String label(AppLocalizations l10n) => switch (this) {
+    StatsFilter.last7 => l10n.filterLast7,
+    StatsFilter.last30 => l10n.filterLast30,
+    StatsFilter.all => l10n.filterAll,
   };
 
   int? get limit => switch (this) {
@@ -35,9 +37,17 @@ class StatsSummary {
 }
 
 /// Sort by actual completion time so the chart remains chronological even if
-/// storage returns sessions in a different order.
-StatsSummary summarizeSessions(List<Session> source, StatsFilter filter) {
-  final sessions = [...source]..sort((a, b) => a.endedAt.compareTo(b.endedAt));
+/// storage returns sessions in a different order. With [epoch], only sessions
+/// of that lifetime count, so averages agree with the lifetime totals.
+StatsSummary summarizeSessions(
+  List<Session> source,
+  StatsFilter filter, {
+  int? epoch,
+}) {
+  final sessions = [
+    for (final session in source)
+      if (epoch == null || session.isInLifetime(epoch)) session,
+  ]..sort((a, b) => a.endedAt.compareTo(b.endedAt));
   final limit = filter.limit;
   final visible = limit != null && sessions.length > limit
       ? sessions.sublist(sessions.length - limit)
@@ -62,12 +72,20 @@ class _StatsViewState extends ConsumerState<StatsView> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = context.l10n;
     final global = ref.watch(globalStateProvider);
-    final summary = summarizeSessions(ref.watch(sessionListProvider), _filter);
+    final lifetimeTaps = ref.watch(lifetimeTapsProvider);
+    final summary = summarizeSessions(
+      ref.watch(sessionListProvider),
+      _filter,
+      epoch: global.epoch,
+    );
     final theme = Theme.of(context);
+    final resetAt = global.lastResetAt;
+    final range = _filter.label(l10n);
 
     return Scaffold(
-      appBar: AppBar(title: const Text('STATISTICS')),
+      appBar: AppBar(title: Text(l10n.statsTitle)),
       body: LayoutBuilder(
         builder: (context, constraints) => SingleChildScrollView(
           padding: const EdgeInsets.all(16),
@@ -78,27 +96,36 @@ class _StatsViewState extends ConsumerState<StatsView> {
                 builder: (context, contentConstraints) => Column(
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
+                    if (resetAt != null) ...[
+                      Text(
+                        l10n.sinceReset(
+                          DateFormat.yMMMd(context.localeName).format(resetAt),
+                        ),
+                        style: theme.textTheme.bodyMedium,
+                      ),
+                      const SizedBox(height: 12),
+                    ],
                     _KpiGrid(
                       width: contentConstraints.maxWidth,
                       items: [
-                        _Kpi('Lifetime Taps', '${global.lifetimeTotalTaps}'),
+                        _Kpi(l10n.lifetimeTaps, '$lifetimeTaps'),
                         _Kpi(
-                          'Lifetime Sessions',
+                          l10n.lifetimeSessions,
                           '${global.lifetimeTotalSessions}',
                         ),
                         _Kpi(
-                          'Average (${_filter.label})',
-                          summary.averageTaps.toStringAsFixed(1),
+                          l10n.averageKpi(range),
+                          NumberFormat(
+                            '0.0',
+                            context.localeName,
+                          ).format(summary.averageTaps),
                         ),
-                        _Kpi(
-                          'Best (${_filter.label})',
-                          '${summary.bestSession}',
-                        ),
+                        _Kpi(l10n.bestKpi(range), '${summary.bestSession}'),
                       ],
                     ),
                     const SizedBox(height: 28),
                     Semantics(
-                      label: 'Session range in number of sessions',
+                      label: l10n.rangeSemantics,
                       child: SingleChildScrollView(
                         scrollDirection: Axis.horizontal,
                         child: SegmentedButton<StatsFilter>(
@@ -106,7 +133,7 @@ class _StatsViewState extends ConsumerState<StatsView> {
                               .map(
                                 (filter) => ButtonSegment(
                                   value: filter,
-                                  label: Text(filter.label),
+                                  label: Text(filter.label(l10n)),
                                 ),
                               )
                               .toList(),
@@ -117,19 +144,16 @@ class _StatsViewState extends ConsumerState<StatsView> {
                       ),
                     ),
                     const SizedBox(height: 28),
-                    Text('Session trend', style: theme.textTheme.titleLarge),
+                    Text(l10n.sessionTrend, style: theme.textTheme.titleLarge),
                     const SizedBox(height: 12),
                     if (summary.sessions.isEmpty)
                       Semantics(
                         liveRegion: true,
-                        child: Center(
-                          child: Text('Complete a session to see your trend.'),
-                        ),
+                        child: Center(child: Text(l10n.noTrend)),
                       )
                     else
                       Semantics(
-                        label:
-                            'Session trend chart for ${summary.sessions.length} sessions. Tap a point to hear its date and tap count.',
+                        label: l10n.chartSemantics(summary.sessions.length),
                         child: SizedBox(
                           height: 300,
                           child: _SessionChart(
@@ -203,11 +227,15 @@ class _SessionChart extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = context.l10n;
+    final locale = context.localeName;
     final yStep = math.max(1, (best / 4).ceil());
+    // A lone point is centred instead of sitting on the left edge.
+    final single = sessions.length == 1;
     return LineChart(
       LineChartData(
-        minX: 0,
-        maxX: math.max(1, sessions.length - 1).toDouble(),
+        minX: single ? -1 : 0,
+        maxX: single ? 1 : (sessions.length - 1).toDouble(),
         minY: 0,
         maxY: yStep * 4.0,
         gridData: FlGridData(
@@ -222,7 +250,7 @@ class _SessionChart extends StatelessWidget {
             getTooltipItems: (spots) => spots.map((spot) {
               final session = sessions[spot.x.round()];
               return LineTooltipItem(
-                '${DateFormat.yMMMd().add_Hm().format(session.endedAt)}\n${session.count} taps',
+                '${DateFormat.yMMMd(locale).add_Hm().format(session.endedAt)}\n${l10n.tapsCount(session.count)}',
                 const TextStyle(
                   color: Colors.white,
                   fontWeight: FontWeight.w600,
@@ -259,7 +287,7 @@ class _SessionChart extends StatelessWidget {
                 return Padding(
                   padding: const EdgeInsets.only(top: 8),
                   child: Text(
-                    DateFormat.MMMd().format(sessions[index].endedAt),
+                    DateFormat.MMMd(locale).format(sessions[index].endedAt),
                   ),
                 );
               },

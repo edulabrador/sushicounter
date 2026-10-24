@@ -3,8 +3,8 @@
 Current release candidate:
 - App name: Sushi Tracker
 - Package / application ID: `dev.edulabrador.sushiscore`
-- Version name: `0.2.4`
-- Version code: `6`
+- Version name: `0.3.0`
+- Version code: `7`
 - Target SDK: 36
 - Release AAB path: `build/app/outputs/bundle/release/app-release.aab`
 - Privacy policy: https://edulabrador.github.io/sushicounter/privacy-policy.html
@@ -48,7 +48,8 @@ Based on the current release:
 - Analytics: No
 - Advertising/tracking: No
 - Backend/cloud transmission: No
-- Counts, sessions and totals remain on-device.
+- Counts, sessions and totals are stored on-device. The app leaves Android Auto Backup enabled, so they can be included in the user's own Google backup. Check Play's current Data safety guidance on Android backup before answering, and keep the answers consistent with the privacy policy.
+- Export/import works only through the clipboard, initiated by the user; nothing is sent anywhere by the app.
 
 The release manifest contains AndroidX's app-scoped `DYNAMIC_RECEIVER_NOT_EXPORTED_PERMISSION`.
 It does not request INTERNET, location, contacts, camera, microphone or storage-access runtime permissions.

@@ -8,6 +8,7 @@ import 'package:sushiscore/core/providers/storage_provider.dart';
 import 'package:sushiscore/features/counter/providers/counter_provider.dart';
 import 'package:sushiscore/features/settings/views/settings_view.dart';
 
+import 'test_app.dart';
 import 'widget_test.dart' show FakeRepository;
 
 class DelayedOngoingRepository extends FakeRepository {
@@ -49,7 +50,10 @@ void main() {
     );
     expect(tile.onTap, isNull);
     expect(
-      find.text('End or reset the current session first.'),
+      find.descendant(
+        of: find.widgetWithText(ListTile, 'Reset Lifetime Global'),
+        matching: find.text('End or reset the current session first.'),
+      ),
       findsOneWidget,
     );
   });
@@ -209,5 +213,5 @@ void main() {
 
 Widget _settings(FakeRepository repository) => ProviderScope(
   overrides: [storageProvider.overrideWithValue(repository)],
-  child: const MaterialApp(home: SettingsView()),
+  child: localizedTestApp(const SettingsView()),
 );

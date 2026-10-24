@@ -2,6 +2,7 @@ name: CI
 
 on:
   push:
+    branches: [main]
   pull_request:
 
 permissions:
@@ -17,6 +18,9 @@ jobs:
           flutter-version: '3.47.5'
           channel: stable
           cache: true
+      # Resolve packages first: dart format reads the language version from
+      # package_config, and pub get also regenerates the l10n sources.
+      - run: flutter pub get
       - name: Check Dart formatting
         shell: bash
         run: |
@@ -26,7 +30,6 @@ jobs:
           dart format .
           git diff -- '*.dart'
           exit 1
-      - run: flutter pub get
       - run: flutter analyze
       - name: Check Android toolchain compatibility
         run: flutter analyze --suggestions
@@ -93,7 +96,14 @@ jobs:
           import zipfile
           import xml.etree.ElementTree as ET
 
+          import re
+          from pathlib import Path
+
           manifest_path, aab_path = sys.argv[1:]
+          # The release identity follows pubspec.yaml, so bumping the version
+          # there is the only change a release needs.
+          version = re.search(r'^version:\s*([0-9.]+)\+([0-9]+)\s*$', Path('pubspec.yaml').read_text(), re.M)
+          assert version, 'pubspec.yaml must declare version: <name>+<code>'
           android = '{http://schemas.android.com/apk/res/android}'
           root = ET.parse(manifest_path).getroot()
           actual = {
@@ -102,7 +112,7 @@ jobs:
               'versionCode': root.attrib.get(android + 'versionCode'),
               'targetSdk': root.find('uses-sdk').attrib.get(android + 'targetSdkVersion'),
           }
-          expected = {'applicationId': 'dev.edulabrador.sushiscore', 'versionName': '0.2.4', 'versionCode': '6', 'targetSdk': '36'}
+          expected = {'applicationId': 'dev.edulabrador.sushiscore', 'versionName': version.group(1), 'versionCode': version.group(2), 'targetSdk': '36'}
           print('Release manifest:', actual)
           assert actual == expected, f'Expected {expected}, got {actual}'
           permissions = [node.attrib.get(android + 'name') for node in root if node.tag.rsplit('}', 1)[-1].startswith('uses-permission')]
