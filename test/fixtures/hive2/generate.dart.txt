@@ -1,0 +1,64 @@
+// Writes Hive 2.2.3 boxes as older Sushi Tracker versions stored them.
+import 'dart:io';
+import 'package:hive/hive.dart';
+
+class LegacySession {
+  LegacySession(this.id, this.startedAt, this.endedAt, this.count, this.duration, [this.epoch]);
+  final String id; final DateTime startedAt; final DateTime endedAt;
+  final int count; final int duration; final int? epoch;
+}
+
+class SessionAdapter extends TypeAdapter<LegacySession> {
+  SessionAdapter(this.withEpoch);
+  final bool withEpoch;
+  @override final int typeId = 0;
+  @override LegacySession read(BinaryReader r) => throw UnimplementedError();
+  @override void write(BinaryWriter w, LegacySession o) {
+    w..writeByte(withEpoch ? 6 : 5)
+     ..writeByte(0)..write(o.id)..writeByte(1)..write(o.startedAt)
+     ..writeByte(2)..write(o.endedAt)..writeByte(3)..write(o.count)
+     ..writeByte(4)..write(o.duration);
+    if (withEpoch) w..writeByte(5)..write(o.epoch ?? 0);
+  }
+}
+
+class LegacyGlobal { LegacyGlobal(this.taps, this.sessions, [this.epoch]); final int taps, sessions; final int? epoch; }
+
+class GlobalAdapter extends TypeAdapter<LegacyGlobal> {
+  GlobalAdapter(this.withEpoch);
+  final bool withEpoch;
+  @override final int typeId = 1;
+  @override LegacyGlobal read(BinaryReader r) => throw UnimplementedError();
+  @override void write(BinaryWriter w, LegacyGlobal o) {
+    w..writeByte(withEpoch ? 3 : 2)..writeByte(0)..write(o.taps)..writeByte(1)..write(o.sessions);
+    if (withEpoch) w..writeByte(2)..write(o.epoch ?? 0);
+  }
+}
+
+Future<void> write(String dir, {required bool modern}) async {
+  Directory(dir).createSync(recursive: true);
+  Hive.init(dir);
+  Hive.registerAdapter(SessionAdapter(modern), override: true);
+  Hive.registerAdapter(GlobalAdapter(modern), override: true);
+  final sessions = await Hive.openBox<LegacySession>('sessions');
+  final global = await Hive.openBox<LegacyGlobal>('global_state');
+  final app = await Hive.openBox('app_state');
+  final t = DateTime.utc(2026, 3, 14, 20);
+  await sessions.put('s1', LegacySession('s1', t, t.add(const Duration(minutes: 40)), 12, 2400, modern ? 0 : null));
+  await sessions.put('s2', LegacySession('s2', t.add(const Duration(days: 7)), t.add(const Duration(days: 7, minutes: 55)), 18, 3300, modern ? 0 : null));
+  await global.put('state', LegacyGlobal(30, 2, modern ? 0 : null));
+  if (modern) {
+    await app.put('ongoing_session', {'count': 4, 'startedAt': t.add(const Duration(days: 30)).millisecondsSinceEpoch});
+    await app.put('epoch_migration_v1', true);
+    await app.put('keep_screen_on', false);
+  } else {
+    await app.put('ongoingCount', 4);
+    await app.put('ongoingStartedAt', t.add(const Duration(days: 30)));
+  }
+  await Hive.close();
+}
+
+Future<void> main(List<String> args) async {
+  await write('${args[0]}/legacy_v01', modern: false);
+  await write('${args[0]}/v03', modern: true);
+}

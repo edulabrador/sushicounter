@@ -25,8 +25,6 @@ class FakeRepository extends HiveRepository {
   List<Session> getAllSessions() =>
       sessions.values.toList()..sort((a, b) => b.endedAt.compareTo(a.endedAt));
 
-  bool keepScreenOn = true;
-
   @override
   GlobalState getGlobalState() => GlobalState(
     lifetimeTotalTaps: _global.lifetimeTotalTaps,
@@ -116,10 +114,11 @@ class FakeRepository extends HiveRepository {
   }
 
   @override
-  bool getKeepScreenOn() => keepScreenOn;
-
-  @override
-  Future<void> setKeepScreenOn(bool value) async => keepScreenOn = value;
+  Future<Session?> setSessionPrice(String id, int? priceCents) async {
+    final session = sessions[id];
+    if (session == null) return null;
+    return sessions[id] = session.copyWith(priceCents: priceCents);
+  }
 
   @override
   int getOngoingCount() => _ongoingCount;

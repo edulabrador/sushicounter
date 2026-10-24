@@ -34,6 +34,7 @@ String encodeBackup(BackupData data, {DateTime? exportedAt}) =>
             'count': session.count,
             'durationSeconds': session.durationSeconds,
             'epoch': session.contributionEpoch,
+            if (session.priceCents != null) 'priceCents': session.priceCents,
           },
       ],
     });
@@ -105,6 +106,9 @@ Session _session(Map<dynamic, dynamic> raw) {
     count: count,
     durationSeconds: _nonNegative(raw['durationSeconds']),
     contributionEpoch: _int(raw['epoch']),
+    priceCents: raw['priceCents'] == null
+        ? null
+        : _nonNegative(raw['priceCents']),
   );
 }
 
