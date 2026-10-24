@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<shortcuts xmlns:android="http://schemas.android.com/apk/res/android">
+    <shortcut
+        android:shortcutId="add_sushi"
+        android:enabled="true"
+        android:icon="@mipmap/ic_launcher"
+        android:shortcutShortLabel="@string/shortcut_add_sushi_short"
+        android:shortcutLongLabel="@string/shortcut_add_sushi_long">
+        <intent
+            android:action="dev.edulabrador.sushiscore.ADD_SUSHI"
+            android:targetPackage="dev.edulabrador.sushiscore"
+            android:targetClass="dev.edulabrador.sushiscore.MainActivity" />
+    </shortcut>
+</shortcuts>

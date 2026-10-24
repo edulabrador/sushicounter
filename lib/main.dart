@@ -7,6 +7,7 @@ import 'core/providers/storage_provider.dart';
 import 'core/theme/app_theme.dart';
 import 'l10n/l10n.dart';
 import 'shared/widgets/bottom_nav.dart';
+import 'shared/widgets/launch_action_controller.dart';
 import 'shared/widgets/screen_awake_controller.dart';
 
 void main() {
@@ -113,6 +114,8 @@ class SushiScoreApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) => _localizedApp(
     title: 'Sushi Tracker',
-    home: const ScreenAwakeController(child: RootNavigation()),
+    home: const LaunchActionController(
+      child: ScreenAwakeController(child: RootNavigation()),
+    ),
   );
 }

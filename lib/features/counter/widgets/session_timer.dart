@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 
+import '../../../core/theme/app_colors.dart';
 import '../../../l10n/l10n.dart';
 import '../views/counter_timer.dart';
 
@@ -79,7 +80,10 @@ class _SessionElapsedTimerState extends State<SessionElapsedTimer>
   Widget build(BuildContext context) => Column(
     crossAxisAlignment: CrossAxisAlignment.start,
     children: [
-      Text(context.l10n.elapsed, style: const TextStyle(color: Colors.white54)),
+      Text(
+        context.l10n.elapsed,
+        style: TextStyle(color: context.colors.textMuted),
+      ),
       Text(
         formatSessionDuration(_elapsed),
         key: counterElapsedTimeKey,

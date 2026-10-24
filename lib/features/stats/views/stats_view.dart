@@ -4,13 +4,16 @@ import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
+import 'package:sushiscore/core/format/money.dart';
+import 'package:sushiscore/core/theme/app_colors.dart';
 import 'package:sushiscore/core/models/session.dart';
 import 'package:sushiscore/features/counter/providers/counter_provider.dart';
 import 'package:sushiscore/features/global/providers/global_provider.dart';
 import 'package:sushiscore/features/history/providers/session_provider.dart';
+import 'package:sushiscore/features/stats/stats_logic.dart';
 import 'package:sushiscore/l10n/l10n.dart';
 
-enum StatsFilter { last7, last30, all }
+export 'package:sushiscore/features/stats/stats_logic.dart';
 
 extension on StatsFilter {
   String label(AppLocalizations l10n) => switch (this) {
@@ -18,46 +21,6 @@ extension on StatsFilter {
     StatsFilter.last30 => l10n.filterLast30,
     StatsFilter.all => l10n.filterAll,
   };
-
-  int? get limit => switch (this) {
-    StatsFilter.last7 => 7,
-    StatsFilter.last30 => 30,
-    StatsFilter.all => null,
-  };
-}
-
-class StatsSummary {
-  const StatsSummary(this.sessions, this.totalTaps, this.bestSession);
-
-  final List<Session> sessions;
-  final int totalTaps;
-  final int bestSession;
-
-  double get averageTaps => sessions.isEmpty ? 0 : totalTaps / sessions.length;
-}
-
-/// Sort by actual completion time so the chart remains chronological even if
-/// storage returns sessions in a different order. With [epoch], only sessions
-/// of that lifetime count, so averages agree with the lifetime totals.
-StatsSummary summarizeSessions(
-  List<Session> source,
-  StatsFilter filter, {
-  int? epoch,
-}) {
-  final sessions = [
-    for (final session in source)
-      if (epoch == null || session.isInLifetime(epoch)) session,
-  ]..sort((a, b) => a.endedAt.compareTo(b.endedAt));
-  final limit = filter.limit;
-  final visible = limit != null && sessions.length > limit
-      ? sessions.sublist(sessions.length - limit)
-      : sessions;
-  final total = visible.fold<int>(0, (sum, session) => sum + session.count);
-  final best = visible.fold<int>(
-    0,
-    (current, session) => math.max(current, session.count),
-  );
-  return StatsSummary(visible, total, best);
 }
 
 class StatsView extends ConsumerStatefulWidget {
@@ -75,11 +38,13 @@ class _StatsViewState extends ConsumerState<StatsView> {
     final l10n = context.l10n;
     final global = ref.watch(globalStateProvider);
     final lifetimeTaps = ref.watch(lifetimeTapsProvider);
-    final summary = summarizeSessions(
-      ref.watch(sessionListProvider),
-      _filter,
-      epoch: global.epoch,
+    final sessions = ref.watch(sessionListProvider);
+    final summary = summarizeSessions(sessions, _filter, epoch: global.epoch);
+    final records = computeRecords(
+      lifetimeSessions(sessions, global.epoch),
+      DateTime.now(),
     );
+    final costPerPiece = summary.costPerPieceCents;
     final theme = Theme.of(context);
     final resetAt = global.lastResetAt;
     final range = _filter.label(l10n);
@@ -121,6 +86,32 @@ class _StatsViewState extends ConsumerState<StatsView> {
                           ).format(summary.averageTaps),
                         ),
                         _Kpi(l10n.bestKpi(range), '${summary.bestSession}'),
+                        if (costPerPiece != null)
+                          _Kpi(
+                            l10n.costPerPiece(range),
+                            formatMoney(context, costPerPiece),
+                          ),
+                      ],
+                    ),
+                    const SizedBox(height: 28),
+                    Text(l10n.recordsTitle, style: theme.textTheme.titleLarge),
+                    const SizedBox(height: 12),
+                    _KpiGrid(
+                      width: contentConstraints.maxWidth,
+                      items: [
+                        _Kpi(l10n.bestEver, '${records.bestSession}'),
+                        _Kpi(
+                          l10n.weeklyStreak,
+                          l10n.weeksCount(records.weeklyStreak),
+                        ),
+                        _Kpi(
+                          l10n.sessionsThisMonth,
+                          '${records.sessionsThisMonth}',
+                        ),
+                        _Kpi(
+                          l10n.piecesThisMonth,
+                          '${records.piecesThisMonth}',
+                        ),
                       ],
                     ),
                     const SizedBox(height: 28),
@@ -230,12 +221,20 @@ class _SessionChart extends StatelessWidget {
     final l10n = context.l10n;
     final locale = context.localeName;
     final yStep = math.max(1, (best / 4).ceil());
-    // A lone point is centred instead of sitting on the left edge.
-    final single = sessions.length == 1;
+    // X is days since the first session, so a month without visits shows as
+    // a gap instead of two neighbouring points.
+    final origin = sessions.first.endedAt;
+    final xs = [for (final s in sessions) chartDay(s.endedAt, origin)];
+    final span = xs.last;
+    // A short range (one session, or all on one day) is widened and centred.
+    final narrow = span < 1;
+    final minX = narrow ? span / 2 - 1 : 0.0;
+    final maxX = narrow ? span / 2 + 1 : span;
+    final labelInterval = narrow ? 1.0 : math.max(1.0, span / 3);
     return LineChart(
       LineChartData(
-        minX: single ? -1 : 0,
-        maxX: single ? 1 : (sessions.length - 1).toDouble(),
+        minX: minX,
+        maxX: maxX,
         minY: 0,
         maxY: yStep * 4.0,
         gridData: FlGridData(
@@ -248,11 +247,11 @@ class _SessionChart extends StatelessWidget {
           touchTooltipData: LineTouchTooltipData(
             fitInsideHorizontally: true,
             getTooltipItems: (spots) => spots.map((spot) {
-              final session = sessions[spot.x.round()];
+              final session = sessions[spot.spotIndex];
               return LineTooltipItem(
                 '${DateFormat.yMMMd(locale).add_Hm().format(session.endedAt)}\n${l10n.tapsCount(session.count)}',
-                const TextStyle(
-                  color: Colors.white,
+                TextStyle(
+                  color: context.colors.text,
                   fontWeight: FontWeight.w600,
                 ),
               );
@@ -278,17 +277,18 @@ class _SessionChart extends StatelessWidget {
             sideTitles: SideTitles(
               showTitles: true,
               reservedSize: 30,
-              interval: math.max(1, (sessions.length - 1) ~/ 3).toDouble(),
-              getTitlesWidget: (value, _) {
-                final index = value.round();
-                if (index < 0 || index >= sessions.length) {
+              interval: labelInterval,
+              getTitlesWidget: (value, meta) {
+                // Only label real days inside the data range.
+                if (value < -0.01 || value > span + 0.01) {
                   return const SizedBox.shrink();
                 }
+                final date = origin.add(
+                  Duration(minutes: (value * Duration.minutesPerDay).round()),
+                );
                 return Padding(
                   padding: const EdgeInsets.only(top: 8),
-                  child: Text(
-                    DateFormat.MMMd(locale).format(sessions[index].endedAt),
-                  ),
+                  child: Text(DateFormat.MMMd(locale).format(date)),
                 );
               },
             ),
@@ -298,7 +298,7 @@ class _SessionChart extends StatelessWidget {
           LineChartBarData(
             spots: [
               for (var i = 0; i < sessions.length; i++)
-                FlSpot(i.toDouble(), sessions[i].count.toDouble()),
+                FlSpot(xs[i], sessions[i].count.toDouble()),
             ],
             isCurved: false,
             color: Theme.of(context).colorScheme.primary,

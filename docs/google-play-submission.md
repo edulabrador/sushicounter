@@ -3,8 +3,8 @@
 Current release candidate:
 - App name: Sushi Tracker
 - Package / application ID: `dev.edulabrador.sushiscore`
-- Version name: `0.3.0`
-- Version code: `7`
+- Version name: `0.4.0`
+- Version code: `8`
 - Target SDK: 36
 - Release AAB path: `build/app/outputs/bundle/release/app-release.aab`
 - Privacy policy: https://edulabrador.github.io/sushicounter/privacy-policy.html
@@ -22,10 +22,29 @@ Sushi Tracker is a simple offline counter for sushi and anything else you want t
 
 Tap the sushi to add one. Use Undo or long-press to correct a count. See how long your current session has lasted, then end it to save the session.
 
-Review saved sessions in History. Check lifetime totals, averages, best sessions, and trends in Statistics. Your counts stay on your device. No account or ads, and no internet connection is required.
+Review saved sessions in History and add what each meal cost. Check lifetime totals, averages, records, weekly streaks, cost per piece, and a trend chart in Statistics. Long-press the app icon to add a sushi straight away, and keep the screen on while you count.
+
+Back up your history to a file and restore it on another phone. Available in English and Spanish. Your counts stay on your device. No account or ads, and no internet connection is required.
 
 ### Suggested category
 Tools
+
+## Store listing (es-ES)
+
+### Nombre de la app
+Sushi Tracker
+
+### Descripción breve
+Cuenta sushi con un toque. Guarda sesiones y sigue tu progreso sin conexión.
+
+### Descripción completa
+Sushi Tracker es un contador sencillo y sin conexión para sushi y cualquier otra cosa que quieras contar.
+
+Toca el sushi para sumar uno. Usa Deshacer o mantén pulsado para corregir. Mira cuánto dura la sesión actual y termínala para guardarla.
+
+Revisa tus sesiones en el Historial y anota cuánto costó cada comida. Consulta totales, medias, récords, rachas semanales, coste por pieza y la evolución en Estadísticas. Mantén pulsado el icono de la app para sumar un sushi al momento, y deja la pantalla encendida mientras cuentas.
+
+Guarda una copia de tu historial en un archivo y recupérala en otro móvil. Disponible en español e inglés. Tus datos se quedan en tu dispositivo. Sin cuentas ni anuncios, y no necesita internet.
 
 ## App content declarations
 
@@ -49,7 +68,7 @@ Based on the current release:
 - Advertising/tracking: No
 - Backend/cloud transmission: No
 - Counts, sessions and totals are stored on-device. The app leaves Android Auto Backup enabled, so they can be included in the user's own Google backup. Check Play's current Data safety guidance on Android backup before answering, and keep the answers consistent with the privacy policy.
-- Export/import works only through the clipboard, initiated by the user; nothing is sent anywhere by the app.
+- Export/import uses the Android document picker (no storage permission) and only runs when the user asks; the user chooses where the file goes. The app itself sends nothing anywhere.
 
 The release manifest contains AndroidX's app-scoped `DYNAMIC_RECEIVER_NOT_EXPORTED_PERMISSION`.
 It does not request INTERNET, location, contacts, camera, microphone or storage-access runtime permissions.

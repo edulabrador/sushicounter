@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:sushiscore/core/format/money.dart';
 import 'package:sushiscore/core/models/session.dart';
+import 'package:sushiscore/core/providers/storage_provider.dart';
+import 'package:sushiscore/core/theme/app_colors.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:sushiscore/features/counter/views/counter_timer.dart';
 import 'package:sushiscore/features/global/providers/global_provider.dart';
@@ -37,7 +40,7 @@ class _HistoryViewState extends ConsumerState<HistoryView> {
           ? Center(
               child: Text(
                 l10n.noSessions,
-                style: const TextStyle(color: Colors.white54),
+                style: TextStyle(color: context.colors.textMuted),
               ),
             )
           : ListView.builder(
@@ -51,7 +54,9 @@ class _HistoryViewState extends ConsumerState<HistoryView> {
                 return ListTile(
                   leading: Icon(
                     Icons.history,
-                    color: inLifetime ? Colors.orange : Colors.white38,
+                    color: inLifetime
+                        ? context.colors.accent
+                        : context.colors.textMuted,
                   ),
                   title: Text(
                     dateFormat.format(session.endedAt),
@@ -77,9 +82,9 @@ class _HistoryViewState extends ConsumerState<HistoryView> {
                           ),
                         ),
                         IconButton(
-                          icon: const Icon(
+                          icon: Icon(
                             Icons.delete_outline,
-                            color: Colors.redAccent,
+                            color: context.colors.danger,
                           ),
                           tooltip: l10n.deleteSessionTooltip,
                           onPressed: _deleting
@@ -89,76 +94,23 @@ class _HistoryViewState extends ConsumerState<HistoryView> {
                       ],
                     ),
                   ),
-                  onTap: () => _showDetails(session, inLifetime),
+                  onTap: () => _showDetails(session.id),
                 );
               },
             ),
     );
   }
 
-  void _showDetails(Session session, bool inLifetime) {
+  void _showDetails(String id) {
     showModalBottomSheet<void>(
       context: context,
-      builder: (sheetContext) {
-        final l10n = sheetContext.l10n;
-        final format = DateFormat.yMd(sheetContext.localeName).add_Hms();
-        final pace = session.tapsPerMinute;
-        return SafeArea(
-          child: SingleChildScrollView(
-            padding: const EdgeInsets.all(24.0),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  l10n.sessionDetails,
-                  style: const TextStyle(
-                    fontSize: 24,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-                const SizedBox(height: 16),
-                Text(l10n.startedLabel(format.format(session.startedAt))),
-                Text(l10n.endedLabel(format.format(session.endedAt))),
-                Text(l10n.countLabel(session.count)),
-                Text(
-                  l10n.durationLabel(
-                    formatSessionSeconds(session.durationSeconds),
-                  ),
-                ),
-                if (pace != null)
-                  Text(
-                    l10n.paceLabel(
-                      NumberFormat('0.0', sheetContext.localeName).format(pace),
-                    ),
-                  ),
-                if (!inLifetime) ...[
-                  const SizedBox(height: 12),
-                  Text(
-                    l10n.beforeResetDetail,
-                    style: const TextStyle(color: Colors.white54),
-                  ),
-                ],
-                const SizedBox(height: 24),
-                Align(
-                  alignment: Alignment.centerRight,
-                  child: TextButton.icon(
-                    onPressed: () {
-                      Navigator.pop(sheetContext);
-                      _deleteSession(session.id);
-                    },
-                    icon: const Icon(Icons.delete_outline),
-                    label: Text(l10n.deleteSessionTooltip),
-                    style: TextButton.styleFrom(
-                      foregroundColor: Colors.redAccent,
-                    ),
-                  ),
-                ),
-              ],
-            ),
-          ),
-        );
-      },
+      builder: (_) => _SessionDetails(
+        id: id,
+        onDelete: () {
+          Navigator.pop(context);
+          _deleteSession(id);
+        },
+      ),
     );
   }
 
@@ -176,7 +128,10 @@ class _HistoryViewState extends ConsumerState<HistoryView> {
           ),
           TextButton(
             onPressed: () => Navigator.pop(context, true),
-            child: Text(l10n.delete, style: const TextStyle(color: Colors.red)),
+            child: Text(
+              l10n.delete,
+              style: TextStyle(color: context.colors.danger),
+            ),
           ),
         ],
       ),
@@ -239,5 +194,183 @@ class _HistoryViewState extends ConsumerState<HistoryView> {
         return;
       }
     }
+  }
+}
+
+/// Watches the session list so a price change shows up immediately.
+class _SessionDetails extends ConsumerWidget {
+  const _SessionDetails({required this.id, required this.onDelete});
+
+  final String id;
+  final VoidCallback onDelete;
+
+  Future<void> _editPrice(
+    BuildContext context,
+    WidgetRef ref,
+    Session session,
+  ) async {
+    final l10n = context.l10n;
+    final messenger = ScaffoldMessenger.of(context);
+    final result = await showDialog<_PriceResult>(
+      context: context,
+      builder: (_) => _PriceDialog(initialCents: session.priceCents),
+    );
+    if (result == null) return;
+    try {
+      await ref.read(storageProvider).setSessionPrice(id, result.cents);
+      ref.read(sessionListProvider.notifier).reload();
+    } catch (_) {
+      messenger.showSnackBar(SnackBar(content: Text(l10n.couldNotSavePrice)));
+    }
+  }
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = context.l10n;
+    final session = ref
+        .watch(sessionListProvider)
+        .where((s) => s.id == id)
+        .firstOrNull;
+    if (session == null) return const SizedBox.shrink();
+    final epoch = ref.watch(globalStateProvider.select((g) => g.epoch));
+    final format = DateFormat.yMd(context.localeName).add_Hms();
+    final pace = session.tapsPerMinute;
+    final price = session.priceCents;
+    return SafeArea(
+      child: SingleChildScrollView(
+        padding: const EdgeInsets.all(24.0),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              l10n.sessionDetails,
+              style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+            ),
+            const SizedBox(height: 16),
+            Text(l10n.startedLabel(format.format(session.startedAt))),
+            Text(l10n.endedLabel(format.format(session.endedAt))),
+            Text(l10n.countLabel(session.count)),
+            Text(
+              l10n.durationLabel(formatSessionSeconds(session.durationSeconds)),
+            ),
+            if (pace != null)
+              Text(
+                l10n.paceLabel(
+                  NumberFormat('0.0', context.localeName).format(pace),
+                ),
+              ),
+            if (price != null)
+              Text(l10n.priceLabel(formatMoney(context, price))),
+            if (!session.isInLifetime(epoch)) ...[
+              const SizedBox(height: 12),
+              Text(
+                l10n.beforeResetDetail,
+                style: TextStyle(color: context.colors.textMuted),
+              ),
+            ],
+            const SizedBox(height: 24),
+            Wrap(
+              alignment: WrapAlignment.spaceBetween,
+              spacing: 8,
+              children: [
+                TextButton.icon(
+                  onPressed: () => _editPrice(context, ref, session),
+                  icon: const Icon(Icons.payments_outlined),
+                  label: Text(price == null ? l10n.setPrice : l10n.editPrice),
+                ),
+                TextButton.icon(
+                  onPressed: onDelete,
+                  icon: const Icon(Icons.delete_outline),
+                  label: Text(l10n.deleteSessionTooltip),
+                  style: TextButton.styleFrom(
+                    foregroundColor: context.colors.danger,
+                  ),
+                ),
+              ],
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+/// Null cents means "remove the price".
+typedef _PriceResult = ({int? cents});
+
+class _PriceDialog extends StatefulWidget {
+  const _PriceDialog({required this.initialCents});
+
+  final int? initialCents;
+
+  @override
+  State<_PriceDialog> createState() => _PriceDialogState();
+}
+
+class _PriceDialogState extends State<_PriceDialog> {
+  late final TextEditingController _controller;
+  bool _invalid = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = TextEditingController();
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    final initial = widget.initialCents;
+    if (initial != null && _controller.text.isEmpty) {
+      _controller.text = priceInputText(context, initial);
+    }
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  void _save() {
+    final cents = parsePriceCents(_controller.text);
+    if (cents == null) {
+      setState(() => _invalid = true);
+      return;
+    }
+    Navigator.pop<_PriceResult>(context, (cents: cents));
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = context.l10n;
+    return AlertDialog(
+      title: Text(l10n.priceDialogTitle),
+      content: TextField(
+        controller: _controller,
+        autofocus: true,
+        keyboardType: const TextInputType.numberWithOptions(decimal: true),
+        onSubmitted: (_) => _save(),
+        decoration: InputDecoration(
+          border: const OutlineInputBorder(),
+          hintText: l10n.priceHint,
+          errorText: _invalid ? l10n.priceInvalid : null,
+        ),
+      ),
+      actions: [
+        if (widget.initialCents != null)
+          TextButton(
+            onPressed: () =>
+                Navigator.pop<_PriceResult>(context, (cents: null)),
+            child: Text(l10n.removePrice),
+          ),
+        TextButton(
+          onPressed: () => Navigator.pop(context),
+          child: Text(l10n.cancel),
+        ),
+        TextButton(onPressed: _save, child: Text(l10n.save)),
+      ],
+    );
   }
 }

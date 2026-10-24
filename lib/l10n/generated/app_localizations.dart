@@ -569,7 +569,7 @@ abstract class AppLocalizations {
   /// No description provided for @exportSubtitle.
   ///
   /// In en, this message translates to:
-  /// **'Copy a backup of your history to the clipboard'**
+  /// **'Save a backup of your history and totals'**
   String get exportSubtitle;
 
   /// No description provided for @exportDone.
@@ -587,7 +587,7 @@ abstract class AppLocalizations {
   /// No description provided for @importSubtitle.
   ///
   /// In en, this message translates to:
-  /// **'Replace all data with a pasted backup'**
+  /// **'Replace all data with a backup'**
   String get importSubtitle;
 
   /// No description provided for @importDialogTitle.
@@ -599,7 +599,7 @@ abstract class AppLocalizations {
   /// No description provided for @importDialogBody.
   ///
   /// In en, this message translates to:
-  /// **'Paste a Sushi Tracker backup. This replaces all current history and totals.'**
+  /// **'Paste a Sushi Tracker backup.'**
   String get importDialogBody;
 
   /// No description provided for @importPaste.
@@ -643,6 +643,144 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Sushi Tracker does not collect, transmit, or share personal data. It has no accounts, analytics, ads, or network services.\n\nYour counts, session history, and lifetime totals are stored on this device. If Android backup is turned on for your Google account, Android may include this data in that backup and restore it when you reinstall the app or set up a new device. That backup is handled by Google under your account; the developer never receives it.\n\nClearing the app data removes it from this device. You can export your own copy from Settings.\n\nThe app requests no special device permissions.\n\nFor questions, contact labradorsantoseduardo@gmail.com.'**
   String get privacyBody;
+
+  /// No description provided for @sessionAlreadySaved.
+  ///
+  /// In en, this message translates to:
+  /// **'This session had already been saved to history.'**
+  String get sessionAlreadySaved;
+
+  /// No description provided for @exportSaved.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{Backup of 1 session saved.} other{Backup of {count} sessions saved.}}'**
+  String exportSaved(int count);
+
+  /// No description provided for @couldNotSaveFile.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not save the file.'**
+  String get couldNotSaveFile;
+
+  /// No description provided for @couldNotReadFile.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not read the file.'**
+  String get couldNotReadFile;
+
+  /// No description provided for @importNext.
+  ///
+  /// In en, this message translates to:
+  /// **'Continue'**
+  String get importNext;
+
+  /// No description provided for @importConfirmTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Replace all data?'**
+  String get importConfirmTitle;
+
+  /// No description provided for @importConfirmBody.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{Your current history and totals will be replaced by the backup, which has 1 session.} other{Your current history and totals will be replaced by the backup, which has {count} sessions.}}'**
+  String importConfirmBody(int count);
+
+  /// No description provided for @priceLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Price: {price}'**
+  String priceLabel(String price);
+
+  /// No description provided for @setPrice.
+  ///
+  /// In en, this message translates to:
+  /// **'Add price'**
+  String get setPrice;
+
+  /// No description provided for @editPrice.
+  ///
+  /// In en, this message translates to:
+  /// **'Edit price'**
+  String get editPrice;
+
+  /// No description provided for @priceDialogTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'What did this meal cost?'**
+  String get priceDialogTitle;
+
+  /// No description provided for @priceHint.
+  ///
+  /// In en, this message translates to:
+  /// **'e.g. 24.90'**
+  String get priceHint;
+
+  /// No description provided for @priceInvalid.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter an amount between 0 and 100,000.'**
+  String get priceInvalid;
+
+  /// No description provided for @save.
+  ///
+  /// In en, this message translates to:
+  /// **'Save'**
+  String get save;
+
+  /// No description provided for @removePrice.
+  ///
+  /// In en, this message translates to:
+  /// **'Remove price'**
+  String get removePrice;
+
+  /// No description provided for @couldNotSavePrice.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not save the price.'**
+  String get couldNotSavePrice;
+
+  /// No description provided for @costPerPiece.
+  ///
+  /// In en, this message translates to:
+  /// **'Cost per piece ({range})'**
+  String costPerPiece(String range);
+
+  /// No description provided for @recordsTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Records'**
+  String get recordsTitle;
+
+  /// No description provided for @bestEver.
+  ///
+  /// In en, this message translates to:
+  /// **'Best session'**
+  String get bestEver;
+
+  /// No description provided for @weeklyStreak.
+  ///
+  /// In en, this message translates to:
+  /// **'Weekly streak'**
+  String get weeklyStreak;
+
+  /// No description provided for @weeksCount.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =0{No streak} =1{1 week} other{{count} weeks}}'**
+  String weeksCount(int count);
+
+  /// No description provided for @sessionsThisMonth.
+  ///
+  /// In en, this message translates to:
+  /// **'Sessions this month'**
+  String get sessionsThisMonth;
+
+  /// No description provided for @piecesThisMonth.
+  ///
+  /// In en, this message translates to:
+  /// **'Pieces this month'**
+  String get piecesThisMonth;
 }
 
 class _AppLocalizationsDelegate

@@ -2,6 +2,23 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.4.0] - 2026-10-24
+### Added
+- Export and import a backup file through the Android document picker (no storage permission). Web and desktop keep the clipboard fallback. Import now always asks before replacing data.
+- Optional price per session, shown in the session details, with cost per piece in Stats. Amounts use the device region's currency.
+- Records in Stats: best session, weekly streak, sessions and pieces this month.
+- Launcher shortcut: long-press the app icon and choose "Add one sushi". Relaunching from Recents never adds again.
+- Spanish Play Store listing text, and Spanish declared for iOS.
+
+### Changed
+- Storage moved from the unmaintained `hive` 2.2.3 to `hive_ce`. Tests open real files written by `hive` 2.2.3 in the 0.1 and 0.3 layouts to prove existing data still loads.
+- The trend chart uses a date axis, so gaps between visits are visible.
+- Settings are split into sections; settings storage has its own `Preferences` class.
+- Colors come from theme tokens checked against WCAG AA contrast. The low-contrast grey in History was replaced.
+- "Discard session" says so when an interrupted save had already reached history.
+- CI runs Kotlin unit tests and an integration test of the real app on an Android emulator.
+- App version is now `0.4.0+8`.
+
 ## [0.3.0] - 2026-10-24
 ### Added
 - Spanish translation. The app follows the device language (English and Spanish).

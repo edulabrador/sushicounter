@@ -158,18 +158,27 @@ class CounterNotifier extends Notifier<CounterState> {
 
   /// Clears the current session without saving it. Also the way out of a
   /// session whose save keeps failing.
-  Future<void> resetCurrent() async {
-    if (!state.canDiscard) return;
+  ///
+  /// Returns true when the session turned out to be in history anyway: a
+  /// save interrupted after its journal was written is completed by journal
+  /// recovery before this write runs, and keeping the data beats losing it.
+  Future<bool> resetCurrent() async {
+    if (!state.canDiscard) return false;
     final previous = state;
+    final pendingId = _pendingSession?.id;
     state = state.copyWith(phase: CounterPhase.persisting);
     try {
-      await ref.read(storageProvider).saveOngoingSession(0, null);
+      final repo = ref.read(storageProvider);
+      await repo.saveOngoingSession(0, null);
       _pendingSession = null;
-      if (!ref.mounted) return;
+      final alreadySaved =
+          pendingId != null &&
+          repo.getAllSessions().any((session) => session.id == pendingId);
+      if (!ref.mounted) return alreadySaved;
       state = CounterState(count: 0, isSavingOngoing: _ongoingWrites > 0);
-      // An interrupted save may have been completed by journal recovery.
       ref.read(globalStateProvider.notifier).reload();
       ref.read(sessionListProvider.notifier).reload();
+      return alreadySaved;
     } catch (_) {
       if (ref.mounted) {
         state = previous.copyWith(

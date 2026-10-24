@@ -61,14 +61,7 @@ class FakeRepository extends HiveRepository {
   Future<Session> completeSession(Session session) async {
     final existing = sessions[session.id];
     if (existing != null) return existing;
-    final recorded = Session(
-      id: session.id,
-      startedAt: session.startedAt,
-      endedAt: session.endedAt,
-      count: session.count,
-      durationSeconds: session.durationSeconds,
-      contributionEpoch: _global.epoch,
-    );
+    final recorded = session.copyWith(contributionEpoch: _global.epoch);
     sessions[recorded.id] = recorded;
     await adjustGlobalState(tapsDelta: recorded.count, sessionsDelta: 1);
     await saveOngoingSession(0, null);
