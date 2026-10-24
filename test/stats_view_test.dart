@@ -3,10 +3,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:sushiscore/core/providers/storage_provider.dart';
-import 'package:sushiscore/core/theme/app_theme.dart';
 import 'package:sushiscore/core/models/session.dart';
 import 'package:sushiscore/features/stats/views/stats_view.dart';
 
+import 'test_app.dart';
 import 'widget_test.dart' show FakeRepository;
 
 Session session(String id, DateTime endedAt, int count) => Session(
@@ -123,6 +123,6 @@ Widget _statsApp(
   data: MediaQueryData(size: size, textScaler: TextScaler.linear(textScale)),
   child: ProviderScope(
     overrides: [storageProvider.overrideWithValue(repository)],
-    child: MaterialApp(theme: AppTheme.darkTheme, home: const StatsView()),
+    child: localizedTestApp(const StatsView()),
   ),
 );

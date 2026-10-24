@@ -1,0 +1,680 @@
+import 'dart:async';
+
+import 'package:flutter/foundation.dart';
+import 'package:flutter/widgets.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
+import 'package:intl/intl.dart' as intl;
+
+import 'app_localizations_en.dart';
+import 'app_localizations_es.dart';
+
+// ignore_for_file: type=lint
+
+/// Callers can lookup localized strings with an instance of AppLocalizations
+/// returned by `AppLocalizations.of(context)`.
+///
+/// Applications need to include `AppLocalizations.delegate()` in their app's
+/// `localizationDelegates` list, and the locales they support in the app's
+/// `supportedLocales` list. For example:
+///
+/// ```dart
+/// import 'generated/app_localizations.dart';
+///
+/// return MaterialApp(
+///   localizationsDelegates: AppLocalizations.localizationsDelegates,
+///   supportedLocales: AppLocalizations.supportedLocales,
+///   home: MyApplicationHome(),
+/// );
+/// ```
+///
+/// ## Update pubspec.yaml
+///
+/// Please make sure to update your pubspec.yaml to include the following
+/// packages:
+///
+/// ```yaml
+/// dependencies:
+///   # Internationalization support.
+///   flutter_localizations:
+///     sdk: flutter
+///   intl: any # Use the pinned version from flutter_localizations
+///
+///   # Rest of dependencies
+/// ```
+///
+/// ## iOS Applications
+///
+/// iOS applications define key application metadata, including supported
+/// locales, in an Info.plist file that is built into the application bundle.
+/// To configure the locales supported by your app, you’ll need to edit this
+/// file.
+///
+/// First, open your project’s ios/Runner.xcworkspace Xcode workspace file.
+/// Then, in the Project Navigator, open the Info.plist file under the Runner
+/// project’s Runner folder.
+///
+/// Next, select the Information Property List item, select Add Item from the
+/// Editor menu, then select Localizations from the pop-up menu.
+///
+/// Select and expand the newly-created Localizations item then, for each
+/// locale your application supports, add a new item and select the locale
+/// you wish to add from the pop-up menu in the Value field. This list should
+/// be consistent with the languages listed in the AppLocalizations.supportedLocales
+/// property.
+abstract class AppLocalizations {
+  AppLocalizations(String locale)
+    : localeName = intl.Intl.canonicalizedLocale(locale.toString());
+
+  final String localeName;
+
+  static AppLocalizations of(BuildContext context) {
+    return Localizations.of<AppLocalizations>(context, AppLocalizations)!;
+  }
+
+  static const LocalizationsDelegate<AppLocalizations> delegate =
+      _AppLocalizationsDelegate();
+
+  /// A list of this localizations delegate along with the default localizations
+  /// delegates.
+  ///
+  /// Returns a list of localizations delegates containing this delegate along with
+  /// GlobalMaterialLocalizations.delegate, GlobalCupertinoLocalizations.delegate,
+  /// and GlobalWidgetsLocalizations.delegate.
+  ///
+  /// Additional delegates can be added by appending to this list in
+  /// MaterialApp. This list does not have to be used at all if a custom list
+  /// of delegates is preferred or required.
+  static const List<LocalizationsDelegate<dynamic>> localizationsDelegates =
+      <LocalizationsDelegate<dynamic>>[
+        delegate,
+        GlobalMaterialLocalizations.delegate,
+        GlobalCupertinoLocalizations.delegate,
+        GlobalWidgetsLocalizations.delegate,
+      ];
+
+  /// A list of this localizations delegate's supported locales.
+  static const List<Locale> supportedLocales = <Locale>[
+    Locale('en'),
+    Locale('es'),
+  ];
+
+  /// No description provided for @appTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Sushi Tracker'**
+  String get appTitle;
+
+  /// No description provided for @settingsTooltip.
+  ///
+  /// In en, this message translates to:
+  /// **'Settings'**
+  String get settingsTooltip;
+
+  /// No description provided for @navCounter.
+  ///
+  /// In en, this message translates to:
+  /// **'Counter'**
+  String get navCounter;
+
+  /// No description provided for @navHistory.
+  ///
+  /// In en, this message translates to:
+  /// **'History'**
+  String get navHistory;
+
+  /// No description provided for @navStats.
+  ///
+  /// In en, this message translates to:
+  /// **'Stats'**
+  String get navStats;
+
+  /// No description provided for @cancel.
+  ///
+  /// In en, this message translates to:
+  /// **'Cancel'**
+  String get cancel;
+
+  /// No description provided for @close.
+  ///
+  /// In en, this message translates to:
+  /// **'Close'**
+  String get close;
+
+  /// No description provided for @delete.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete'**
+  String get delete;
+
+  /// No description provided for @reset.
+  ///
+  /// In en, this message translates to:
+  /// **'Reset'**
+  String get reset;
+
+  /// No description provided for @undo.
+  ///
+  /// In en, this message translates to:
+  /// **'Undo'**
+  String get undo;
+
+  /// No description provided for @storageError.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not open your saved data.'**
+  String get storageError;
+
+  /// No description provided for @tryAgain.
+  ///
+  /// In en, this message translates to:
+  /// **'Try again'**
+  String get tryAgain;
+
+  /// No description provided for @currentSessionSemantics.
+  ///
+  /// In en, this message translates to:
+  /// **'Current session: {count} sushi'**
+  String currentSessionSemantics(int count);
+
+  /// No description provided for @tapToStart.
+  ///
+  /// In en, this message translates to:
+  /// **'Tap the sushi to start'**
+  String get tapToStart;
+
+  /// No description provided for @tapHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Tap to add · Long press or Undo to remove'**
+  String get tapHint;
+
+  /// No description provided for @sushiButtonLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Add one sushi'**
+  String get sushiButtonLabel;
+
+  /// No description provided for @sushiButtonHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Double tap to add one. Long press to remove one.'**
+  String get sushiButtonHint;
+
+  /// No description provided for @endSession.
+  ///
+  /// In en, this message translates to:
+  /// **'End Session'**
+  String get endSession;
+
+  /// No description provided for @thisSession.
+  ///
+  /// In en, this message translates to:
+  /// **'This session'**
+  String get thisSession;
+
+  /// No description provided for @lifetimeTotal.
+  ///
+  /// In en, this message translates to:
+  /// **'Lifetime total'**
+  String get lifetimeTotal;
+
+  /// No description provided for @elapsed.
+  ///
+  /// In en, this message translates to:
+  /// **'Elapsed'**
+  String get elapsed;
+
+  /// No description provided for @errorSaveOngoing.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not save the current session.'**
+  String get errorSaveOngoing;
+
+  /// No description provided for @errorResetCurrent.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not reset the current session.'**
+  String get errorResetCurrent;
+
+  /// No description provided for @errorCompleteSession.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not save this session. Please try again.'**
+  String get errorCompleteSession;
+
+  /// No description provided for @discardSession.
+  ///
+  /// In en, this message translates to:
+  /// **'Discard session'**
+  String get discardSession;
+
+  /// No description provided for @discardSessionTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Discard this session?'**
+  String get discardSessionTitle;
+
+  /// No description provided for @discardSessionBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Its taps will not be saved to history.'**
+  String get discardSessionBody;
+
+  /// No description provided for @discard.
+  ///
+  /// In en, this message translates to:
+  /// **'Discard'**
+  String get discard;
+
+  /// No description provided for @sessionDiscarded.
+  ///
+  /// In en, this message translates to:
+  /// **'Session discarded.'**
+  String get sessionDiscarded;
+
+  /// No description provided for @historyTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'SESSION HISTORY'**
+  String get historyTitle;
+
+  /// No description provided for @noSessions.
+  ///
+  /// In en, this message translates to:
+  /// **'No sessions yet.'**
+  String get noSessions;
+
+  /// No description provided for @durationLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Duration: {duration}'**
+  String durationLabel(String duration);
+
+  /// No description provided for @beforeReset.
+  ///
+  /// In en, this message translates to:
+  /// **'Before lifetime reset'**
+  String get beforeReset;
+
+  /// No description provided for @deleteSessionTooltip.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete session'**
+  String get deleteSessionTooltip;
+
+  /// No description provided for @deleteSessionTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete Session?'**
+  String get deleteSessionTitle;
+
+  /// No description provided for @deleteSessionBody.
+  ///
+  /// In en, this message translates to:
+  /// **'This removes it from history. It updates the lifetime total when it belongs to the current lifetime.'**
+  String get deleteSessionBody;
+
+  /// No description provided for @sessionsDeleted.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{Session deleted} other{{count} sessions deleted}}'**
+  String sessionsDeleted(int count);
+
+  /// No description provided for @couldNotDelete.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not delete this session. Please try again.'**
+  String get couldNotDelete;
+
+  /// No description provided for @couldNotRestore.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not restore this session.'**
+  String get couldNotRestore;
+
+  /// No description provided for @sessionDetails.
+  ///
+  /// In en, this message translates to:
+  /// **'Session Details'**
+  String get sessionDetails;
+
+  /// No description provided for @startedLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Started: {time}'**
+  String startedLabel(String time);
+
+  /// No description provided for @endedLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Ended: {time}'**
+  String endedLabel(String time);
+
+  /// No description provided for @countLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{Count: 1 tap} other{Count: {count} taps}}'**
+  String countLabel(int count);
+
+  /// No description provided for @paceLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Pace: {pace} per minute'**
+  String paceLabel(String pace);
+
+  /// No description provided for @beforeResetDetail.
+  ///
+  /// In en, this message translates to:
+  /// **'Recorded before the last lifetime reset, so it is not part of the current lifetime totals.'**
+  String get beforeResetDetail;
+
+  /// No description provided for @statsTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'STATISTICS'**
+  String get statsTitle;
+
+  /// No description provided for @lifetimeTaps.
+  ///
+  /// In en, this message translates to:
+  /// **'Lifetime Taps'**
+  String get lifetimeTaps;
+
+  /// No description provided for @lifetimeSessions.
+  ///
+  /// In en, this message translates to:
+  /// **'Lifetime Sessions'**
+  String get lifetimeSessions;
+
+  /// No description provided for @averageKpi.
+  ///
+  /// In en, this message translates to:
+  /// **'Average ({range})'**
+  String averageKpi(String range);
+
+  /// No description provided for @bestKpi.
+  ///
+  /// In en, this message translates to:
+  /// **'Best ({range})'**
+  String bestKpi(String range);
+
+  /// No description provided for @filterLast7.
+  ///
+  /// In en, this message translates to:
+  /// **'7 sessions'**
+  String get filterLast7;
+
+  /// No description provided for @filterLast30.
+  ///
+  /// In en, this message translates to:
+  /// **'30 sessions'**
+  String get filterLast30;
+
+  /// No description provided for @filterAll.
+  ///
+  /// In en, this message translates to:
+  /// **'All sessions'**
+  String get filterAll;
+
+  /// No description provided for @rangeSemantics.
+  ///
+  /// In en, this message translates to:
+  /// **'Session range in number of sessions'**
+  String get rangeSemantics;
+
+  /// No description provided for @sessionTrend.
+  ///
+  /// In en, this message translates to:
+  /// **'Session trend'**
+  String get sessionTrend;
+
+  /// No description provided for @noTrend.
+  ///
+  /// In en, this message translates to:
+  /// **'Complete a session to see your trend.'**
+  String get noTrend;
+
+  /// No description provided for @chartSemantics.
+  ///
+  /// In en, this message translates to:
+  /// **'Session trend chart for {count} sessions. Tap a point to see its date and tap count.'**
+  String chartSemantics(int count);
+
+  /// No description provided for @tapsCount.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 tap} other{{count} taps}}'**
+  String tapsCount(int count);
+
+  /// No description provided for @sinceReset.
+  ///
+  /// In en, this message translates to:
+  /// **'Since the lifetime reset on {date}'**
+  String sinceReset(String date);
+
+  /// No description provided for @settingsTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'SETTINGS'**
+  String get settingsTitle;
+
+  /// No description provided for @resetCurrentTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Reset Current Session'**
+  String get resetCurrentTitle;
+
+  /// No description provided for @resetCurrentSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Clear active taps without saving'**
+  String get resetCurrentSubtitle;
+
+  /// No description provided for @resetCurrentDialogTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Reset Current Session?'**
+  String get resetCurrentDialogTitle;
+
+  /// No description provided for @resetCurrentDialogBody.
+  ///
+  /// In en, this message translates to:
+  /// **'This will clear your ongoing taps without saving.'**
+  String get resetCurrentDialogBody;
+
+  /// No description provided for @currentSessionReset.
+  ///
+  /// In en, this message translates to:
+  /// **'Current session reset.'**
+  String get currentSessionReset;
+
+  /// No description provided for @resetLifetimeTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Reset Lifetime Global'**
+  String get resetLifetimeTitle;
+
+  /// No description provided for @resetLifetimeSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Permanently reset all-time taps and sessions to 0'**
+  String get resetLifetimeSubtitle;
+
+  /// No description provided for @finishSessionFirst.
+  ///
+  /// In en, this message translates to:
+  /// **'End or reset the current session first.'**
+  String get finishSessionFirst;
+
+  /// No description provided for @permanentReset.
+  ///
+  /// In en, this message translates to:
+  /// **'PERMANENT RESET'**
+  String get permanentReset;
+
+  /// No description provided for @permanentResetBody.
+  ///
+  /// In en, this message translates to:
+  /// **'This action permanently wipes your lifetime stats. Session history remains intact but totals return to 0.\n\nType \"{keyword}\" to confirm.'**
+  String permanentResetBody(String keyword);
+
+  /// No description provided for @resetKeyword.
+  ///
+  /// In en, this message translates to:
+  /// **'RESET'**
+  String get resetKeyword;
+
+  /// No description provided for @confirmReset.
+  ///
+  /// In en, this message translates to:
+  /// **'CONFIRM RESET'**
+  String get confirmReset;
+
+  /// No description provided for @lifetimeResetDone.
+  ///
+  /// In en, this message translates to:
+  /// **'Global lifetime stats reset.'**
+  String get lifetimeResetDone;
+
+  /// No description provided for @couldNotResetLifetime.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not reset lifetime stats. Please try again.'**
+  String get couldNotResetLifetime;
+
+  /// No description provided for @keepScreenOnTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Keep screen on during a session'**
+  String get keepScreenOnTitle;
+
+  /// No description provided for @keepScreenOnSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Uses a little more battery while you count'**
+  String get keepScreenOnSubtitle;
+
+  /// No description provided for @couldNotSaveSetting.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not save this setting.'**
+  String get couldNotSaveSetting;
+
+  /// No description provided for @exportTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Export data'**
+  String get exportTitle;
+
+  /// No description provided for @exportSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Copy a backup of your history to the clipboard'**
+  String get exportSubtitle;
+
+  /// No description provided for @exportDone.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{Backup of 1 session copied to the clipboard.} other{Backup of {count} sessions copied to the clipboard.}}'**
+  String exportDone(int count);
+
+  /// No description provided for @importTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Import data'**
+  String get importTitle;
+
+  /// No description provided for @importSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Replace all data with a pasted backup'**
+  String get importSubtitle;
+
+  /// No description provided for @importDialogTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Import backup'**
+  String get importDialogTitle;
+
+  /// No description provided for @importDialogBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Paste a Sushi Tracker backup. This replaces all current history and totals.'**
+  String get importDialogBody;
+
+  /// No description provided for @importPaste.
+  ///
+  /// In en, this message translates to:
+  /// **'Paste'**
+  String get importPaste;
+
+  /// No description provided for @importConfirm.
+  ///
+  /// In en, this message translates to:
+  /// **'Replace data'**
+  String get importConfirm;
+
+  /// No description provided for @importInvalid.
+  ///
+  /// In en, this message translates to:
+  /// **'This is not a valid Sushi Tracker backup.'**
+  String get importInvalid;
+
+  /// No description provided for @importDone.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{Imported 1 session.} other{Imported {count} sessions.}}'**
+  String importDone(int count);
+
+  /// No description provided for @importFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not import the backup.'**
+  String get importFailed;
+
+  /// No description provided for @privacyTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Privacy Policy'**
+  String get privacyTitle;
+
+  /// No description provided for @privacyBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Sushi Tracker does not collect, transmit, or share personal data. It has no accounts, analytics, ads, or network services.\n\nYour counts, session history, and lifetime totals are stored on this device. If Android backup is turned on for your Google account, Android may include this data in that backup and restore it when you reinstall the app or set up a new device. That backup is handled by Google under your account; the developer never receives it.\n\nClearing the app data removes it from this device. You can export your own copy from Settings.\n\nThe app requests no special device permissions.\n\nFor questions, contact labradorsantoseduardo@gmail.com.'**
+  String get privacyBody;
+}
+
+class _AppLocalizationsDelegate
+    extends LocalizationsDelegate<AppLocalizations> {
+  const _AppLocalizationsDelegate();
+
+  @override
+  Future<AppLocalizations> load(Locale locale) {
+    return SynchronousFuture<AppLocalizations>(lookupAppLocalizations(locale));
+  }
+
+  @override
+  bool isSupported(Locale locale) =>
+      <String>['en', 'es'].contains(locale.languageCode);
+
+  @override
+  bool shouldReload(_AppLocalizationsDelegate old) => false;
+}
+
+AppLocalizations lookupAppLocalizations(Locale locale) {
+  // Lookup logic when only language code is specified.
+  switch (locale.languageCode) {
+    case 'en':
+      return AppLocalizationsEn();
+    case 'es':
+      return AppLocalizationsEs();
+  }
+
+  throw FlutterError(
+    'AppLocalizations.delegate failed to load unsupported locale "$locale". This is likely '
+    'an issue with the localizations generation tool. Please file an issue '
+    'on GitHub with a reproducible sample app and the gen-l10n configuration '
+    'that was used.',
+  );
+}

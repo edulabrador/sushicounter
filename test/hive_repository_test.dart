@@ -93,10 +93,10 @@ void main() {
       await repository.completeSession(session);
       expect(repository.getGlobalState().lifetimeTotalTaps, 3);
       await repository.resetGlobalState();
-      await repository.deleteSessionWithTotals('one');
+      final deleted = await repository.deleteSessionWithTotals('one');
       expect(repository.getGlobalState().lifetimeTotalTaps, 0);
-      await repository.restoreSessionWithTotals(session);
-      await repository.restoreSessionWithTotals(session);
+      await repository.restoreSessionWithTotals(deleted!);
+      await repository.restoreSessionWithTotals(deleted);
       expect(repository.getGlobalState().lifetimeTotalSessions, 0);
     },
   );

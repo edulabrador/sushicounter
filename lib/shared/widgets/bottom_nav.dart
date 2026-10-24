@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import '../../features/counter/views/counter_view.dart';
 import '../../features/history/views/history_view.dart';
 import '../../features/stats/views/stats_view.dart';
+import '../../l10n/l10n.dart';
 
 class RootNavigation extends StatefulWidget {
   const RootNavigation({super.key});
@@ -18,15 +19,25 @@ class _RootNavigationState extends State<RootNavigation> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = context.l10n;
     return Scaffold(
       body: IndexedStack(index: _currentIndex, children: _pages),
       bottomNavigationBar: NavigationBar(
         selectedIndex: _currentIndex,
         onDestinationSelected: (index) => setState(() => _currentIndex = index),
-        destinations: const [
-          NavigationDestination(icon: Icon(Icons.touch_app), label: 'Counter'),
-          NavigationDestination(icon: Icon(Icons.history), label: 'History'),
-          NavigationDestination(icon: Icon(Icons.bar_chart), label: 'Stats'),
+        destinations: [
+          NavigationDestination(
+            icon: const Icon(Icons.touch_app),
+            label: l10n.navCounter,
+          ),
+          NavigationDestination(
+            icon: const Icon(Icons.history),
+            label: l10n.navHistory,
+          ),
+          NavigationDestination(
+            icon: const Icon(Icons.bar_chart),
+            label: l10n.navStats,
+          ),
         ],
       ),
     );

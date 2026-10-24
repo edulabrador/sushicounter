@@ -11,6 +11,7 @@ import 'package:sushiscore/features/counter/widgets/sushi_button.dart';
 import 'package:sushiscore/features/counter/widgets/session_timer.dart';
 import 'package:sushiscore/main.dart';
 
+import 'test_app.dart';
 import 'widget_test.dart' show FakeRepository;
 
 class FailingRepository extends HiveRepository {
@@ -246,8 +247,8 @@ void main() {
     var now = DateTime(2026, 9, 23, 12);
     final startedAt = now.subtract(const Duration(seconds: 5));
     await tester.pumpWidget(
-      MaterialApp(
-        home: Scaffold(
+      localizedTestApp(
+        Scaffold(
           body: SessionElapsedTimer(startedAt: startedAt, now: () => now),
         ),
       ),

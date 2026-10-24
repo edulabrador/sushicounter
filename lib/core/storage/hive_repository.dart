@@ -4,9 +4,14 @@ import 'package:hive_flutter/hive_flutter.dart';
 
 import '../models/global_state.dart';
 import '../models/session.dart';
+import 'backup.dart';
 
 /// Hive has no multi-box transaction. Related mutations are serialized and a
 /// journal completes any interrupted mutation on startup or before the next write.
+///
+/// Reads (`getAllSessions`, `getGlobalState`, ...) are synchronous and do not
+/// wait for the queue. Callers only read after awaiting the mutation they
+/// depend on, so they never observe a half-applied journal in practice.
 class HiveRepository {
   static const String sessionBoxName = 'sessions';
   static const String globalStateBoxName = 'global_state';
@@ -15,6 +20,7 @@ class HiveRepository {
   static const _journalKey = 'mutation_journal';
   static const _ongoingKey = 'ongoing_session';
   static const _epochMigrationKey = 'epoch_migration_v1';
+  static const _keepScreenOnKey = 'keep_screen_on';
 
   late Box<Session> _sessionBox;
   late Box<GlobalState> _globalStateBox;
@@ -67,6 +73,7 @@ class HiveRepository {
       lifetimeTotalTaps: stored?.lifetimeTotalTaps ?? 0,
       lifetimeTotalSessions: stored?.lifetimeTotalSessions ?? 0,
       epoch: stored?.epoch ?? 0,
+      lastResetAt: stored?.lastResetAt,
     );
   }
 
@@ -79,6 +86,7 @@ class HiveRepository {
           lifetimeTotalTaps: 0,
           lifetimeTotalSessions: 0,
           epoch: current.epoch + 1,
+          lastResetAt: DateTime.now(),
         ),
       ),
     });
@@ -107,34 +115,56 @@ class HiveRepository {
   });
 
   /// Old history does not affect a later post-reset lifetime total.
-  Future<Session?> deleteSessionWithTotals(String id) => _serial(() async {
-    final session = _sessionBox.get(id);
-    if (session == null) return null;
-    final current = getGlobalState();
-    final target = session.contributionEpoch == current.epoch
-        ? _adjust(current, -session.count, -1)
-        : current;
-    await _runJournal({
-      'kind': 'delete',
-      'session': _sessionMap(session),
-      'global': _globalMap(target),
-    });
-    return session;
-  });
+  Future<DeletedSession?> deleteSessionWithTotals(String id) =>
+      _serial(() async {
+        final session = _sessionBox.get(id);
+        if (session == null) return null;
+        final current = getGlobalState();
+        final target = session.contributionEpoch == current.epoch
+            ? _adjust(current, -session.count, -1)
+            : current;
+        await _runJournal({
+          'kind': 'delete',
+          'session': _sessionMap(session),
+          'global': _globalMap(target),
+        });
+        return DeletedSession(
+          session,
+          tapsRemoved: current.lifetimeTotalTaps - target.lifetimeTotalTaps,
+          sessionsRemoved:
+              current.lifetimeTotalSessions - target.lifetimeTotalSessions,
+        );
+      });
 
-  /// Idempotent undo: add a contribution only if it belongs to this epoch.
-  Future<void> restoreSessionWithTotals(Session session) => _serial(() async {
-    if (_sessionBox.containsKey(session.id)) return;
-    final current = getGlobalState();
-    final target = session.contributionEpoch == current.epoch
-        ? _adjust(current, session.count, 1)
-        : current;
-    await _runJournal({
-      'kind': 'restore',
-      'session': _sessionMap(session),
-      'global': _globalMap(target),
-    });
-  });
+  /// Idempotent undo: put back exactly what the delete removed, and only if
+  /// the totals still belong to the same lifetime.
+  Future<void> restoreSessionWithTotals(DeletedSession deleted) =>
+      _serial(() async {
+        final session = deleted.session;
+        if (_sessionBox.containsKey(session.id)) return;
+        final current = getGlobalState();
+        final target = session.contributionEpoch == current.epoch
+            ? _adjust(current, deleted.tapsRemoved, deleted.sessionsRemoved)
+            : current;
+        await _runJournal({
+          'kind': 'restore',
+          'session': _sessionMap(session),
+          'global': _globalMap(target),
+        });
+      });
+
+  BackupData exportBackup() =>
+      BackupData(global: getGlobalState(), sessions: getAllSessions());
+
+  /// Replaces all saved history and totals with [backup].
+  Future<void> importBackup(BackupData backup) => _serial(
+    () => _runJournal({
+      'kind': 'replace',
+      'sessions': [for (final session in backup.sessions) _sessionMap(session)],
+      'global': _globalMap(backup.global),
+      'ongoing': {'count': 0, 'startedAt': null},
+    }),
+  );
 
   Future<void> _runJournal(Map<String, dynamic> record) async {
     await _appStateBox.put(_journalKey, record);
@@ -150,6 +180,7 @@ class HiveRepository {
     await _appStateBox.delete(_journalKey);
   }
 
+  /// Every step writes absolute values, so replaying a journal is idempotent.
   Future<void> _applyJournal(Map<String, dynamic> record) async {
     final global = _globalFromMap(
       Map<dynamic, dynamic>.from(record['global'] as Map),
@@ -167,6 +198,16 @@ class HiveRepository {
         break;
       case 'delete':
         if (session != null) await _sessionBox.delete(session.id);
+        break;
+      case 'replace':
+        final sessions = [
+          for (final raw in record['sessions'] as List)
+            _sessionFromMap(Map<dynamic, dynamic>.from(raw as Map)),
+        ];
+        await _sessionBox.clear();
+        await _sessionBox.putAll({
+          for (final session in sessions) session.id: session,
+        });
         break;
       case 'global':
         break;
@@ -199,7 +240,7 @@ class HiveRepository {
             endedAt: session.endedAt,
             count: session.count,
             durationSeconds: session.durationSeconds,
-            contributionEpoch: -1,
+            contributionEpoch: Session.unattributedEpoch,
           ),
         );
       }
@@ -214,6 +255,7 @@ class HiveRepository {
       lifetimeTotalTaps: nextTaps < 0 ? 0 : nextTaps,
       lifetimeTotalSessions: nextSessions < 0 ? 0 : nextSessions,
       epoch: state.epoch,
+      lastResetAt: state.lastResetAt,
     );
   }
 
@@ -224,12 +266,20 @@ class HiveRepository {
     'taps': value.lifetimeTotalTaps,
     'sessions': value.lifetimeTotalSessions,
     'epoch': value.epoch,
+    'resetAt': value.lastResetAt?.millisecondsSinceEpoch,
   };
-  GlobalState _globalFromMap(Map<dynamic, dynamic> value) => GlobalState(
-    lifetimeTotalTaps: value['taps'] as int,
-    lifetimeTotalSessions: value['sessions'] as int,
-    epoch: value['epoch'] as int? ?? 0,
-  );
+  GlobalState _globalFromMap(Map<dynamic, dynamic> value) {
+    final resetAt = value['resetAt'] as int?;
+    return GlobalState(
+      lifetimeTotalTaps: value['taps'] as int,
+      lifetimeTotalSessions: value['sessions'] as int,
+      epoch: value['epoch'] as int? ?? 0,
+      lastResetAt: resetAt == null
+          ? null
+          : DateTime.fromMillisecondsSinceEpoch(resetAt),
+    );
+  }
+
   Map<String, dynamic> _sessionMap(Session value) => {
     'id': value.id,
     'startedAt': value.startedAt.millisecondsSinceEpoch,
@@ -268,7 +318,10 @@ class HiveRepository {
     final startedAt = _appStateBox.get('ongoingStartedAt') as DateTime?;
     await _appStateBox.put(_ongoingKey, {
       'count': count,
-      'startedAt': startedAt?.millisecondsSinceEpoch,
+      // Legacy installs could hold a count without a start time.
+      'startedAt': count > 0
+          ? (startedAt ?? DateTime.now()).millisecondsSinceEpoch
+          : null,
     });
   }
 
@@ -278,4 +331,10 @@ class HiveRepository {
       'startedAt': startedAt?.millisecondsSinceEpoch,
     }),
   );
+
+  bool getKeepScreenOn() =>
+      _appStateBox.get(_keepScreenOnKey, defaultValue: true) as bool;
+
+  Future<void> setKeepScreenOn(bool value) =>
+      _serial(() => _appStateBox.put(_keepScreenOnKey, value));
 }

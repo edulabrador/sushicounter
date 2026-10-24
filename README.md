@@ -8,11 +8,13 @@ Tap to add a piece, use Undo or long-press to correct a count, and end the sessi
 
 **Counter** - the home screen. Tap the sushi graphic to count, use visible Undo or long-press to decrement, and end the session to save it. It shows this session, the lifetime total including the active session, and a live elapsed timer.
 
-**History** - every past session, newest first, with its count, duration, and completion time. Individual sessions can be deleted and restored with Undo.
+**History** - every past session, newest first, with its count, duration, and completion time. Tap one for details such as pace per minute. Sessions can be deleted and restored with Undo, including several deletes in a row.
 
 **Stats** - lifetime taps and sessions, average and best session counts, plus a trend chart for the latest 7 sessions, 30 sessions, or all sessions.
 
-**Settings** - reset the current session or lifetime totals. Lifetime reset is unavailable while a session is active and requires typing "RESET" to confirm. It clears lifetime totals while preserving session history.
+**Settings** - reset the current session or lifetime totals, keep the screen on while counting, and export or import a backup through the clipboard. Lifetime reset is unavailable while a session is active and requires typing "RESET" (or "BORRAR" in Spanish) to confirm. It clears lifetime totals while preserving session history; Stats then cover the new lifetime and older sessions are marked in History.
+
+The app is available in English and Spanish and follows the device language. Each tap gives light haptic feedback, so you can count without looking at the screen.
 
 ### Updating from an older version
 
@@ -22,7 +24,8 @@ Existing history is preserved. When upgrading, Sushi Tracker only links legacy h
 
 Nothing fancy, just a clean, feature-first structure so it's easy to find your way around:
 
-- **State management**, [`flutter_riverpod`](https://pub.dev/packages/flutter_riverpod)
+- **State management**, [`flutter_riverpod`](https://pub.dev/packages/flutter_riverpod) `Notifier`s
+- **Localization**, Flutter `gen-l10n` with ARB files in `lib/l10n` (run `flutter pub get` after editing them)
 - **Local storage**, [`hive`](https://pub.dev/packages/hive) / `hive_flutter`, so everything persists instantly with no server round-trip
 - **Charts**, [`fl_chart`](https://pub.dev/packages/fl_chart) for the trend line on the Stats screen
 

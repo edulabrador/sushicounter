@@ -16,6 +16,34 @@ class Session extends HiveObject {
     required this.durationSeconds,
     this.contributionEpoch = 0,
   });
+
+  /// Epoch of legacy history whose totals could not be attributed safely.
+  static const unattributedEpoch = -1;
+
+  /// Whether this session belongs to the lifetime shown for [epoch]. Legacy
+  /// history is shown as part of the first lifetime, but deleting it never
+  /// changes totals (see [HiveRepository.deleteSessionWithTotals]).
+  bool isInLifetime(int epoch) =>
+      contributionEpoch == epoch ||
+      (epoch == 0 && contributionEpoch == unattributedEpoch);
+
+  /// Taps per minute, or null when the session is too short to be meaningful.
+  double? get tapsPerMinute =>
+      durationSeconds < 60 ? null : count / (durationSeconds / 60);
+}
+
+/// A deleted session plus the exact totals its delete removed, so undo can
+/// put back precisely what was taken even when the delete was clamped at 0.
+class DeletedSession {
+  const DeletedSession(
+    this.session, {
+    required this.tapsRemoved,
+    required this.sessionsRemoved,
+  });
+
+  final Session session;
+  final int tapsRemoved;
+  final int sessionsRemoved;
 }
 
 class SessionAdapter extends TypeAdapter<Session> {

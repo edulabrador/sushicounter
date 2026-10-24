@@ -3,6 +3,8 @@ import 'dart:math' as math;
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
+import '../../../l10n/l10n.dart';
+
 /// A tappable kawaii salmon-nigiri character.
 ///
 /// Recreated in vector (CustomPaint) rather than embedding a bitmap so it
@@ -89,6 +91,8 @@ class _SushiButtonState extends State<SushiButton>
   void _handleTap() {
     if (!widget.enabled) return;
     widget.onTap();
+    // Lets the user count without looking at the screen.
+    HapticFeedback.lightImpact();
     // Honour the platform's accessibility preference. The counter still works;
     // only the non-essential celebratory motion is skipped.
     if (MediaQuery.disableAnimationsOf(context)) return;
@@ -98,16 +102,23 @@ class _SushiButtonState extends State<SushiButton>
     _controller.forward(from: 0);
   }
 
+  void _handleLongPress() {
+    if (!widget.enabled) return;
+    widget.onLongPress();
+    HapticFeedback.mediumImpact();
+  }
+
   @override
   Widget build(BuildContext context) {
+    final l10n = context.l10n;
     return Semantics(
       button: true,
       excludeSemantics: true,
       enabled: widget.enabled,
-      label: 'Add one sushi',
-      hint: 'Double tap to add one. Long press to remove one.',
+      label: l10n.sushiButtonLabel,
+      hint: l10n.sushiButtonHint,
       onTap: widget.enabled ? _handleTap : null,
-      onLongPress: widget.enabled ? widget.onLongPress : null,
+      onLongPress: widget.enabled ? _handleLongPress : null,
       child: FocusableActionDetector(
         focusNode: _focusNode,
         enabled: widget.enabled,
@@ -143,7 +154,7 @@ class _SushiButtonState extends State<SushiButton>
                     _handleTap();
                   }
                 : null,
-            onLongPress: widget.enabled ? widget.onLongPress : null,
+            onLongPress: widget.enabled ? _handleLongPress : null,
             child: AnimatedBuilder(
               animation: _controller,
               builder: (context, child) {

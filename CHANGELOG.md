@@ -2,6 +2,33 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.3.0] - 2026-10-24
+### Added
+- Spanish translation. The app follows the device language (English and Spanish).
+- Haptic feedback when adding or removing a sushi.
+- Optional "keep screen on during a session" setting, on by default (Android).
+- Export and import of all history and totals as a text backup through the clipboard.
+- Session details show pace per minute and can delete the session.
+- "Discard session" when saving a finished session keeps failing, so the counter is never stuck.
+
+### Fixed
+- Restoring an old unsaved session without a start time no longer crashes the Counter screen.
+- Counter and Stats show the same lifetime total (both include the active session).
+- After a lifetime reset, Stats averages, best session and chart cover only the current lifetime, show when it started, and History marks older sessions.
+- Undoing a delete restores exactly what the delete removed, even when the total had been clamped at 0.
+- Several deletes in a row can all be undone from the latest snackbar.
+- The elapsed timer no longer falls behind when frames are skipped, and starts correctly when the app opens in the background.
+- History durations read as `1:02:05` instead of raw seconds.
+- A single-session chart is centred.
+- An unresolved save error stays visible until a later save succeeds.
+- The reset confirmation ignores case and surrounding spaces and focuses the field.
+- The privacy policy now states that Android backup may include app data.
+
+### Changed
+- Riverpod providers use `Notifier` instead of the legacy `StateNotifier` API, and the counter state is a phase enum with `copyWith`.
+- CI reads the expected release version from `pubspec.yaml` and runs on pushes to `main` and on pull requests.
+- App version is now `0.3.0+7`.
+
 ## [0.2.4] - 2026-09-23
 ### Added
 - A visible Undo control and live elapsed timer on the Counter screen.
