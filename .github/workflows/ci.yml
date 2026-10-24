@@ -18,6 +18,9 @@ jobs:
           flutter-version: '3.47.5'
           channel: stable
           cache: true
+      # Resolve packages first: dart format reads the language version from
+      # package_config, and pub get also regenerates the l10n sources.
+      - run: flutter pub get
       - name: Check Dart formatting
         shell: bash
         run: |
@@ -27,7 +30,6 @@ jobs:
           dart format .
           git diff -- '*.dart'
           exit 1
-      - run: flutter pub get
       - run: flutter analyze
       - name: Check Android toolchain compatibility
         run: flutter analyze --suggestions
