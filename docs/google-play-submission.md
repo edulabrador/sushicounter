@@ -3,8 +3,8 @@
 Current release candidate:
 - App name: Sushi Tracker
 - Package / application ID: `dev.edulabrador.sushiscore`
-- Version name: `0.4.0`
-- Version code: `8`
+- Version name: `0.5.0`
+- Version code: `9`
 - Target SDK: 36
 - Release AAB path: `build/app/outputs/bundle/release/app-release.aab`
 - Privacy policy: https://edulabrador.github.io/sushicounter/privacy-policy.html

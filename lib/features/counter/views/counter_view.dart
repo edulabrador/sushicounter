@@ -5,6 +5,8 @@ import 'package:sushiscore/features/counter/widgets/sushi_button.dart';
 import 'package:sushiscore/features/counter/widgets/session_timer.dart';
 import 'package:sushiscore/core/theme/app_colors.dart';
 import 'package:sushiscore/features/settings/views/settings_view.dart';
+import 'package:sushiscore/features/stats/providers/records_provider.dart';
+import 'package:sushiscore/shared/art/sushi_art.dart';
 import 'package:sushiscore/l10n/l10n.dart';
 
 const counterCurrentCountKey = ValueKey<String>('current-count');
@@ -79,6 +81,8 @@ class CounterView extends ConsumerWidget {
     final lifetimeTaps = ref.watch(lifetimeTapsProvider);
     final startedAt = counterState.startedAt;
     final error = counterState.persistenceError;
+    final best = ref.watch(lifetimeBestProvider);
+    final beatingRecord = best > 0 && counterState.count > best;
     return Scaffold(
       appBar: AppBar(
         leading: IconButton(
@@ -124,8 +128,18 @@ class CounterView extends ConsumerWidget {
                             fontSize: 16,
                           ),
                         ),
+                        if (best > 0 && counterState.count > 0) ...[
+                          const SizedBox(height: 16),
+                          _RecordProgress(
+                            count: counterState.count,
+                            best: best,
+                          ),
+                        ],
                         const SizedBox(height: 24),
                         SushiButton(
+                          mood: beatingRecord
+                              ? SushiMood.starry
+                              : SushiMood.happy,
                           onTap: () =>
                               ref.read(counterProvider.notifier).increment(),
                           onLongPress: () =>
@@ -190,27 +204,45 @@ class CounterView extends ConsumerWidget {
                       child: Padding(
                         padding: const EdgeInsets.symmetric(
                           vertical: 16,
-                          horizontal: 20,
+                          horizontal: 12,
                         ),
-                        child: Wrap(
-                          alignment: WrapAlignment.spaceBetween,
-                          crossAxisAlignment: WrapCrossAlignment.center,
-                          spacing: 20,
-                          runSpacing: 12,
+                        child: Column(
                           children: [
-                            _Metric(
-                              label: l10n.thisSession,
-                              value: '${counterState.count}',
-                              valueKey: counterSessionTotalKey,
+                            IntrinsicHeight(
+                              child: Row(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Expanded(
+                                    child: _Metric(
+                                      icon: Icons.restaurant,
+                                      label: l10n.thisSession,
+                                      value: '${counterState.count}',
+                                      valueKey: counterSessionTotalKey,
+                                    ),
+                                  ),
+                                  const VerticalDivider(width: 16),
+                                  Expanded(
+                                    child: _Metric(
+                                      icon: Icons.all_inclusive,
+                                      label: l10n.lifetimeTotal,
+                                      value: '$lifetimeTaps',
+                                      valueKey: counterLifetimeTotalKey,
+                                    ),
+                                  ),
+                                  if (counterState.count > 0 &&
+                                      startedAt != null) ...[
+                                    const VerticalDivider(width: 16),
+                                    Expanded(
+                                      child: SessionElapsedTimer(
+                                        startedAt: startedAt,
+                                      ),
+                                    ),
+                                  ],
+                                ],
+                              ),
                             ),
-                            _Metric(
-                              label: l10n.lifetimeTotal,
-                              value: '$lifetimeTaps',
-                              valueKey: counterLifetimeTotalKey,
-                            ),
-                            if (counterState.count > 0 && startedAt != null)
-                              SessionElapsedTimer(startedAt: startedAt),
-                            if (error != null)
+                            if (error != null) ...[
+                              const SizedBox(height: 12),
                               Semantics(
                                 liveRegion: true,
                                 child: Text(
@@ -221,6 +253,7 @@ class CounterView extends ConsumerWidget {
                                   ),
                                 ),
                               ),
+                            ],
                           ],
                         ),
                       ),
@@ -237,21 +270,92 @@ class CounterView extends ConsumerWidget {
 }
 
 class _Metric extends StatelessWidget {
-  const _Metric({required this.label, required this.value, this.valueKey});
+  const _Metric({
+    required this.icon,
+    required this.label,
+    required this.value,
+    this.valueKey,
+  });
+  final IconData icon;
   final String label;
   final String value;
   final Key? valueKey;
 
   @override
   Widget build(BuildContext context) => Column(
-    crossAxisAlignment: CrossAxisAlignment.start,
     children: [
-      Text(label, style: TextStyle(color: context.colors.textMuted)),
+      Icon(icon, size: 18, color: context.colors.accent),
+      const SizedBox(height: 4),
       Text(
-        value,
-        key: valueKey,
-        style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+        label,
+        textAlign: TextAlign.center,
+        style: TextStyle(color: context.colors.textMuted, fontSize: 13),
+      ),
+      const SizedBox(height: 2),
+      FittedBox(
+        fit: BoxFit.scaleDown,
+        child: Text(
+          value,
+          key: valueKey,
+          style: const TextStyle(fontSize: 24, fontWeight: FontWeight.w800),
+        ),
       ),
     ],
   );
+}
+
+/// How close the session is to the best one of this lifetime.
+class _RecordProgress extends StatelessWidget {
+  const _RecordProgress({required this.count, required this.best});
+
+  final int count;
+  final int best;
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = context.l10n;
+    final colors = context.colors;
+    final label = count > best
+        ? l10n.newRecord(best)
+        : count == best
+        ? l10n.recordTied(best)
+        : l10n.recordToBeat(best, best - count);
+    return ConstrainedBox(
+      constraints: const BoxConstraints(maxWidth: 320),
+      child: Column(
+        children: [
+          Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Icon(
+                count >= best ? Icons.emoji_events : Icons.flag_outlined,
+                size: 16,
+                color: colors.accent,
+              ),
+              const SizedBox(width: 6),
+              Flexible(
+                child: Text(
+                  label,
+                  textAlign: TextAlign.center,
+                  style: TextStyle(
+                    color: count >= best ? colors.accent : colors.textMuted,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 8),
+          ClipRRect(
+            borderRadius: BorderRadius.circular(8),
+            child: LinearProgressIndicator(
+              value: (count / best).clamp(0.0, 1.0),
+              minHeight: 8,
+              semanticsLabel: label,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
 }

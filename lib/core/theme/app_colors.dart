@@ -10,6 +10,7 @@ class AppColors extends ThemeExtension<AppColors> {
     required this.text,
     required this.textMuted,
     required this.accent,
+    required this.onAccent,
     required this.danger,
   });
 
@@ -18,7 +19,9 @@ class AppColors extends ThemeExtension<AppColors> {
     surface: Color(0xFF1E293B),
     text: Color(0xFFFFFFFF),
     textMuted: Color(0xFFA6B0C0),
-    accent: Color(0xFFFFA726),
+    // A lighter salmon than the drawing's, so text in it stays readable.
+    accent: Color(0xFFF7A072),
+    onAccent: Color(0xFF2A1810),
     danger: Color(0xFFF87171),
   );
 
@@ -30,6 +33,9 @@ class AppColors extends ThemeExtension<AppColors> {
   final Color textMuted;
   final Color accent;
 
+  /// Text and icons placed on [accent].
+  final Color onAccent;
+
   /// Destructive actions and errors.
   final Color danger;
 
@@ -40,6 +46,7 @@ class AppColors extends ThemeExtension<AppColors> {
     Color? text,
     Color? textMuted,
     Color? accent,
+    Color? onAccent,
     Color? danger,
   }) => AppColors(
     background: background ?? this.background,
@@ -47,6 +54,7 @@ class AppColors extends ThemeExtension<AppColors> {
     text: text ?? this.text,
     textMuted: textMuted ?? this.textMuted,
     accent: accent ?? this.accent,
+    onAccent: onAccent ?? this.onAccent,
     danger: danger ?? this.danger,
   );
 
@@ -59,6 +67,7 @@ class AppColors extends ThemeExtension<AppColors> {
       text: Color.lerp(text, other.text, t)!,
       textMuted: Color.lerp(textMuted, other.textMuted, t)!,
       accent: Color.lerp(accent, other.accent, t)!,
+      onAccent: Color.lerp(onAccent, other.onAccent, t)!,
       danger: Color.lerp(danger, other.danger, t)!,
     );
   }

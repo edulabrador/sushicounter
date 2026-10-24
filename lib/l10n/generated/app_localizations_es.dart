@@ -455,4 +455,80 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get piecesThisMonth => 'Piezas este mes';
+
+  @override
+  String recordToBeat(int best, int remaining) {
+    return 'Récord $best · te faltan $remaining';
+  }
+
+  @override
+  String recordTied(int best) {
+    return '¡Has igualado tu récord de $best!';
+  }
+
+  @override
+  String newRecord(int best) {
+    return '¡Nuevo récord! El anterior era $best';
+  }
+
+  @override
+  String get emptyHistoryHint => 'Termina una sesión y aparecerá aquí.';
+
+  @override
+  String monthSummary(int sessions, int pieces) {
+    String _temp0 = intl.Intl.pluralLogic(
+      sessions,
+      locale: localeName,
+      other: '$sessions sesiones',
+      one: '1 sesión',
+    );
+    String _temp1 = intl.Intl.pluralLogic(
+      pieces,
+      locale: localeName,
+      other: '$pieces piezas',
+      one: '1 pieza',
+    );
+    return '$_temp0 · $_temp1';
+  }
+
+  @override
+  String get recordBadge => 'Récord';
+
+  @override
+  String get summaryTitle => 'Resumen';
+
+  @override
+  String averageLine(String value) {
+    return 'Media $value';
+  }
+
+  @override
+  String get weeklyTitle => 'Piezas por semana';
+
+  @override
+  String weeklySemantics(int weeks) {
+    return 'Gráfico de barras con las piezas de cada una de las últimas $weeks semanas.';
+  }
+
+  @override
+  String piecesCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count piezas',
+      one: '1 pieza',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String piecesUnit(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'piezas',
+      one: 'pieza',
+    );
+    return '$_temp0';
+  }
 }

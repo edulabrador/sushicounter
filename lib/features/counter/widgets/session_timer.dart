@@ -78,16 +78,22 @@ class _SessionElapsedTimerState extends State<SessionElapsedTimer>
 
   @override
   Widget build(BuildContext context) => Column(
-    crossAxisAlignment: CrossAxisAlignment.start,
     children: [
+      Icon(Icons.timer_outlined, size: 18, color: context.colors.accent),
+      const SizedBox(height: 4),
       Text(
         context.l10n.elapsed,
-        style: TextStyle(color: context.colors.textMuted),
+        textAlign: TextAlign.center,
+        style: TextStyle(color: context.colors.textMuted, fontSize: 13),
       ),
-      Text(
-        formatSessionDuration(_elapsed),
-        key: counterElapsedTimeKey,
-        style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+      const SizedBox(height: 2),
+      FittedBox(
+        fit: BoxFit.scaleDown,
+        child: Text(
+          formatSessionDuration(_elapsed),
+          key: counterElapsedTimeKey,
+          style: const TextStyle(fontSize: 24, fontWeight: FontWeight.w800),
+        ),
       ),
     ],
   );

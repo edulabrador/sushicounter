@@ -7,11 +7,58 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:sushiscore/features/counter/views/counter_timer.dart';
 import 'package:sushiscore/features/global/providers/global_provider.dart';
 import 'package:sushiscore/features/history/providers/session_provider.dart';
+import 'package:sushiscore/features/stats/providers/records_provider.dart';
 import 'package:sushiscore/l10n/l10n.dart';
+import 'package:sushiscore/shared/art/sushi_art.dart';
+import 'package:sushiscore/shared/widgets/empty_state.dart';
 import 'package:intl/intl.dart';
 
 String formatSessionSeconds(int seconds) =>
     formatSessionDuration(Duration(seconds: seconds));
+
+sealed class HistoryEntry {
+  const HistoryEntry();
+}
+
+class MonthHeader extends HistoryEntry {
+  const MonthHeader(this.month, this.sessions, this.pieces);
+
+  /// First day of the month, local time.
+  final DateTime month;
+  final int sessions;
+  final int pieces;
+}
+
+class SessionEntry extends HistoryEntry {
+  const SessionEntry(this.session);
+  final Session session;
+}
+
+/// Sessions (newest first) with a header before each calendar month.
+List<HistoryEntry> historyEntries(List<Session> newestFirst) {
+  final entries = <HistoryEntry>[];
+  var i = 0;
+  while (i < newestFirst.length) {
+    final ended = newestFirst[i].endedAt.toLocal();
+    final month = DateTime(ended.year, ended.month);
+    final inMonth = <Session>[];
+    while (i < newestFirst.length) {
+      final other = newestFirst[i].endedAt.toLocal();
+      if (other.year != month.year || other.month != month.month) break;
+      inMonth.add(newestFirst[i++]);
+    }
+    entries
+      ..add(
+        MonthHeader(
+          month,
+          inMonth.length,
+          inMonth.fold(0, (sum, session) => sum + session.count),
+        ),
+      )
+      ..addAll(inMonth.map(SessionEntry.new));
+  }
+  return entries;
+}
 
 class HistoryView extends ConsumerStatefulWidget {
   const HistoryView({super.key});
@@ -32,70 +79,29 @@ class _HistoryViewState extends ConsumerState<HistoryView> {
     final l10n = context.l10n;
     final sessions = ref.watch(sessionListProvider);
     final epoch = ref.watch(globalStateProvider.select((g) => g.epoch));
-    final dateFormat = DateFormat.yMMMd(context.localeName).add_Hm();
+    final best = ref.watch(lifetimeBestProvider);
+    final entries = historyEntries(sessions);
 
     return Scaffold(
       appBar: AppBar(title: Text(l10n.historyTitle)),
       body: sessions.isEmpty
-          ? Center(
-              child: Text(
-                l10n.noSessions,
-                style: TextStyle(color: context.colors.textMuted),
-              ),
-            )
+          ? EmptyState(title: l10n.noSessions, hint: l10n.emptyHistoryHint)
           : ListView.builder(
-              itemCount: sessions.length,
-              itemBuilder: (context, index) {
-                final session = sessions[index];
-                final inLifetime = session.isInLifetime(epoch);
-                final duration = l10n.durationLabel(
-                  formatSessionSeconds(session.durationSeconds),
-                );
-                return ListTile(
-                  leading: Icon(
-                    Icons.history,
-                    color: inLifetime
-                        ? context.colors.accent
-                        : context.colors.textMuted,
-                  ),
-                  title: Text(
-                    dateFormat.format(session.endedAt),
-                    maxLines: 2,
-                    overflow: TextOverflow.ellipsis,
-                  ),
-                  subtitle: Text(
-                    inLifetime ? duration : '$duration · ${l10n.beforeReset}',
-                  ),
-                  trailing: ConstrainedBox(
-                    constraints: const BoxConstraints(maxWidth: 132),
-                    child: Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Flexible(
-                          child: Text(
-                            '${session.count}',
-                            overflow: TextOverflow.ellipsis,
-                            style: const TextStyle(
-                              fontSize: 20,
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
-                        ),
-                        IconButton(
-                          icon: Icon(
-                            Icons.delete_outline,
-                            color: context.colors.danger,
-                          ),
-                          tooltip: l10n.deleteSessionTooltip,
-                          onPressed: _deleting
-                              ? null
-                              : () => _deleteSession(session.id),
-                        ),
-                      ],
-                    ),
-                  ),
+              padding: const EdgeInsets.fromLTRB(16, 0, 16, 24),
+              itemCount: entries.length,
+              itemBuilder: (context, index) => switch (entries[index]) {
+                MonthHeader header => _MonthHeaderTile(header: header),
+                SessionEntry(:final session) => _SessionCard(
+                  session: session,
+                  inLifetime: session.isInLifetime(epoch),
+                  isRecord:
+                      best > 0 &&
+                      session.count == best &&
+                      session.isInLifetime(epoch),
+                  deleting: _deleting,
                   onTap: () => _showDetails(session.id),
-                );
+                  onDelete: () => _deleteSession(session.id),
+                ),
               },
             ),
     );
@@ -371,6 +377,191 @@ class _PriceDialogState extends State<_PriceDialog> {
         ),
         TextButton(onPressed: _save, child: Text(l10n.save)),
       ],
+    );
+  }
+}
+
+class _MonthHeaderTile extends StatelessWidget {
+  const _MonthHeaderTile({required this.header});
+
+  final MonthHeader header;
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = context.l10n;
+    final month = toBeginningOfSentenceCase(
+      DateFormat.yMMMM(context.localeName).format(header.month),
+    );
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(4, 20, 4, 8),
+      child: Wrap(
+        crossAxisAlignment: WrapCrossAlignment.end,
+        spacing: 8,
+        children: [
+          Text(month, style: Theme.of(context).textTheme.titleMedium),
+          Text(
+            l10n.monthSummary(header.sessions, header.pieces),
+            style: TextStyle(color: context.colors.textMuted, fontSize: 13),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _SessionCard extends StatelessWidget {
+  const _SessionCard({
+    required this.session,
+    required this.inLifetime,
+    required this.isRecord,
+    required this.deleting,
+    required this.onTap,
+    required this.onDelete,
+  });
+
+  final Session session;
+  final bool inLifetime;
+  final bool isRecord;
+  final bool deleting;
+  final VoidCallback onTap;
+  final VoidCallback onDelete;
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = context.l10n;
+    final colors = context.colors;
+    final duration = l10n.durationLabel(
+      formatSessionSeconds(session.durationSeconds),
+    );
+    final price = session.priceCents;
+    final date = DateFormat.MMMEd(
+      context.localeName,
+    ).add_Hm().format(session.endedAt);
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 8),
+      child: Card(
+        clipBehavior: Clip.antiAlias,
+        child: InkWell(
+          onTap: onTap,
+          child: Padding(
+            padding: const EdgeInsets.fromLTRB(12, 10, 4, 10),
+            child: Row(
+              children: [
+                Opacity(
+                  opacity: inLifetime ? 1 : 0.5,
+                  child: SushiArt(
+                    size: 44,
+                    mood: isRecord ? SushiMood.starry : SushiMood.happy,
+                  ),
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        toBeginningOfSentenceCase(date),
+                        maxLines: 2,
+                        overflow: TextOverflow.ellipsis,
+                        style: Theme.of(context).textTheme.titleMedium,
+                      ),
+                      const SizedBox(height: 2),
+                      Text(
+                        inLifetime
+                            ? duration
+                            : '$duration · ${l10n.beforeReset}',
+                        style: TextStyle(color: colors.textMuted, fontSize: 13),
+                      ),
+                      if (price != null || isRecord) ...[
+                        const SizedBox(height: 4),
+                        Wrap(
+                          spacing: 6,
+                          runSpacing: 4,
+                          children: [
+                            if (isRecord)
+                              _Chip(
+                                icon: Icons.emoji_events,
+                                label: l10n.recordBadge,
+                                highlighted: true,
+                              ),
+                            if (price != null)
+                              _Chip(
+                                icon: Icons.payments_outlined,
+                                label: formatMoney(context, price),
+                              ),
+                          ],
+                        ),
+                      ],
+                    ],
+                  ),
+                ),
+                const SizedBox(width: 8),
+                Column(
+                  children: [
+                    Text(
+                      '${session.count}',
+                      style: TextStyle(
+                        fontSize: 24,
+                        fontWeight: FontWeight.w800,
+                        color: inLifetime ? colors.accent : colors.textMuted,
+                      ),
+                    ),
+                    Text(
+                      l10n.piecesUnit(session.count),
+                      style: TextStyle(color: colors.textMuted, fontSize: 11),
+                    ),
+                  ],
+                ),
+                IconButton(
+                  icon: Icon(Icons.delete_outline, color: colors.danger),
+                  tooltip: l10n.deleteSessionTooltip,
+                  onPressed: deleting ? null : onDelete,
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _Chip extends StatelessWidget {
+  const _Chip({
+    required this.icon,
+    required this.label,
+    this.highlighted = false,
+  });
+
+  final IconData icon;
+  final String label;
+  final bool highlighted;
+
+  @override
+  Widget build(BuildContext context) {
+    final colors = context.colors;
+    final color = highlighted ? colors.accent : colors.textMuted;
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(12),
+        color: color.withValues(alpha: 0.14),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(icon, size: 13, color: color),
+          const SizedBox(width: 4),
+          Text(
+            label,
+            style: TextStyle(
+              color: color,
+              fontSize: 12,
+              fontWeight: FontWeight.w600,
+            ),
+          ),
+        ],
+      ),
     );
   }
 }

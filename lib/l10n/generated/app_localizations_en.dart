@@ -451,4 +451,80 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get piecesThisMonth => 'Pieces this month';
+
+  @override
+  String recordToBeat(int best, int remaining) {
+    return 'Record $best · $remaining to go';
+  }
+
+  @override
+  String recordTied(int best) {
+    return 'You matched your record of $best!';
+  }
+
+  @override
+  String newRecord(int best) {
+    return 'New record! Previous best: $best';
+  }
+
+  @override
+  String get emptyHistoryHint => 'End a session and it will show up here.';
+
+  @override
+  String monthSummary(int sessions, int pieces) {
+    String _temp0 = intl.Intl.pluralLogic(
+      sessions,
+      locale: localeName,
+      other: '$sessions sessions',
+      one: '1 session',
+    );
+    String _temp1 = intl.Intl.pluralLogic(
+      pieces,
+      locale: localeName,
+      other: '$pieces pieces',
+      one: '1 piece',
+    );
+    return '$_temp0 · $_temp1';
+  }
+
+  @override
+  String get recordBadge => 'Record';
+
+  @override
+  String get summaryTitle => 'Summary';
+
+  @override
+  String averageLine(String value) {
+    return 'Avg $value';
+  }
+
+  @override
+  String get weeklyTitle => 'Pieces per week';
+
+  @override
+  String weeklySemantics(int weeks) {
+    return 'Bar chart of pieces eaten in each of the last $weeks weeks.';
+  }
+
+  @override
+  String piecesCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count pieces',
+      one: '1 piece',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String piecesUnit(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'pieces',
+      one: 'piece',
+    );
+    return '$_temp0';
+  }
 }
