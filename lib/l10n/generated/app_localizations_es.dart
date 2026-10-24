@@ -147,32 +147,6 @@ class AppLocalizationsEs extends AppLocalizations {
   String get sessionDetails => 'Detalles de la sesión';
 
   @override
-  String startedLabel(String time) {
-    return 'Inicio: $time';
-  }
-
-  @override
-  String endedLabel(String time) {
-    return 'Fin: $time';
-  }
-
-  @override
-  String countLabel(int count) {
-    String _temp0 = intl.Intl.pluralLogic(
-      count,
-      locale: localeName,
-      other: 'Total: $count toques',
-      one: 'Total: 1 toque',
-    );
-    return '$_temp0';
-  }
-
-  @override
-  String paceLabel(String pace) {
-    return 'Ritmo: $pace por minuto';
-  }
-
-  @override
   String get beforeResetDetail =>
       'Se registró antes del último reinicio, así que no cuenta en los totales históricos actuales.';
 
@@ -396,11 +370,6 @@ class AppLocalizationsEs extends AppLocalizations {
   }
 
   @override
-  String priceLabel(String price) {
-    return 'Precio: $price';
-  }
-
-  @override
   String get setPrice => 'Añadir precio';
 
   @override
@@ -531,4 +500,47 @@ class AppLocalizationsEs extends AppLocalizations {
     );
     return '$_temp0';
   }
+
+  @override
+  String get settingsSectionSession => 'Sesión';
+
+  @override
+  String get settingsSectionPreferences => 'Preferencias';
+
+  @override
+  String get settingsSectionData => 'Tus datos';
+
+  @override
+  String get settingsSectionAbout => 'Información';
+
+  @override
+  String get settingsTagline => 'Tu sushi, contado en este dispositivo.';
+
+  @override
+  String get loadingData => 'Preparando tu sushi…';
+
+  @override
+  String timeRange(String start, String end) {
+    return '$start – $end';
+  }
+
+  @override
+  String get detailPieces => 'Piezas';
+
+  @override
+  String get detailDuration => 'Duración';
+
+  @override
+  String get detailPace => 'Ritmo';
+
+  @override
+  String get detailPrice => 'Precio';
+
+  @override
+  String paceValue(String pace) {
+    return '$pace/min';
+  }
+
+  @override
+  String get noValue => '—';
 }

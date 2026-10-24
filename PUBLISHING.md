@@ -4,7 +4,7 @@
 
 - Android app label and display branding: **Sushi Tracker**.
 - Android `applicationId`: `dev.edulabrador.sushiscore` (unchanged). Android namespace: `dev.edulabrador.sushiscore`.
-- Release version in `pubspec.yaml`: `0.5.0+9`. Confirm that version code 9 exceeds the latest code in Play Console before uploading.
+- Release version in `pubspec.yaml`: `0.5.1+10`. Confirm that version code 10 exceeds the latest code in Play Console before uploading.
 - Android uses AGP 9.0.1 with Flutter 3.47.5, compile/target SDK 36, and Kotlin Gradle Plugin 2.3.20. `android.builtInKotlin=false` and `android.newDsl=false` remain enabled for the temporary legacy mode.
 - The current resolved Android plugin graph was reviewed for KGP usage. `path_provider_android` delegates Android integration through `jni_flutter`; its Android module applies only `com.android.library` and contains no Kotlin Gradle Plugin usage.
 - Built-in Kotlin migration is deferred: AGP 9.0.1 supplies KGP 2.2.10, below Flutter 3.47.5's minimum 2.2.20, and an attempted migration failed the Android debug build. The existing legacy-mode build emits Flutter's future-migration warning; it is non-blocking for this release and must be revisited after a compatible toolchain is available.
@@ -26,7 +26,7 @@ A production AAB still requires Eduardo's private Play upload key in `android/ke
 
 ## External Play Console steps
 
-1. Confirm the app/package exists in Play Console and that `0.5.0+9` uses a version code greater than every uploaded release.
+1. Confirm the app/package exists in Play Console and that `0.5.1+10` uses a version code greater than every uploaded release.
 2. Obtain the real upload keystore for this app, populate `android/key.properties`, and build/sign `build/app/outputs/bundle/release/app-release.aab`. Do not generate a replacement key if the package already has an upload key. In Windows `.properties` files, prefer forward slashes for `storeFile`, for example `C:/Users/Edu/path/upload-keystore.jks`; backslashes can be interpreted as escapes. Never commit the real path or passwords.
 3. Verify the public privacy-policy URL opens without authentication and points to the current policy. Publish the policy if the URL is unavailable.
 4. Capture genuine phone screenshots from the final app build. No screenshots are included in this repository.

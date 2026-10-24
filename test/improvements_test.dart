@@ -406,7 +406,8 @@ void main() {
       await openHistory(tester, repo);
       await tester.tap(find.text('Duration: 10:00'));
       await tester.pumpAndSettle();
-      expect(find.text('Pace: 3.0 per minute'), findsOneWidget);
+      expect(find.text('Pace'), findsOneWidget);
+      expect(find.text('3.0/min'), findsOneWidget);
 
       await tester.tap(find.widgetWithText(TextButton, 'Delete session'));
       await tester.pumpAndSettle();
@@ -456,6 +457,9 @@ void main() {
       expect(decodeBackup(clipboard!).sessions.single.id, 'a');
 
       repo.sessions.clear();
+      // Let the export snackbar time out; it floats over the last rows.
+      await tester.pump(const Duration(seconds: 5));
+      await tester.pumpAndSettle();
       await tester.tap(find.text('Import data'));
       await tester.pumpAndSettle();
       await tester.tap(find.byTooltip('Paste'));
@@ -514,7 +518,8 @@ void main() {
     expect(find.text('Enero de 2026'), findsOneWidget);
     await tester.tap(find.text('Duración: 10:00'));
     await tester.pumpAndSettle();
-    expect(find.text('Ritmo: 3,0 por minuto'), findsOneWidget);
+    expect(find.text('Ritmo'), findsOneWidget);
+    expect(find.text('3,0/min'), findsOneWidget);
     await tester.tapAt(const Offset(10, 10));
     await tester.pumpAndSettle();
 

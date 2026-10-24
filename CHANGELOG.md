@@ -2,6 +2,14 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.5.1] - 2026-10-24
+### Changed
+- Settings: a header with the nigiri and settings grouped into titled cards (Session, Preferences, Your data, About), with boxed icons like the Stats tiles.
+- Session details: a header with the nigiri (starry for the record), the date and time range, and a grid of pieces, duration, pace and price.
+- Startup: the nigiri and a short message while data loads; a new worried nigiri and a filled retry button when it cannot be opened.
+- Dialogs, bottom sheets, switches, text fields and list rows follow the app theme; example text in fields is dimmed so it never looks typed.
+- App version is now `0.5.1+10`.
+
 ## [0.5.0] - 2026-10-24
 ### Changed
 - Visual redesign around the app's nigiri character. Its drawing now lives in shared code (`lib/shared/art/sushi_art.dart`) and gains two moods: sleepy for empty screens and starry for records. The happy face is pixel-identical to the original at every counter-button size, which a test checks.

@@ -86,7 +86,13 @@ void main() {
       await tester.tap(find.text('Save'));
       await tester.pumpAndSettle();
       expect(repo.sessions['a']!.priceCents, 2490);
-      expect(find.text(r'Price: $24.90'), findsOneWidget);
+      expect(
+        find.descendant(
+          of: find.byType(BottomSheet),
+          matching: find.text(r'$24.90'),
+        ),
+        findsOneWidget,
+      );
 
       await tester.tap(find.text('Edit price'));
       await tester.pumpAndSettle();
@@ -97,7 +103,17 @@ void main() {
       await tester.tap(find.text('Remove price'));
       await tester.pumpAndSettle();
       expect(repo.sessions['a']!.priceCents, isNull);
-      expect(find.textContaining('Price:'), findsNothing);
+      expect(
+        find.descendant(
+          of: find.byType(BottomSheet),
+          matching: find.text(r'$24.90'),
+        ),
+        findsNothing,
+      );
+      expect(
+        find.descendant(of: find.byType(BottomSheet), matching: find.text('—')),
+        findsOneWidget,
+      );
       expect(find.text('Add price'), findsOneWidget);
     });
 
@@ -115,7 +131,13 @@ void main() {
       await tester.enterText(find.byType(TextField), '24,90');
       await tester.tap(find.text('Guardar'));
       await tester.pumpAndSettle();
-      expect(find.text('Precio: 24,90 €'), findsOneWidget);
+      expect(
+        find.descendant(
+          of: find.byType(BottomSheet),
+          matching: find.text('24,90\u00A0€'),
+        ),
+        findsOneWidget,
+      );
     });
 
     testWidgets('stats show cost per piece only for priced sessions', (

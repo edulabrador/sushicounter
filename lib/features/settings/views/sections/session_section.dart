@@ -80,14 +80,14 @@ class _SessionSettingsSectionState
     return Column(
       children: [
         ListTile(
-          leading: const Icon(Icons.refresh),
+          leading: const SettingsIcon(Icons.refresh),
           title: Text(l10n.resetCurrentTitle),
           subtitle: Text(l10n.resetCurrentSubtitle),
           onTap: _busy || !counter.canDiscard ? null : _resetCurrentSession,
         ),
-        const Divider(),
+        const Divider(height: 1, indent: 68),
         ListTile(
-          leading: Icon(Icons.delete_forever, color: danger),
+          leading: const SettingsIcon(Icons.delete_forever, danger: true),
           title: Text(l10n.resetLifetimeTitle, style: TextStyle(color: danger)),
           subtitle: Text(
             counter.canResetLifetime
@@ -138,10 +138,7 @@ class _ResetLifetimeDialogState extends State<_ResetLifetimeDialog> {
             onSubmitted: (_) {
               if (_matches) Navigator.pop(context, true);
             },
-            decoration: InputDecoration(
-              border: const OutlineInputBorder(),
-              hintText: widget.keyword,
-            ),
+            decoration: InputDecoration(hintText: widget.keyword),
           ),
         ],
       ),

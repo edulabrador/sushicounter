@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:math' as math;
 import 'dart:ui' as ui;
 
@@ -9,6 +10,7 @@ import 'package:sushiscore/core/models/session.dart';
 import 'package:sushiscore/core/platform/backup_files.dart';
 import 'package:sushiscore/core/platform/screen_awake.dart';
 import 'package:sushiscore/core/providers/storage_provider.dart';
+import 'package:sushiscore/core/storage/hive_repository.dart';
 import 'package:sushiscore/core/theme/app_theme.dart';
 import 'package:sushiscore/features/counter/widgets/sushi_button.dart';
 import 'package:sushiscore/features/history/views/history_view.dart';
@@ -49,6 +51,7 @@ Future<List<int>> _render(CustomPainter painter, double size) async {
 }
 
 void main() {
+  _moreTests();
   group('sushi art', () {
     testWidgets('the happy nigiri is pixel-identical to the original drawing', (
       tester,
@@ -77,6 +80,12 @@ void main() {
         expect(sleepy, isNot(happy));
         expect(starry, isNot(happy));
         expect(starry, isNot(sleepy));
+        final worried = await _render(
+          const NigiriPainter(mood: SushiMood.worried),
+          120,
+        );
+        expect(worried, isNot(happy));
+        expect(worried, isNot(sleepy));
       });
     });
 
@@ -301,6 +310,84 @@ void main() {
       expect(tester.takeException(), isNull);
     });
   });
+}
+
+void _moreTests() {
+  group('remaining screens', () {
+    testWidgets('startup shows the nigiri while loading', (tester) async {
+      await tester.pumpWidget(StartupApp(createRepository: _NeverOpens.new));
+      await tester.pump();
+      expect(find.byType(SushiArt), findsOneWidget);
+      expect(find.text('Getting your sushi ready…'), findsOneWidget);
+    });
+
+    testWidgets('a startup failure shows the worried nigiri and retry', (
+      tester,
+    ) async {
+      await tester.pumpWidget(StartupApp(createRepository: _FailsToOpen.new));
+      await tester.pump();
+      expect(
+        tester.widget<SushiArt>(find.byType(SushiArt)).mood,
+        SushiMood.worried,
+      );
+      expect(find.widgetWithText(FilledButton, 'Try again'), findsOneWidget);
+    });
+
+    testWidgets('settings are grouped in titled sections', (tester) async {
+      await tester.pumpWidget(_app(FakeRepository()));
+      await tester.tap(find.byTooltip('Settings'));
+      await tester.pumpAndSettle();
+      for (final title in ['SESSION', 'PREFERENCES', 'YOUR DATA']) {
+        expect(find.text(title), findsOneWidget);
+      }
+      await tester.scrollUntilVisible(find.text('ABOUT'), 200);
+      expect(find.text('ABOUT'), findsOneWidget);
+      expect(tester.takeException(), isNull);
+    });
+
+    testWidgets('session details show a tile per figure', (tester) async {
+      final repo = FakeRepository();
+      // 30 seconds: too short for a pace, and no price yet.
+      await repo.completeSession(
+        Session(
+          id: 'quick',
+          startedAt: DateTime(2026, 10, 2, 20),
+          endedAt: DateTime(2026, 10, 2, 20, 0, 30),
+          count: 4,
+          durationSeconds: 30,
+        ),
+      );
+      await tester.pumpWidget(_app(repo));
+      await tester.tap(find.text('History'));
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('Duration: 00:30'));
+      await tester.pumpAndSettle();
+
+      Finder inSheet(String text) => find.descendant(
+        of: find.byType(BottomSheet),
+        matching: find.text(text),
+      );
+      for (final label in ['Pieces', 'Duration', 'Pace', 'Price']) {
+        expect(inSheet(label), findsOneWidget);
+      }
+      expect(inSheet('4'), findsOneWidget);
+      expect(inSheet('00:30'), findsOneWidget);
+      expect(inSheet('—'), findsNWidgets(2));
+      expect(inSheet('20:00 – 20:00'), findsOneWidget);
+      expect(tester.takeException(), isNull);
+    });
+  });
+}
+
+class _NeverOpens extends HiveRepository {
+  @override
+  Future<void> init({String? path}) => Completer<void>().future;
+}
+
+class _FailsToOpen extends HiveRepository {
+  @override
+  Future<void> init({String? path}) =>
+      Future<void>.error(StateError('storage unavailable'));
 }
 
 /// The drawing exactly as it shipped in 0.4.0 (sushi_button.dart), kept to

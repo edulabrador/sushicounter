@@ -338,30 +338,6 @@ abstract class AppLocalizations {
   /// **'Session Details'**
   String get sessionDetails;
 
-  /// No description provided for @startedLabel.
-  ///
-  /// In en, this message translates to:
-  /// **'Started: {time}'**
-  String startedLabel(String time);
-
-  /// No description provided for @endedLabel.
-  ///
-  /// In en, this message translates to:
-  /// **'Ended: {time}'**
-  String endedLabel(String time);
-
-  /// No description provided for @countLabel.
-  ///
-  /// In en, this message translates to:
-  /// **'{count, plural, =1{Count: 1 tap} other{Count: {count} taps}}'**
-  String countLabel(int count);
-
-  /// No description provided for @paceLabel.
-  ///
-  /// In en, this message translates to:
-  /// **'Pace: {pace} per minute'**
-  String paceLabel(String pace);
-
   /// No description provided for @beforeResetDetail.
   ///
   /// In en, this message translates to:
@@ -686,12 +662,6 @@ abstract class AppLocalizations {
   /// **'{count, plural, =1{Your current history and totals will be replaced by the backup, which has 1 session.} other{Your current history and totals will be replaced by the backup, which has {count} sessions.}}'**
   String importConfirmBody(int count);
 
-  /// No description provided for @priceLabel.
-  ///
-  /// In en, this message translates to:
-  /// **'Price: {price}'**
-  String priceLabel(String price);
-
   /// No description provided for @setPrice.
   ///
   /// In en, this message translates to:
@@ -853,6 +823,84 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'{count, plural, =1{piece} other{pieces}}'**
   String piecesUnit(int count);
+
+  /// No description provided for @settingsSectionSession.
+  ///
+  /// In en, this message translates to:
+  /// **'Session'**
+  String get settingsSectionSession;
+
+  /// No description provided for @settingsSectionPreferences.
+  ///
+  /// In en, this message translates to:
+  /// **'Preferences'**
+  String get settingsSectionPreferences;
+
+  /// No description provided for @settingsSectionData.
+  ///
+  /// In en, this message translates to:
+  /// **'Your data'**
+  String get settingsSectionData;
+
+  /// No description provided for @settingsSectionAbout.
+  ///
+  /// In en, this message translates to:
+  /// **'About'**
+  String get settingsSectionAbout;
+
+  /// No description provided for @settingsTagline.
+  ///
+  /// In en, this message translates to:
+  /// **'Your sushi, counted on this device.'**
+  String get settingsTagline;
+
+  /// No description provided for @loadingData.
+  ///
+  /// In en, this message translates to:
+  /// **'Getting your sushi ready…'**
+  String get loadingData;
+
+  /// No description provided for @timeRange.
+  ///
+  /// In en, this message translates to:
+  /// **'{start} – {end}'**
+  String timeRange(String start, String end);
+
+  /// No description provided for @detailPieces.
+  ///
+  /// In en, this message translates to:
+  /// **'Pieces'**
+  String get detailPieces;
+
+  /// No description provided for @detailDuration.
+  ///
+  /// In en, this message translates to:
+  /// **'Duration'**
+  String get detailDuration;
+
+  /// No description provided for @detailPace.
+  ///
+  /// In en, this message translates to:
+  /// **'Pace'**
+  String get detailPace;
+
+  /// No description provided for @detailPrice.
+  ///
+  /// In en, this message translates to:
+  /// **'Price'**
+  String get detailPrice;
+
+  /// No description provided for @paceValue.
+  ///
+  /// In en, this message translates to:
+  /// **'{pace}/min'**
+  String paceValue(String pace);
+
+  /// No description provided for @noValue.
+  ///
+  /// In en, this message translates to:
+  /// **'—'**
+  String get noValue;
 }
 
 class _AppLocalizationsDelegate
