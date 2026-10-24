@@ -511,7 +511,7 @@ void main() {
     // Dates and numbers use Spanish formats without missing locale data.
     await tester.tap(find.text('Historial'));
     await tester.pumpAndSettle();
-    expect(find.textContaining('ene 2026'), findsOneWidget);
+    expect(find.text('Enero de 2026'), findsOneWidget);
     await tester.tap(find.text('Duración: 10:00'));
     await tester.pumpAndSettle();
     expect(find.text('Ritmo: 3,0 por minuto'), findsOneWidget);

@@ -122,3 +122,29 @@ StatsRecords computeRecords(List<Session> sessions, DateTime now) {
 /// show as gaps on the chart.
 double chartDay(DateTime time, DateTime origin) =>
     time.difference(origin).inMinutes / Duration.minutesPerDay;
+
+/// Monday of the week [weekIndex] numbers, as a local calendar date.
+DateTime weekStart(int index) {
+  final utc = DateTime.utc(1970, 1, 5).add(Duration(days: index * 7));
+  return DateTime(utc.year, utc.month, utc.day);
+}
+
+/// Pieces eaten in each of the last [weeks] calendar weeks, oldest first,
+/// ending with the week containing [now]. Empty weeks are included as 0.
+List<({DateTime weekStart, int pieces})> weeklyPieces(
+  List<Session> sessions,
+  DateTime now, {
+  int weeks = 8,
+}) {
+  final last = weekIndex(now);
+  final first = last - weeks + 1;
+  final totals = List<int>.filled(weeks, 0);
+  for (final session in sessions) {
+    final index = weekIndex(session.endedAt);
+    if (index >= first && index <= last) totals[index - first] += session.count;
+  }
+  return [
+    for (var i = 0; i < weeks; i++)
+      (weekStart: weekStart(first + i), pieces: totals[i]),
+  ];
+}

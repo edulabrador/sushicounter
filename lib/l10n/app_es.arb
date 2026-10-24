@@ -113,5 +113,17 @@
   "weeklyStreak": "Racha semanal",
   "weeksCount": "{count, plural, =0{Sin racha} =1{1 semana} other{{count} semanas}}",
   "sessionsThisMonth": "Sesiones este mes",
-  "piecesThisMonth": "Piezas este mes"
+  "piecesThisMonth": "Piezas este mes",
+  "recordToBeat": "Récord {best} · te faltan {remaining}",
+  "recordTied": "¡Has igualado tu récord de {best}!",
+  "newRecord": "¡Nuevo récord! El anterior era {best}",
+  "emptyHistoryHint": "Termina una sesión y aparecerá aquí.",
+  "monthSummary": "{sessions, plural, =1{1 sesión} other{{sessions} sesiones}} · {pieces, plural, =1{1 pieza} other{{pieces} piezas}}",
+  "recordBadge": "Récord",
+  "summaryTitle": "Resumen",
+  "averageLine": "Media {value}",
+  "weeklyTitle": "Piezas por semana",
+  "weeklySemantics": "Gráfico de barras con las piezas de cada una de las últimas {weeks} semanas.",
+  "piecesCount": "{count, plural, =1{1 pieza} other{{count} piezas}}",
+  "piecesUnit": "{count, plural, =1{pieza} other{piezas}}"
 }

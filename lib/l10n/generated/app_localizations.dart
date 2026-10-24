@@ -781,6 +781,78 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Pieces this month'**
   String get piecesThisMonth;
+
+  /// No description provided for @recordToBeat.
+  ///
+  /// In en, this message translates to:
+  /// **'Record {best} · {remaining} to go'**
+  String recordToBeat(int best, int remaining);
+
+  /// No description provided for @recordTied.
+  ///
+  /// In en, this message translates to:
+  /// **'You matched your record of {best}!'**
+  String recordTied(int best);
+
+  /// No description provided for @newRecord.
+  ///
+  /// In en, this message translates to:
+  /// **'New record! Previous best: {best}'**
+  String newRecord(int best);
+
+  /// No description provided for @emptyHistoryHint.
+  ///
+  /// In en, this message translates to:
+  /// **'End a session and it will show up here.'**
+  String get emptyHistoryHint;
+
+  /// No description provided for @monthSummary.
+  ///
+  /// In en, this message translates to:
+  /// **'{sessions, plural, =1{1 session} other{{sessions} sessions}} · {pieces, plural, =1{1 piece} other{{pieces} pieces}}'**
+  String monthSummary(int sessions, int pieces);
+
+  /// No description provided for @recordBadge.
+  ///
+  /// In en, this message translates to:
+  /// **'Record'**
+  String get recordBadge;
+
+  /// No description provided for @summaryTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Summary'**
+  String get summaryTitle;
+
+  /// No description provided for @averageLine.
+  ///
+  /// In en, this message translates to:
+  /// **'Avg {value}'**
+  String averageLine(String value);
+
+  /// No description provided for @weeklyTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Pieces per week'**
+  String get weeklyTitle;
+
+  /// No description provided for @weeklySemantics.
+  ///
+  /// In en, this message translates to:
+  /// **'Bar chart of pieces eaten in each of the last {weeks} weeks.'**
+  String weeklySemantics(int weeks);
+
+  /// No description provided for @piecesCount.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 piece} other{{count} pieces}}'**
+  String piecesCount(int count);
+
+  /// No description provided for @piecesUnit.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{piece} other{pieces}}'**
+  String piecesUnit(int count);
 }
 
 class _AppLocalizationsDelegate

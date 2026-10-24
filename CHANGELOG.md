@@ -2,6 +2,16 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.5.0] - 2026-10-24
+### Changed
+- Visual redesign around the app's nigiri character. Its drawing now lives in shared code (`lib/shared/art/sushi_art.dart`) and gains two moods: sleepy for empty screens and starry for records. The happy face is pixel-identical to the original at every counter-button size, which a test checks.
+- Colors follow the sushi: salmon accent (contrast-checked), salmon buttons and navigation, flatter cards.
+- Counter: the nigiri gets starry eyes when the session beats your record, a progress bar shows how far the record is, and the three metrics sit in equal columns with icons.
+- History: grouped by month with session and piece totals, card rows with a mini nigiri, a record badge and the price.
+- Stats: two-column summary tiles, a curved salmon trend line with a soft fill, a dashed average with its own legend, the record marked by a starry nigiri, a new pieces-per-week bar chart, and records with the character.
+- Empty History and Stats show the sleepy nigiri instead of plain text.
+- App version is now `0.5.0+9`.
+
 ## [0.4.0] - 2026-10-24
 ### Added
 - Export and import a backup file through the Android document picker (no storage permission). Web and desktop keep the clipboard fallback. Import now always asks before replacing data.

@@ -253,5 +253,79 @@
     }
   },
   "sessionsThisMonth": "Sessions this month",
-  "piecesThisMonth": "Pieces this month"
+  "piecesThisMonth": "Pieces this month",
+  "recordToBeat": "Record {best} · {remaining} to go",
+  "@recordToBeat": {
+    "placeholders": {
+      "best": {
+        "type": "int"
+      },
+      "remaining": {
+        "type": "int"
+      }
+    }
+  },
+  "recordTied": "You matched your record of {best}!",
+  "@recordTied": {
+    "placeholders": {
+      "best": {
+        "type": "int"
+      }
+    }
+  },
+  "newRecord": "New record! Previous best: {best}",
+  "@newRecord": {
+    "placeholders": {
+      "best": {
+        "type": "int"
+      }
+    }
+  },
+  "emptyHistoryHint": "End a session and it will show up here.",
+  "monthSummary": "{sessions, plural, =1{1 session} other{{sessions} sessions}} · {pieces, plural, =1{1 piece} other{{pieces} pieces}}",
+  "@monthSummary": {
+    "placeholders": {
+      "sessions": {
+        "type": "int"
+      },
+      "pieces": {
+        "type": "int"
+      }
+    }
+  },
+  "recordBadge": "Record",
+  "summaryTitle": "Summary",
+  "averageLine": "Avg {value}",
+  "@averageLine": {
+    "placeholders": {
+      "value": {
+        "type": "String"
+      }
+    }
+  },
+  "weeklyTitle": "Pieces per week",
+  "weeklySemantics": "Bar chart of pieces eaten in each of the last {weeks} weeks.",
+  "@weeklySemantics": {
+    "placeholders": {
+      "weeks": {
+        "type": "int"
+      }
+    }
+  },
+  "piecesCount": "{count, plural, =1{1 piece} other{{count} pieces}}",
+  "@piecesCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "piecesUnit": "{count, plural, =1{piece} other{pieces}}",
+  "@piecesUnit": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  }
 }
