@@ -12,7 +12,7 @@ class PreferencesSettingsSection extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final l10n = context.l10n;
     return SwitchListTile(
-      secondary: const Icon(Icons.light_mode_outlined),
+      secondary: const SettingsIcon(Icons.light_mode_outlined),
       title: Text(l10n.keepScreenOnTitle),
       subtitle: Text(l10n.keepScreenOnSubtitle),
       value: ref.watch(keepScreenOnProvider),

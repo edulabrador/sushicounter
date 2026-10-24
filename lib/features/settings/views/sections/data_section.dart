@@ -118,13 +118,14 @@ class _DataSettingsSectionState extends ConsumerState<DataSettingsSection> {
     return Column(
       children: [
         ListTile(
-          leading: const Icon(Icons.upload_outlined),
+          leading: const SettingsIcon(Icons.upload_outlined),
           title: Text(l10n.exportTitle),
           subtitle: Text(l10n.exportSubtitle),
           onTap: _busy ? null : _export,
         ),
+        const Divider(height: 1, indent: 68),
         ListTile(
-          leading: const Icon(Icons.download_outlined),
+          leading: const SettingsIcon(Icons.download_outlined),
           title: Text(l10n.importTitle),
           subtitle: Text(idle ? l10n.importSubtitle : l10n.finishSessionFirst),
           onTap: _busy || !idle ? null : _import,
@@ -173,7 +174,6 @@ class _PasteBackupDialogState extends State<_PasteBackupDialog> {
             minLines: 3,
             maxLines: 6,
             decoration: InputDecoration(
-              border: const OutlineInputBorder(),
               suffixIcon: IconButton(
                 tooltip: l10n.importPaste,
                 icon: const Icon(Icons.content_paste),

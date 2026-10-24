@@ -40,3 +40,25 @@ Future<bool> confirmDestructive(
   );
   return confirm == true && context.mounted;
 }
+
+/// Leading icon for settings rows, boxed like the Stats tiles.
+class SettingsIcon extends StatelessWidget {
+  const SettingsIcon(this.icon, {super.key, this.danger = false});
+
+  final IconData icon;
+  final bool danger;
+
+  @override
+  Widget build(BuildContext context) {
+    final color = danger ? context.colors.danger : context.colors.accent;
+    return Container(
+      width: 36,
+      height: 36,
+      decoration: BoxDecoration(
+        color: color.withValues(alpha: 0.16),
+        borderRadius: BorderRadius.circular(12),
+      ),
+      child: Icon(icon, size: 20, color: color),
+    );
+  }
+}

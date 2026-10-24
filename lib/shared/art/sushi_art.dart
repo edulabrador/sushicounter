@@ -13,6 +13,9 @@ enum SushiMood {
 
   /// Sparkling eyes: a record.
   starry,
+
+  /// Worried brows and a small frown: something went wrong.
+  worried,
 }
 
 /// Colors of the drawing, also used by the theme so the UI matches it.
@@ -113,6 +116,19 @@ void paintNigiri(Canvas canvas, Rect rect, {SushiMood mood = SushiMood.happy}) {
         );
       case SushiMood.starry:
         _paintSparkle(canvas, center.translate(0, s * 0.01), s * 0.05);
+      case SushiMood.worried:
+        canvas.drawCircle(
+          center.translate(0, s * 0.01),
+          s * 0.022,
+          Paint()..color = SushiPalette.faceDark,
+        );
+        // Brows tilt up towards the middle of the face.
+        final inner = x < 0.375 ? 1.0 : -1.0;
+        canvas.drawLine(
+          center.translate(-inner * s * 0.04, -s * 0.05),
+          center.translate(inner * s * 0.03, -s * 0.075),
+          eyePaint,
+        );
     }
   }
 
@@ -121,7 +137,16 @@ void paintNigiri(Canvas canvas, Rect rect, {SushiMood mood = SushiMood.happy}) {
   canvas.drawCircle(Offset(s * 0.245, s * 0.685), s * 0.028, cheekPaint);
   canvas.drawCircle(Offset(s * 0.505, s * 0.685), s * 0.028, cheekPaint);
 
-  if (mood == SushiMood.sleepy) {
+  if (mood == SushiMood.worried) {
+    // A small frown.
+    canvas.drawArc(
+      Rect.fromCircle(center: Offset(s * 0.375, s * 0.71), radius: s * 0.035),
+      math.pi * 1.15,
+      math.pi * 0.7,
+      false,
+      eyePaint,
+    );
+  } else if (mood == SushiMood.sleepy) {
     // A small calm mouth and a drifting "z".
     canvas.drawCircle(
       Offset(s * 0.375, s * 0.69),

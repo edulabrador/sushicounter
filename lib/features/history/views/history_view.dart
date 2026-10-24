@@ -109,6 +109,7 @@ class _HistoryViewState extends ConsumerState<HistoryView> {
 
   void _showDetails(String id) {
     showModalBottomSheet<void>(
+      isScrollControlled: true,
       context: context,
       builder: (_) => _SessionDetails(
         id: id,
@@ -239,64 +240,189 @@ class _SessionDetails extends ConsumerWidget {
         .firstOrNull;
     if (session == null) return const SizedBox.shrink();
     final epoch = ref.watch(globalStateProvider.select((g) => g.epoch));
-    final format = DateFormat.yMd(context.localeName).add_Hms();
+    final locale = context.localeName;
+    final colors = context.colors;
     final pace = session.tapsPerMinute;
     final price = session.priceCents;
+    final best = ref.watch(lifetimeBestProvider);
+    final inLifetime = session.isInLifetime(epoch);
+    final isRecord = inLifetime && best > 0 && session.count == best;
+    final time = DateFormat.Hm(locale);
     return SafeArea(
       child: SingleChildScrollView(
-        padding: const EdgeInsets.all(24.0),
+        padding: const EdgeInsets.fromLTRB(24, 0, 24, 24),
         child: Column(
           mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
+          crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            Text(
-              l10n.sessionDetails,
-              style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
-            ),
-            const SizedBox(height: 16),
-            Text(l10n.startedLabel(format.format(session.startedAt))),
-            Text(l10n.endedLabel(format.format(session.endedAt))),
-            Text(l10n.countLabel(session.count)),
-            Text(
-              l10n.durationLabel(formatSessionSeconds(session.durationSeconds)),
-            ),
-            if (pace != null)
-              Text(
-                l10n.paceLabel(
-                  NumberFormat('0.0', context.localeName).format(pace),
+            Row(
+              children: [
+                SushiArt(
+                  size: 64,
+                  mood: isRecord ? SushiMood.starry : SushiMood.happy,
                 ),
-              ),
-            if (price != null)
-              Text(l10n.priceLabel(formatMoney(context, price))),
-            if (!session.isInLifetime(epoch)) ...[
+                const SizedBox(width: 16),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        l10n.sessionDetails,
+                        style: TextStyle(color: colors.textMuted, fontSize: 13),
+                      ),
+                      Text(
+                        toBeginningOfSentenceCase(
+                          DateFormat.yMMMMEEEEd(locale).format(session.endedAt),
+                        ),
+                        style: Theme.of(context).textTheme.titleMedium,
+                      ),
+                      Text(
+                        l10n.timeRange(
+                          time.format(session.startedAt),
+                          time.format(session.endedAt),
+                        ),
+                        style: TextStyle(color: colors.textMuted),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 20),
+            LayoutBuilder(
+              builder: (context, constraints) {
+                const gap = 10.0;
+                final width = (constraints.maxWidth - gap) / 2;
+                return Wrap(
+                  spacing: gap,
+                  runSpacing: gap,
+                  children: [
+                    for (final (icon, label, value) in [
+                      (Icons.restaurant, l10n.detailPieces, '${session.count}'),
+                      (
+                        Icons.timer_outlined,
+                        l10n.detailDuration,
+                        formatSessionSeconds(session.durationSeconds),
+                      ),
+                      (
+                        Icons.speed,
+                        l10n.detailPace,
+                        pace == null
+                            ? l10n.noValue
+                            : l10n.paceValue(
+                                NumberFormat('0.0', locale).format(pace),
+                              ),
+                      ),
+                      (
+                        Icons.payments_outlined,
+                        l10n.detailPrice,
+                        price == null
+                            ? l10n.noValue
+                            : formatMoney(context, price),
+                      ),
+                    ])
+                      SizedBox(
+                        width: width,
+                        child: _DetailTile(
+                          icon: icon,
+                          label: label,
+                          value: value,
+                        ),
+                      ),
+                  ],
+                );
+              },
+            ),
+            if (!inLifetime) ...[
               const SizedBox(height: 12),
               Text(
                 l10n.beforeResetDetail,
-                style: TextStyle(color: context.colors.textMuted),
+                style: TextStyle(color: colors.textMuted),
               ),
             ],
-            const SizedBox(height: 24),
-            Wrap(
-              alignment: WrapAlignment.spaceBetween,
-              spacing: 8,
+            const SizedBox(height: 20),
+            Row(
               children: [
-                TextButton.icon(
-                  onPressed: () => _editPrice(context, ref, session),
-                  icon: const Icon(Icons.payments_outlined),
-                  label: Text(price == null ? l10n.setPrice : l10n.editPrice),
+                Expanded(
+                  child: OutlinedButton.icon(
+                    onPressed: () => _editPrice(context, ref, session),
+                    icon: const Icon(Icons.payments_outlined),
+                    label: Text(price == null ? l10n.setPrice : l10n.editPrice),
+                    style: OutlinedButton.styleFrom(
+                      foregroundColor: colors.accent,
+                      side: BorderSide(color: colors.accent),
+                      minimumSize: const Size.fromHeight(48),
+                    ),
+                  ),
                 ),
-                TextButton.icon(
-                  onPressed: onDelete,
-                  icon: const Icon(Icons.delete_outline),
-                  label: Text(l10n.deleteSessionTooltip),
-                  style: TextButton.styleFrom(
-                    foregroundColor: context.colors.danger,
+                const SizedBox(width: 10),
+                Expanded(
+                  child: TextButton.icon(
+                    onPressed: onDelete,
+                    icon: const Icon(Icons.delete_outline),
+                    label: Text(l10n.deleteSessionTooltip),
+                    style: TextButton.styleFrom(
+                      foregroundColor: colors.danger,
+                      minimumSize: const Size.fromHeight(48),
+                    ),
                   ),
                 ),
               ],
             ),
           ],
         ),
+      ),
+    );
+  }
+}
+
+class _DetailTile extends StatelessWidget {
+  const _DetailTile({
+    required this.icon,
+    required this.label,
+    required this.value,
+  });
+
+  final IconData icon;
+  final String label;
+  final String value;
+
+  @override
+  Widget build(BuildContext context) {
+    final colors = context.colors;
+    return Container(
+      padding: const EdgeInsets.all(12),
+      decoration: BoxDecoration(
+        color: colors.background,
+        borderRadius: BorderRadius.circular(16),
+      ),
+      child: Row(
+        children: [
+          Icon(icon, size: 20, color: colors.accent),
+          const SizedBox(width: 10),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  label,
+                  style: TextStyle(color: colors.textMuted, fontSize: 12),
+                ),
+                FittedBox(
+                  fit: BoxFit.scaleDown,
+                  alignment: Alignment.centerLeft,
+                  child: Text(
+                    value,
+                    style: const TextStyle(
+                      fontSize: 17,
+                      fontWeight: FontWeight.w700,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
       ),
     );
   }
@@ -359,7 +485,6 @@ class _PriceDialogState extends State<_PriceDialog> {
         keyboardType: const TextInputType.numberWithOptions(decimal: true),
         onSubmitted: (_) => _save(),
         decoration: InputDecoration(
-          border: const OutlineInputBorder(),
           hintText: l10n.priceHint,
           errorText: _invalid ? l10n.priceInvalid : null,
         ),

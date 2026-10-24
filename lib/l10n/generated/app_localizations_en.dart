@@ -145,32 +145,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String get sessionDetails => 'Session Details';
 
   @override
-  String startedLabel(String time) {
-    return 'Started: $time';
-  }
-
-  @override
-  String endedLabel(String time) {
-    return 'Ended: $time';
-  }
-
-  @override
-  String countLabel(int count) {
-    String _temp0 = intl.Intl.pluralLogic(
-      count,
-      locale: localeName,
-      other: 'Count: $count taps',
-      one: 'Count: 1 tap',
-    );
-    return '$_temp0';
-  }
-
-  @override
-  String paceLabel(String pace) {
-    return 'Pace: $pace per minute';
-  }
-
-  @override
   String get beforeResetDetail =>
       'Recorded before the last lifetime reset, so it is not part of the current lifetime totals.';
 
@@ -392,11 +366,6 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
-  String priceLabel(String price) {
-    return 'Price: $price';
-  }
-
-  @override
   String get setPrice => 'Add price';
 
   @override
@@ -527,4 +496,47 @@ class AppLocalizationsEn extends AppLocalizations {
     );
     return '$_temp0';
   }
+
+  @override
+  String get settingsSectionSession => 'Session';
+
+  @override
+  String get settingsSectionPreferences => 'Preferences';
+
+  @override
+  String get settingsSectionData => 'Your data';
+
+  @override
+  String get settingsSectionAbout => 'About';
+
+  @override
+  String get settingsTagline => 'Your sushi, counted on this device.';
+
+  @override
+  String get loadingData => 'Getting your sushi ready…';
+
+  @override
+  String timeRange(String start, String end) {
+    return '$start – $end';
+  }
+
+  @override
+  String get detailPieces => 'Pieces';
+
+  @override
+  String get detailDuration => 'Duration';
+
+  @override
+  String get detailPace => 'Pace';
+
+  @override
+  String get detailPrice => 'Price';
+
+  @override
+  String paceValue(String pace) {
+    return '$pace/min';
+  }
+
+  @override
+  String get noValue => '—';
 }

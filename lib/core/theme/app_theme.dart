@@ -94,6 +94,77 @@ class AppTheme {
         shape: rounded,
       ),
       dividerTheme: const DividerThemeData(color: Colors.white10),
+      dialogTheme: DialogThemeData(
+        backgroundColor: colors.surface,
+        surfaceTintColor: Colors.transparent,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(28)),
+        titleTextStyle: TextStyle(
+          color: colors.text,
+          fontSize: 20,
+          fontWeight: FontWeight.w700,
+        ),
+        contentTextStyle: TextStyle(
+          color: colors.textMuted,
+          fontSize: 15,
+          height: 1.4,
+        ),
+      ),
+      bottomSheetTheme: BottomSheetThemeData(
+        backgroundColor: colors.surface,
+        surfaceTintColor: Colors.transparent,
+        showDragHandle: true,
+        dragHandleColor: Colors.white24,
+        shape: const RoundedRectangleBorder(
+          borderRadius: BorderRadius.vertical(top: Radius.circular(28)),
+        ),
+      ),
+      textButtonTheme: TextButtonThemeData(
+        style: TextButton.styleFrom(
+          foregroundColor: colors.accent,
+          textStyle: const TextStyle(fontWeight: FontWeight.w600),
+        ),
+      ),
+      switchTheme: SwitchThemeData(
+        thumbColor: WidgetStateProperty.resolveWith(
+          (states) => states.contains(WidgetState.selected)
+              ? colors.onAccent
+              : colors.textMuted,
+        ),
+        trackColor: WidgetStateProperty.resolveWith(
+          (states) => states.contains(WidgetState.selected)
+              ? colors.accent
+              : colors.background,
+        ),
+      ),
+      listTileTheme: ListTileThemeData(
+        iconColor: colors.accent,
+        textColor: colors.text,
+        titleTextStyle: TextStyle(
+          color: colors.text,
+          fontSize: 16,
+          fontWeight: FontWeight.w600,
+        ),
+        subtitleTextStyle: TextStyle(color: colors.textMuted, fontSize: 13),
+        contentPadding: const EdgeInsets.symmetric(horizontal: 16),
+      ),
+      inputDecorationTheme: InputDecorationTheme(
+        filled: true,
+        fillColor: colors.background,
+        // Clearly an example, never mistaken for typed text.
+        hintStyle: TextStyle(color: colors.textMuted.withValues(alpha: 0.6)),
+        border: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(14),
+          borderSide: const BorderSide(color: Colors.white24),
+        ),
+        enabledBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(14),
+          borderSide: const BorderSide(color: Colors.white24),
+        ),
+        focusedBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(14),
+          borderSide: BorderSide(color: colors.accent, width: 2),
+        ),
+      ),
       textTheme: TextTheme(
         displayLarge: TextStyle(
           color: colors.text,

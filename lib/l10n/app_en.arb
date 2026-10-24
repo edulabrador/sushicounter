@@ -61,38 +61,6 @@
   "couldNotDelete": "Could not delete this session. Please try again.",
   "couldNotRestore": "Could not restore this session.",
   "sessionDetails": "Session Details",
-  "startedLabel": "Started: {time}",
-  "@startedLabel": {
-    "placeholders": {
-      "time": {
-        "type": "String"
-      }
-    }
-  },
-  "endedLabel": "Ended: {time}",
-  "@endedLabel": {
-    "placeholders": {
-      "time": {
-        "type": "String"
-      }
-    }
-  },
-  "countLabel": "{count, plural, =1{Count: 1 tap} other{Count: {count} taps}}",
-  "@countLabel": {
-    "placeholders": {
-      "count": {
-        "type": "int"
-      }
-    }
-  },
-  "paceLabel": "Pace: {pace} per minute",
-  "@paceLabel": {
-    "placeholders": {
-      "pace": {
-        "type": "String"
-      }
-    }
-  },
   "beforeResetDetail": "Recorded before the last lifetime reset, so it is not part of the current lifetime totals.",
   "statsTitle": "STATISTICS",
   "lifetimeTaps": "Lifetime Taps",
@@ -217,14 +185,6 @@
       }
     }
   },
-  "priceLabel": "Price: {price}",
-  "@priceLabel": {
-    "placeholders": {
-      "price": {
-        "type": "String"
-      }
-    }
-  },
   "setPrice": "Add price",
   "editPrice": "Edit price",
   "priceDialogTitle": "What did this meal cost?",
@@ -327,5 +287,35 @@
         "type": "int"
       }
     }
-  }
+  },
+  "settingsSectionSession": "Session",
+  "settingsSectionPreferences": "Preferences",
+  "settingsSectionData": "Your data",
+  "settingsSectionAbout": "About",
+  "settingsTagline": "Your sushi, counted on this device.",
+  "loadingData": "Getting your sushi ready…",
+  "timeRange": "{start} – {end}",
+  "@timeRange": {
+    "placeholders": {
+      "start": {
+        "type": "String"
+      },
+      "end": {
+        "type": "String"
+      }
+    }
+  },
+  "detailPieces": "Pieces",
+  "detailDuration": "Duration",
+  "detailPace": "Pace",
+  "detailPrice": "Price",
+  "paceValue": "{pace}/min",
+  "@paceValue": {
+    "placeholders": {
+      "pace": {
+        "type": "String"
+      }
+    }
+  },
+  "noValue": "—"
 }

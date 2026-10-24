@@ -6,6 +6,7 @@ import 'core/storage/hive_repository.dart';
 import 'core/providers/storage_provider.dart';
 import 'core/theme/app_theme.dart';
 import 'l10n/l10n.dart';
+import 'shared/art/sushi_art.dart';
 import 'shared/widgets/bottom_nav.dart';
 import 'shared/widgets/launch_action_controller.dart';
 import 'shared/widgets/screen_awake_controller.dart';
@@ -66,17 +67,39 @@ class _StartupAppState extends State<StartupApp> {
         return _localizedApp(home: _StartupError(onRetry: _retry));
       }
       if (!snapshot.hasData) {
-        return _localizedApp(
-          home: const Scaffold(
-            body: Center(child: CircularProgressIndicator()),
-          ),
-        );
+        return _localizedApp(home: const _StartupLoading());
       }
       return ProviderScope(
         overrides: [storageProvider.overrideWithValue(snapshot.data!)],
         child: const SushiScoreApp(),
       );
     },
+  );
+}
+
+class _StartupLoading extends StatelessWidget {
+  const _StartupLoading();
+
+  @override
+  Widget build(BuildContext context) => Scaffold(
+    body: Center(
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          const SushiArt(size: 120),
+          const SizedBox(height: 20),
+          const SizedBox(
+            width: 120,
+            child: LinearProgressIndicator(minHeight: 4),
+          ),
+          const SizedBox(height: 12),
+          Text(
+            context.l10n.loadingData,
+            style: TextStyle(color: context.colors.textMuted),
+          ),
+        ],
+      ),
+    ),
   );
 }
 
@@ -88,20 +111,28 @@ class _StartupError extends StatelessWidget {
   @override
   Widget build(BuildContext context) => Scaffold(
     body: Center(
-      child: Padding(
-        padding: const EdgeInsets.all(24),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            const Icon(Icons.storage_outlined, size: 48),
-            const SizedBox(height: 16),
-            Text(context.l10n.storageError, textAlign: TextAlign.center),
-            const SizedBox(height: 12),
-            ElevatedButton(
-              onPressed: onRetry,
-              child: Text(context.l10n.tryAgain),
-            ),
-          ],
+      child: SingleChildScrollView(
+        padding: const EdgeInsets.all(32),
+        child: ConstrainedBox(
+          constraints: const BoxConstraints(maxWidth: 320),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              const SushiArt(size: 120, mood: SushiMood.worried),
+              const SizedBox(height: 20),
+              Text(
+                context.l10n.storageError,
+                textAlign: TextAlign.center,
+                style: Theme.of(context).textTheme.titleMedium,
+              ),
+              const SizedBox(height: 20),
+              FilledButton.icon(
+                onPressed: onRetry,
+                icon: const Icon(Icons.refresh),
+                label: Text(context.l10n.tryAgain),
+              ),
+            ],
+          ),
         ),
       ),
     ),
