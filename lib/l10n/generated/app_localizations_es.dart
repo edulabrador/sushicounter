@@ -300,8 +300,7 @@ class AppLocalizationsEs extends AppLocalizations {
   String get exportTitle => 'Exportar datos';
 
   @override
-  String get exportSubtitle =>
-      'Copia una copia de seguridad del historial al portapapeles';
+  String get exportSubtitle => 'Guarda una copia de tu historial y totales';
 
   @override
   String exportDone(int count) {
@@ -318,14 +317,13 @@ class AppLocalizationsEs extends AppLocalizations {
   String get importTitle => 'Importar datos';
 
   @override
-  String get importSubtitle => 'Sustituye todos los datos por una copia pegada';
+  String get importSubtitle => 'Sustituye todos los datos por una copia';
 
   @override
   String get importDialogTitle => 'Importar copia';
 
   @override
-  String get importDialogBody =>
-      'Pega una copia de Sushi Tracker. Sustituirá todo el historial y los totales actuales.';
+  String get importDialogBody => 'Pega una copia de Sushi Tracker.';
 
   @override
   String get importPaste => 'Pegar';
@@ -356,4 +354,105 @@ class AppLocalizationsEs extends AppLocalizations {
   @override
   String get privacyBody =>
       'Sushi Tracker no recopila, transmite ni comparte datos personales. No tiene cuentas, analíticas, anuncios ni servicios de red.\n\nTus recuentos, historial y totales se guardan en este dispositivo. Si la copia de seguridad de Android está activada en tu cuenta de Google, Android puede incluir estos datos en esa copia y restaurarlos al reinstalar la app o configurar un dispositivo nuevo. Esa copia la gestiona Google en tu cuenta; el desarrollador nunca la recibe.\n\nBorrar los datos de la app los elimina de este dispositivo. Puedes exportar tu propia copia desde Ajustes.\n\nLa app no pide permisos especiales del dispositivo.\n\nPara cualquier duda, escribe a labradorsantoseduardo@gmail.com.';
+
+  @override
+  String get sessionAlreadySaved =>
+      'Esta sesión ya se había guardado en el historial.';
+
+  @override
+  String exportSaved(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Copia de $count sesiones guardada.',
+      one: 'Copia de 1 sesión guardada.',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get couldNotSaveFile => 'No se pudo guardar el archivo.';
+
+  @override
+  String get couldNotReadFile => 'No se pudo leer el archivo.';
+
+  @override
+  String get importNext => 'Continuar';
+
+  @override
+  String get importConfirmTitle => '¿Sustituir todos los datos?';
+
+  @override
+  String importConfirmBody(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other:
+          'Tu historial y totales actuales se sustituirán por la copia, que tiene $count sesiones.',
+      one:
+          'Tu historial y totales actuales se sustituirán por la copia, que tiene 1 sesión.',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String priceLabel(String price) {
+    return 'Precio: $price';
+  }
+
+  @override
+  String get setPrice => 'Añadir precio';
+
+  @override
+  String get editPrice => 'Editar precio';
+
+  @override
+  String get priceDialogTitle => '¿Cuánto costó esta comida?';
+
+  @override
+  String get priceHint => 'p. ej. 24,90';
+
+  @override
+  String get priceInvalid => 'Introduce un importe entre 0 y 100.000.';
+
+  @override
+  String get save => 'Guardar';
+
+  @override
+  String get removePrice => 'Quitar precio';
+
+  @override
+  String get couldNotSavePrice => 'No se pudo guardar el precio.';
+
+  @override
+  String costPerPiece(String range) {
+    return 'Coste por pieza ($range)';
+  }
+
+  @override
+  String get recordsTitle => 'Récords';
+
+  @override
+  String get bestEver => 'Mejor sesión';
+
+  @override
+  String get weeklyStreak => 'Racha semanal';
+
+  @override
+  String weeksCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count semanas',
+      one: '1 semana',
+      zero: 'Sin racha',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get sessionsThisMonth => 'Sesiones este mes';
+
+  @override
+  String get piecesThisMonth => 'Piezas este mes';
 }

@@ -296,7 +296,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get exportTitle => 'Export data';
 
   @override
-  String get exportSubtitle => 'Copy a backup of your history to the clipboard';
+  String get exportSubtitle => 'Save a backup of your history and totals';
 
   @override
   String exportDone(int count) {
@@ -313,14 +313,13 @@ class AppLocalizationsEn extends AppLocalizations {
   String get importTitle => 'Import data';
 
   @override
-  String get importSubtitle => 'Replace all data with a pasted backup';
+  String get importSubtitle => 'Replace all data with a backup';
 
   @override
   String get importDialogTitle => 'Import backup';
 
   @override
-  String get importDialogBody =>
-      'Paste a Sushi Tracker backup. This replaces all current history and totals.';
+  String get importDialogBody => 'Paste a Sushi Tracker backup.';
 
   @override
   String get importPaste => 'Paste';
@@ -351,4 +350,105 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get privacyBody =>
       'Sushi Tracker does not collect, transmit, or share personal data. It has no accounts, analytics, ads, or network services.\n\nYour counts, session history, and lifetime totals are stored on this device. If Android backup is turned on for your Google account, Android may include this data in that backup and restore it when you reinstall the app or set up a new device. That backup is handled by Google under your account; the developer never receives it.\n\nClearing the app data removes it from this device. You can export your own copy from Settings.\n\nThe app requests no special device permissions.\n\nFor questions, contact labradorsantoseduardo@gmail.com.';
+
+  @override
+  String get sessionAlreadySaved =>
+      'This session had already been saved to history.';
+
+  @override
+  String exportSaved(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Backup of $count sessions saved.',
+      one: 'Backup of 1 session saved.',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get couldNotSaveFile => 'Could not save the file.';
+
+  @override
+  String get couldNotReadFile => 'Could not read the file.';
+
+  @override
+  String get importNext => 'Continue';
+
+  @override
+  String get importConfirmTitle => 'Replace all data?';
+
+  @override
+  String importConfirmBody(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other:
+          'Your current history and totals will be replaced by the backup, which has $count sessions.',
+      one:
+          'Your current history and totals will be replaced by the backup, which has 1 session.',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String priceLabel(String price) {
+    return 'Price: $price';
+  }
+
+  @override
+  String get setPrice => 'Add price';
+
+  @override
+  String get editPrice => 'Edit price';
+
+  @override
+  String get priceDialogTitle => 'What did this meal cost?';
+
+  @override
+  String get priceHint => 'e.g. 24.90';
+
+  @override
+  String get priceInvalid => 'Enter an amount between 0 and 100,000.';
+
+  @override
+  String get save => 'Save';
+
+  @override
+  String get removePrice => 'Remove price';
+
+  @override
+  String get couldNotSavePrice => 'Could not save the price.';
+
+  @override
+  String costPerPiece(String range) {
+    return 'Cost per piece ($range)';
+  }
+
+  @override
+  String get recordsTitle => 'Records';
+
+  @override
+  String get bestEver => 'Best session';
+
+  @override
+  String get weeklyStreak => 'Weekly streak';
+
+  @override
+  String weeksCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count weeks',
+      one: '1 week',
+      zero: 'No streak',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get sessionsThisMonth => 'Sessions this month';
+
+  @override
+  String get piecesThisMonth => 'Pieces this month';
 }

@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:sushiscore/features/counter/providers/counter_provider.dart';
 import 'package:sushiscore/features/counter/widgets/sushi_button.dart';
 import 'package:sushiscore/features/counter/widgets/session_timer.dart';
+import 'package:sushiscore/core/theme/app_colors.dart';
 import 'package:sushiscore/features/settings/views/settings_view.dart';
 import 'package:sushiscore/l10n/l10n.dart';
 
@@ -47,7 +48,7 @@ class CounterView extends ConsumerWidget {
             onPressed: () => Navigator.pop(context, true),
             child: Text(
               l10n.discard,
-              style: const TextStyle(color: Colors.red),
+              style: TextStyle(color: context.colors.danger),
             ),
           ),
         ],
@@ -56,8 +57,16 @@ class CounterView extends ConsumerWidget {
     if (confirm != true || !context.mounted) return;
     final messenger = ScaffoldMessenger.of(context);
     try {
-      await ref.read(counterProvider.notifier).resetCurrent();
-      messenger.showSnackBar(SnackBar(content: Text(l10n.sessionDiscarded)));
+      final alreadySaved = await ref
+          .read(counterProvider.notifier)
+          .resetCurrent();
+      messenger.showSnackBar(
+        SnackBar(
+          content: Text(
+            alreadySaved ? l10n.sessionAlreadySaved : l10n.sessionDiscarded,
+          ),
+        ),
+      );
     } catch (_) {
       // The provider exposes the error on screen.
     }
@@ -110,7 +119,10 @@ class CounterView extends ConsumerWidget {
                               ? l10n.tapToStart
                               : l10n.tapHint,
                           textAlign: TextAlign.center,
-                          style: TextStyle(color: Colors.white54, fontSize: 16),
+                          style: TextStyle(
+                            color: context.colors.textMuted,
+                            fontSize: 16,
+                          ),
                         ),
                         const SizedBox(height: 24),
                         SushiButton(
@@ -133,7 +145,7 @@ class CounterView extends ConsumerWidget {
                           icon: const Icon(Icons.undo, size: 18),
                           label: Text(l10n.undo),
                           style: TextButton.styleFrom(
-                            foregroundColor: Colors.white70,
+                            foregroundColor: context.colors.textMuted,
                           ),
                         ),
                         const SizedBox(height: 4),
@@ -166,7 +178,7 @@ class CounterView extends ConsumerWidget {
                             icon: const Icon(Icons.delete_outline, size: 18),
                             label: Text(l10n.discardSession),
                             style: TextButton.styleFrom(
-                              foregroundColor: Colors.redAccent,
+                              foregroundColor: context.colors.danger,
                             ),
                           ),
                       ],
@@ -204,8 +216,8 @@ class CounterView extends ConsumerWidget {
                                 child: Text(
                                   counterErrorMessage(l10n, error),
                                   textAlign: TextAlign.center,
-                                  style: const TextStyle(
-                                    color: Colors.redAccent,
+                                  style: TextStyle(
+                                    color: context.colors.danger,
                                   ),
                                 ),
                               ),
@@ -234,7 +246,7 @@ class _Metric extends StatelessWidget {
   Widget build(BuildContext context) => Column(
     crossAxisAlignment: CrossAxisAlignment.start,
     children: [
-      Text(label, style: const TextStyle(color: Colors.white54)),
+      Text(label, style: TextStyle(color: context.colors.textMuted)),
       Text(
         value,
         key: valueKey,

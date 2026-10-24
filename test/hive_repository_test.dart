@@ -1,7 +1,7 @@
 import 'dart:io';
 
 import 'package:flutter_test/flutter_test.dart';
-import 'package:hive/hive.dart';
+import 'package:hive_ce/hive.dart';
 import 'package:sushiscore/core/models/global_state.dart';
 import 'package:sushiscore/core/models/session.dart';
 import 'package:sushiscore/core/storage/hive_repository.dart';

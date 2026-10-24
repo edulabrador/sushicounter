@@ -1,51 +1,58 @@
 import 'package:flutter/material.dart';
 
+import 'app_colors.dart';
+
+export 'app_colors.dart';
+
 class AppTheme {
   static ThemeData get darkTheme {
+    const colors = AppColors.dark;
     return ThemeData(
       brightness: Brightness.dark,
-      primaryColor: Colors.orange,
-      colorScheme: const ColorScheme.dark(
-        primary: Color(0xFFFFA726),
-        secondary: Color(0xFFFFCC80),
-        surface: Color(0xFF1E293B),
+      primaryColor: colors.accent,
+      colorScheme: ColorScheme.dark(
+        primary: colors.accent,
+        secondary: const Color(0xFFFFCC80),
+        surface: colors.surface,
+        error: colors.danger,
       ),
-      scaffoldBackgroundColor: const Color(0xFF0F172A), // Dark navy
-      appBarTheme: const AppBarTheme(
+      scaffoldBackgroundColor: colors.background,
+      extensions: const [colors],
+      appBarTheme: AppBarTheme(
         backgroundColor: Colors.transparent,
         elevation: 0,
         centerTitle: true,
-        iconTheme: IconThemeData(color: Colors.white70),
+        iconTheme: IconThemeData(color: colors.textMuted),
         titleTextStyle: TextStyle(
-          color: Colors.white,
+          color: colors.text,
           fontSize: 20,
           fontWeight: FontWeight.w600,
           letterSpacing: 1.5,
         ),
       ),
       cardTheme: CardThemeData(
-        color: const Color(0xFF1E293B),
+        color: colors.surface,
         elevation: 4,
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(24),
           side: const BorderSide(color: Colors.white12, width: 1),
         ),
       ),
-      textTheme: const TextTheme(
+      textTheme: TextTheme(
         displayLarge: TextStyle(
-          color: Colors.white,
+          color: colors.text,
           fontSize: 96,
           fontWeight: FontWeight.bold,
         ),
-        bodyLarge: TextStyle(color: Colors.white70, fontSize: 18),
-        bodyMedium: TextStyle(color: Colors.white54, fontSize: 14),
+        bodyLarge: TextStyle(color: colors.text, fontSize: 18),
+        bodyMedium: TextStyle(color: colors.textMuted, fontSize: 14),
         titleLarge: TextStyle(
-          color: Colors.white,
+          color: colors.text,
           fontSize: 20,
           fontWeight: FontWeight.w600,
         ),
         headlineMedium: TextStyle(
-          color: Color(0xFFFFA726),
+          color: colors.accent,
           fontSize: 28,
           fontWeight: FontWeight.bold,
         ),

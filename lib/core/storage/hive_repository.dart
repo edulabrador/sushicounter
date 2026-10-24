@@ -1,10 +1,11 @@
 import 'dart:async';
 
-import 'package:hive_flutter/hive_flutter.dart';
+import 'package:hive_ce_flutter/hive_flutter.dart';
 
 import '../models/global_state.dart';
 import '../models/session.dart';
 import 'backup.dart';
+import 'preferences.dart';
 
 /// Hive has no multi-box transaction. Related mutations are serialized and a
 /// journal completes any interrupted mutation on startup or before the next write.
@@ -20,12 +21,14 @@ class HiveRepository {
   static const _journalKey = 'mutation_journal';
   static const _ongoingKey = 'ongoing_session';
   static const _epochMigrationKey = 'epoch_migration_v1';
-  static const _keepScreenOnKey = 'keep_screen_on';
 
   late Box<Session> _sessionBox;
   late Box<GlobalState> _globalStateBox;
   late Box _appStateBox;
   Future<void> _tail = Future<void>.value();
+
+  /// In memory until [init] opens storage, so test doubles need no setup.
+  Preferences preferences = InMemoryPreferences();
 
   Future<void> init({String? path}) async {
     if (path == null) {
@@ -42,6 +45,7 @@ class HiveRepository {
     _sessionBox = await Hive.openBox<Session>(sessionBoxName);
     _globalStateBox = await Hive.openBox<GlobalState>(globalStateBoxName);
     _appStateBox = await Hive.openBox(appStateBoxName);
+    preferences = HivePreferences(_appStateBox);
     if (_globalStateBox.isEmpty) {
       await _globalStateBox.put(
         _globalKey,
@@ -97,14 +101,7 @@ class HiveRepository {
     final existing = _sessionBox.get(session.id);
     if (existing != null) return existing;
     final current = getGlobalState();
-    final recorded = Session(
-      id: session.id,
-      startedAt: session.startedAt,
-      endedAt: session.endedAt,
-      count: session.count,
-      durationSeconds: session.durationSeconds,
-      contributionEpoch: current.epoch,
-    );
+    final recorded = session.copyWith(contributionEpoch: current.epoch);
     await _runJournal({
       'kind': 'complete',
       'session': _sessionMap(recorded),
@@ -151,6 +148,17 @@ class HiveRepository {
           'session': _sessionMap(session),
           'global': _globalMap(target),
         });
+      });
+
+  /// Records what a session cost, or clears it with null. A single put, so it
+  /// needs no journal. Returns null if the session no longer exists.
+  Future<Session?> setSessionPrice(String id, int? priceCents) =>
+      _serial(() async {
+        final session = _sessionBox.get(id);
+        if (session == null) return null;
+        final updated = session.copyWith(priceCents: priceCents);
+        await _sessionBox.put(id, updated);
+        return updated;
       });
 
   BackupData exportBackup() =>
@@ -234,14 +242,7 @@ class HiveRepository {
       for (final session in sessions) {
         await _sessionBox.put(
           session.id,
-          Session(
-            id: session.id,
-            startedAt: session.startedAt,
-            endedAt: session.endedAt,
-            count: session.count,
-            durationSeconds: session.durationSeconds,
-            contributionEpoch: Session.unattributedEpoch,
-          ),
+          session.copyWith(contributionEpoch: Session.unattributedEpoch),
         );
       }
     }
@@ -287,6 +288,7 @@ class HiveRepository {
     'count': value.count,
     'durationSeconds': value.durationSeconds,
     'epoch': value.contributionEpoch,
+    'priceCents': value.priceCents,
   };
   Session _sessionFromMap(Map<dynamic, dynamic> value) => Session(
     id: value['id'] as String,
@@ -295,6 +297,7 @@ class HiveRepository {
     count: value['count'] as int,
     durationSeconds: value['durationSeconds'] as int,
     contributionEpoch: value['epoch'] as int? ?? 0,
+    priceCents: value['priceCents'] as int?,
   );
 
   int getOngoingCount() => _ongoing()['count'] as int;
@@ -331,10 +334,4 @@ class HiveRepository {
       'startedAt': startedAt?.millisecondsSinceEpoch,
     }),
   );
-
-  bool getKeepScreenOn() =>
-      _appStateBox.get(_keepScreenOnKey, defaultValue: true) as bool;
-
-  Future<void> setKeepScreenOn(bool value) =>
-      _serial(() => _appStateBox.put(_keepScreenOnKey, value));
 }

@@ -5,13 +5,15 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:hive/hive.dart';
+import 'package:hive_ce/hive.dart';
 import 'package:sushiscore/core/models/global_state.dart';
 import 'package:sushiscore/core/models/session.dart';
+import 'package:sushiscore/core/platform/backup_files.dart';
 import 'package:sushiscore/core/platform/screen_awake.dart';
 import 'package:sushiscore/core/providers/storage_provider.dart';
 import 'package:sushiscore/core/storage/backup.dart';
 import 'package:sushiscore/core/storage/hive_repository.dart';
+import 'package:sushiscore/core/storage/preferences.dart';
 import 'package:sushiscore/features/counter/providers/counter_provider.dart';
 import 'package:sushiscore/features/counter/views/counter_view.dart';
 import 'package:sushiscore/features/counter/widgets/session_timer.dart';
@@ -20,6 +22,7 @@ import 'package:sushiscore/features/settings/views/settings_view.dart';
 import 'package:sushiscore/features/stats/views/stats_view.dart';
 import 'package:sushiscore/main.dart';
 
+import 'fakes.dart';
 import 'widget_test.dart' show FakeRepository, makeContainer;
 
 Session _session(
@@ -54,9 +57,14 @@ class FailingOngoingRepository extends FakeRepository {
   }
 }
 
-Widget _app(FakeRepository repo, {List<bool>? screenRequests}) => ProviderScope(
+Widget _app(
+  FakeRepository repo, {
+  List<bool>? screenRequests,
+  BackupFiles? files,
+}) => ProviderScope(
   overrides: [
     storageProvider.overrideWithValue(repo),
+    backupFilesProvider.overrideWithValue(files ?? FakeBackupFiles()),
     if (screenRequests != null)
       screenAwakeProvider.overrideWithValue((value) async {
         screenRequests.add(value);
@@ -171,10 +179,10 @@ void main() {
 
     test('keep-screen-on defaults to true and persists', () async {
       final repository = await open();
-      expect(repository.getKeepScreenOn(), isTrue);
-      await repository.setKeepScreenOn(false);
+      expect(repository.preferences.keepScreenOn, isTrue);
+      await repository.preferences.setKeepScreenOn(false);
       await Hive.close();
-      expect((await open()).getKeepScreenOn(), isFalse);
+      expect((await open()).preferences.keepScreenOn, isFalse);
     });
   });
 
@@ -287,7 +295,8 @@ void main() {
 
     testWidgets('screen is left alone when the setting is off', (tester) async {
       final requests = <bool>[];
-      final repo = FakeRepository()..keepScreenOn = false;
+      final repo = FakeRepository()
+        ..preferences = InMemoryPreferences(keepScreenOn: false);
       await tester.pumpWidget(_app(repo, screenRequests: requests));
       await tester.tap(find.byType(SushiButton));
       await tester.pump();
@@ -438,12 +447,7 @@ void main() {
 
       final repo = FakeRepository();
       await repo.completeSession(_session('a', 3));
-      await tester.pumpWidget(
-        ProviderScope(
-          overrides: [storageProvider.overrideWithValue(repo)],
-          child: const SushiScoreApp(),
-        ),
-      );
+      await tester.pumpWidget(_app(repo));
       await tester.tap(find.byTooltip('Settings'));
       await tester.pumpAndSettle();
 
@@ -456,6 +460,9 @@ void main() {
       await tester.pumpAndSettle();
       await tester.tap(find.byTooltip('Paste'));
       await tester.pumpAndSettle();
+      await tester.tap(find.text('Continue'));
+      await tester.pumpAndSettle();
+      expect(find.text('Replace all data?'), findsOneWidget);
       await tester.tap(find.text('Replace data'));
       await tester.pumpAndSettle();
 
@@ -471,7 +478,7 @@ void main() {
       await tester.tap(find.text('Import data'));
       await tester.pumpAndSettle();
       await tester.enterText(find.byType(TextField), 'hello');
-      await tester.tap(find.text('Replace data'));
+      await tester.tap(find.text('Continue'));
       await tester.pumpAndSettle();
       expect(
         find.text('This is not a valid Sushi Tracker backup.'),
@@ -486,7 +493,7 @@ void main() {
       await tester.pumpAndSettle();
       await tester.tap(find.byType(SwitchListTile));
       await tester.pumpAndSettle();
-      expect(repo.keepScreenOn, isFalse);
+      expect(repo.preferences.keepScreenOn, isFalse);
     });
   });
 

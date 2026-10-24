@@ -6,13 +6,13 @@ Tap to add a piece, use Undo or long-press to correct a count, and end the sessi
 
 ## What it does
 
-**Counter** - the home screen. Tap the sushi graphic to count, use visible Undo or long-press to decrement, and end the session to save it. It shows this session, the lifetime total including the active session, and a live elapsed timer.
+**Counter** - the home screen. Tap the sushi graphic to count, use visible Undo or long-press to decrement, and end the session to save it. It shows this session, the lifetime total including the active session, and a live elapsed timer. On Android, long-pressing the app icon offers "Add one sushi", which opens the app with one more piece counted.
 
-**History** - every past session, newest first, with its count, duration, and completion time. Tap one for details such as pace per minute. Sessions can be deleted and restored with Undo, including several deletes in a row.
+**History** - every past session, newest first, with its count, duration, and completion time. Tap one for details such as pace per minute, and to record what the meal cost. Sessions can be deleted and restored with Undo, including several deletes in a row.
 
-**Stats** - lifetime taps and sessions, average and best session counts, plus a trend chart for the latest 7 sessions, 30 sessions, or all sessions.
+**Stats** - lifetime taps and sessions, average and best session counts, cost per piece, records (best session, weekly streak, this month), plus a date-based trend chart for the latest 7 sessions, 30 sessions, or all sessions.
 
-**Settings** - reset the current session or lifetime totals, keep the screen on while counting, and export or import a backup through the clipboard. Lifetime reset is unavailable while a session is active and requires typing "RESET" (or "BORRAR" in Spanish) to confirm. It clears lifetime totals while preserving session history; Stats then cover the new lifetime and older sessions are marked in History.
+**Settings** - reset the current session or lifetime totals, keep the screen on while counting, and export or import a backup file (clipboard on web and desktop). Lifetime reset is unavailable while a session is active and requires typing "RESET" (or "BORRAR" in Spanish) to confirm. It clears lifetime totals while preserving session history; Stats then cover the new lifetime and older sessions are marked in History.
 
 The app is available in English and Spanish and follows the device language. Each tap gives light haptic feedback, so you can count without looking at the screen.
 
@@ -26,7 +26,8 @@ Nothing fancy, just a clean, feature-first structure so it's easy to find your w
 
 - **State management**, [`flutter_riverpod`](https://pub.dev/packages/flutter_riverpod) `Notifier`s
 - **Localization**, Flutter `gen-l10n` with ARB files in `lib/l10n` (run `flutter pub get` after editing them)
-- **Local storage**, [`hive`](https://pub.dev/packages/hive) / `hive_flutter`, so everything persists instantly with no server round-trip
+- **Local storage**, [`hive_ce`](https://pub.dev/packages/hive_ce) / `hive_ce_flutter` (the maintained continuation of Hive 2, same file format), so everything persists instantly with no server round-trip
+- **Android integration**, small method channels in `MainActivity.kt` for keeping the screen on, the backup file picker and the launcher shortcut, with no extra plugins or permissions
 - **Charts**, [`fl_chart`](https://pub.dev/packages/fl_chart) for the trend line on the Stats screen
 
 ```
@@ -45,6 +46,14 @@ git clone https://github.com/edulabrador/sushicounter.git
 cd sushicounter
 flutter pub get
 flutter run
+```
+
+## Testing
+
+```bash
+flutter test                         # unit and widget tests
+flutter build apk --debug && flutter test integration_test   # the real app, on a device or emulator
+(cd android && ./gradlew :app:testDebugUnitTest)   # Kotlin helpers, after one flutter build
 ```
 
 ## Building for Android

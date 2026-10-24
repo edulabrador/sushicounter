@@ -1,4 +1,6 @@
-import 'package:hive/hive.dart';
+import 'package:hive_ce/hive.dart';
+
+const _keep = Object();
 
 class Session extends HiveObject {
   final String id;
@@ -8,6 +10,9 @@ class Session extends HiveObject {
   final int durationSeconds;
   final int contributionEpoch;
 
+  /// What the meal cost, in hundredths of the local currency, if recorded.
+  final int? priceCents;
+
   Session({
     required this.id,
     required this.startedAt,
@@ -15,7 +20,21 @@ class Session extends HiveObject {
     required this.count,
     required this.durationSeconds,
     this.contributionEpoch = 0,
+    this.priceCents,
   });
+
+  Session copyWith({int? contributionEpoch, Object? priceCents = _keep}) =>
+      Session(
+        id: id,
+        startedAt: startedAt,
+        endedAt: endedAt,
+        count: count,
+        durationSeconds: durationSeconds,
+        contributionEpoch: contributionEpoch ?? this.contributionEpoch,
+        priceCents: identical(priceCents, _keep)
+            ? this.priceCents
+            : priceCents as int?,
+      );
 
   /// Epoch of legacy history whose totals could not be attributed safely.
   static const unattributedEpoch = -1;
@@ -63,13 +82,14 @@ class SessionAdapter extends TypeAdapter<Session> {
       count: fields[3] as int,
       durationSeconds: fields[4] as int,
       contributionEpoch: fields[5] as int? ?? 0,
+      priceCents: fields[6] as int?,
     );
   }
 
   @override
   void write(BinaryWriter writer, Session obj) {
     writer
-      ..writeByte(6)
+      ..writeByte(7)
       ..writeByte(0)
       ..write(obj.id)
       ..writeByte(1)
@@ -81,6 +101,8 @@ class SessionAdapter extends TypeAdapter<Session> {
       ..writeByte(4)
       ..write(obj.durationSeconds)
       ..writeByte(5)
-      ..write(obj.contributionEpoch);
+      ..write(obj.contributionEpoch)
+      ..writeByte(6)
+      ..write(obj.priceCents);
   }
 }
