@@ -52,7 +52,7 @@ flutter run
 
 ```bash
 flutter test                         # unit and widget tests
-flutter test integration_test        # the real app, needs a device or emulator
+flutter build apk --debug && flutter test integration_test   # the real app, on a device or emulator
 (cd android && ./gradlew :app:testDebugUnitTest)   # Kotlin helpers, after one flutter build
 ```
 
