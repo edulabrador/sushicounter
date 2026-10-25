@@ -2,6 +2,21 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.6.0] - 2026-10-25
+### Added
+- Restaurant per session: name it from the session details, with suggestions from earlier sessions. History shows it on each card, and Stats gains "By restaurant" with sessions, average pieces and cost per piece, plus a trophy for the cheapest per piece.
+- Achievements: ten goals in Stats (sessions, pieces, a big session, a weekly streak, prices, restaurants), each with its progress. Ending a session that unlocks one says so.
+- Optional light theme: Settings > Appearance offers Dark (default), Light or System. Both palettes are checked for WCAG AA contrast.
+- Charts can switch to a list (trend newest first, weekly by "Week of"), which reads better with a screen reader.
+- Golden tests for the counter, history, stats and settings screens in both themes, on a fixed clock.
+- Play Store phone screenshots in English and Spanish (1080×1920) and a new feature graphic with the nigiri in each language, with the scripts that render them in `tool/store/`.
+
+### Changed
+- App icon drawn from the in-app nigiri on navy, with an Android adaptive icon (including a themed monochrome layer) and a navy native splash with the nigiri, so there is no white flash at launch.
+- History and Stats views are split into smaller widget files.
+- Time-dependent screens read the time through `package:clock`, so tests can fix it.
+- App version is now `0.6.0+11`.
+
 ## [0.5.1] - 2026-10-24
 ### Changed
 - Settings: a header with the nigiri and settings grouped into titled cards (Session, Preferences, Your data, About), with boxed icons like the Stats tiles.
