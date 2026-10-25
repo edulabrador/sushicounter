@@ -23,20 +23,41 @@ void main() {
   const colors = AppColors.dark;
 
   test('text colors meet WCAG AA on page and card backgrounds', () {
-    for (final background in [colors.background, colors.surface]) {
-      for (final (name, color) in [
-        ('text', colors.text),
-        ('textMuted', colors.textMuted),
-        ('accent', colors.accent),
-        ('danger', colors.danger),
-      ]) {
-        expect(
-          contrast(color, background),
-          greaterThanOrEqualTo(4.5),
-          reason: '$name on $background',
-        );
+    for (final colors in [AppColors.dark, AppColors.light]) {
+      for (final background in [colors.background, colors.surface]) {
+        for (final (name, color) in [
+          ('text', colors.text),
+          ('textMuted', colors.textMuted),
+          ('accent', colors.accent),
+          ('danger', colors.danger),
+        ]) {
+          expect(
+            contrast(color, background),
+            greaterThanOrEqualTo(4.5),
+            reason: '${colors.brightness} $name on $background',
+          );
+        }
       }
     }
+  });
+
+  test('text on accent and danger buttons is readable in both themes', () {
+    for (final colors in [AppColors.dark, AppColors.light]) {
+      expect(
+        contrast(colors.onAccent, colors.accent),
+        greaterThanOrEqualTo(4.5),
+      );
+      expect(
+        contrast(colors.onDanger, colors.danger),
+        greaterThanOrEqualTo(4.5),
+      );
+    }
+  });
+
+  test('each theme carries its own palette', () {
+    expect(AppTheme.lightTheme.extension<AppColors>(), AppColors.light);
+    expect(AppTheme.lightTheme.brightness, Brightness.light);
+    expect(AppTheme.darkTheme.brightness, Brightness.dark);
   });
 
   test('the theme exposes the tokens', () {

@@ -161,6 +161,18 @@ class HiveRepository {
         return updated;
       });
 
+  /// Records where a session happened, or clears it with null or blank.
+  Future<Session?> setSessionRestaurant(String id, String? restaurant) =>
+      _serial(() async {
+        final session = _sessionBox.get(id);
+        if (session == null) return null;
+        final updated = session.copyWith(
+          restaurant: Session.normalizeRestaurant(restaurant),
+        );
+        await _sessionBox.put(id, updated);
+        return updated;
+      });
+
   BackupData exportBackup() =>
       BackupData(global: getGlobalState(), sessions: getAllSessions());
 
@@ -289,6 +301,7 @@ class HiveRepository {
     'durationSeconds': value.durationSeconds,
     'epoch': value.contributionEpoch,
     'priceCents': value.priceCents,
+    'restaurant': value.restaurant,
   };
   Session _sessionFromMap(Map<dynamic, dynamic> value) => Session(
     id: value['id'] as String,
@@ -298,6 +311,7 @@ class HiveRepository {
     durationSeconds: value['durationSeconds'] as int,
     contributionEpoch: value['epoch'] as int? ?? 0,
     priceCents: value['priceCents'] as int?,
+    restaurant: value['restaurant'] as String?,
   );
 
   int getOngoingCount() => _ongoing()['count'] as int;

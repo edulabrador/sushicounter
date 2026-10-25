@@ -1,3 +1,5 @@
+import 'package:clock/clock.dart';
+
 String formatSessionDuration(Duration duration) {
   final safeDuration = duration.isNegative ? Duration.zero : duration;
   final hours = safeDuration.inHours;
@@ -14,6 +16,6 @@ String formatSessionDuration(Duration duration) {
 }
 
 Duration elapsedSince(DateTime startedAt, {DateTime? now}) {
-  final elapsed = (now ?? DateTime.now()).difference(startedAt);
+  final elapsed = (now ?? clock.now()).difference(startedAt);
   return elapsed.isNegative ? Duration.zero : elapsed;
 }

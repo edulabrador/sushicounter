@@ -1,7 +1,7 @@
 name: sushiscore
 description: "A minimalist Flutter application that tracks session taps."
 publish_to: 'none'
-version: 0.5.1+10
+version: 0.6.0+11
 
 environment:
   sdk: '>=3.12.0 <4.0.0'
@@ -18,6 +18,7 @@ dependencies:
   fl_chart: ^1.2.0
   uuid: ^4.3.3
   intl: ^0.20.3
+  clock: ^1.1.3
 
 dev_dependencies:
   flutter_test:
@@ -33,7 +34,12 @@ flutter:
   assets:
     - assets/icon/app_icon.png
 
+# Icons are rendered from the in-app nigiri; see tool/icons/render_icons_test.dart.
 flutter_launcher_icons:
   android: true
   ios: true
   image_path: "assets/icon/app_icon.png"
+  remove_alpha_ios: true
+  adaptive_icon_background: "#0F172A"
+  adaptive_icon_foreground: "assets/icon/app_icon_foreground.png"
+  adaptive_icon_monochrome: "assets/icon/app_icon_monochrome.png"

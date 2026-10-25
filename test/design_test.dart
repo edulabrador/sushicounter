@@ -340,7 +340,11 @@ void _moreTests() {
       for (final title in ['SESSION', 'PREFERENCES', 'YOUR DATA']) {
         expect(find.text(title), findsOneWidget);
       }
-      await tester.scrollUntilVisible(find.text('ABOUT'), 200);
+      await tester.scrollUntilVisible(
+        find.text('ABOUT'),
+        200,
+        scrollable: find.byType(Scrollable).first,
+      );
       expect(find.text('ABOUT'), findsOneWidget);
       expect(tester.takeException(), isNull);
     });

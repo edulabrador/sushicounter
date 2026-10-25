@@ -150,7 +150,7 @@ class _ResetLifetimeDialogState extends State<_ResetLifetimeDialog> {
         ElevatedButton(
           style: ElevatedButton.styleFrom(
             backgroundColor: danger,
-            foregroundColor: Colors.black,
+            foregroundColor: context.colors.onDanger,
           ),
           onPressed: _matches ? () => Navigator.pop(context, true) : null,
           child: Text(l10n.confirmReset),

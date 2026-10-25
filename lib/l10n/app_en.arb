@@ -317,5 +317,96 @@
       }
     }
   },
-  "noValue": "—"
+  "noValue": "—",
+  "addRestaurant": "Add restaurant",
+  "editRestaurant": "Change restaurant",
+  "restaurantDialogTitle": "Where did you eat?",
+  "restaurantHint": "e.g. Sushi Zen",
+  "removeRestaurant": "Remove",
+  "couldNotSaveRestaurant": "Could not save the restaurant.",
+  "byRestaurantTitle": "By restaurant",
+  "restaurantSummary": "{sessions, plural, =1{1 session} other{{sessions} sessions}} · avg {average}",
+  "@restaurantSummary": {
+    "placeholders": {
+      "sessions": {
+        "type": "int"
+      },
+      "average": {
+        "type": "String"
+      }
+    }
+  },
+  "perPiece": "{value}/piece",
+  "@perPiece": {
+    "placeholders": {
+      "value": {
+        "type": "String"
+      }
+    }
+  },
+  "achievementsTitle": "Achievements",
+  "achievementsCount": "{unlocked} of {total}",
+  "@achievementsCount": {
+    "placeholders": {
+      "unlocked": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
+  "achievementUnlocked": "Achievement unlocked: {name}",
+  "@achievementUnlocked": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "achievementProgress": "{progress}/{target}",
+  "@achievementProgress": {
+    "placeholders": {
+      "progress": {
+        "type": "int"
+      },
+      "target": {
+        "type": "int"
+      }
+    }
+  },
+  "achFirstSession": "First bite",
+  "achFirstSessionDesc": "Save your first session",
+  "achTenSessions": "Regular customer",
+  "achTenSessionsDesc": "Save 10 sessions",
+  "achFiftySessions": "Sushi veteran",
+  "achFiftySessionsDesc": "Save 50 sessions",
+  "achBigAppetite": "Big appetite",
+  "achBigAppetiteDesc": "30 pieces in one session",
+  "achSushiMaster": "Sushi master",
+  "achSushiMasterDesc": "50 pieces in one session",
+  "achHundredPieces": "Century",
+  "achHundredPiecesDesc": "100 pieces in total",
+  "achThousandPieces": "Thousand club",
+  "achThousandPiecesDesc": "1,000 pieces in total",
+  "achRegular": "Every week",
+  "achRegularDesc": "4 weeks in a row with a session",
+  "achPriceWatcher": "Bargain hunter",
+  "achPriceWatcherDesc": "Add the price to 5 sessions",
+  "achExplorer": "Explorer",
+  "achExplorerDesc": "Eat at 3 different restaurants",
+  "showAsList": "Show as list",
+  "showAsChart": "Show as chart",
+  "weekOf": "Week of {date}",
+  "@weekOf": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "appearanceTitle": "Appearance",
+  "appearanceDark": "Dark",
+  "appearanceLight": "Light",
+  "appearanceSystem": "System"
 }

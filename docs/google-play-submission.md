@@ -3,8 +3,8 @@
 Current release candidate:
 - App name: Sushi Tracker
 - Package / application ID: `dev.edulabrador.sushiscore`
-- Version name: `0.5.1`
-- Version code: `10`
+- Version name: `0.6.0`
+- Version code: `11`
 - Target SDK: 36
 - Release AAB path: `build/app/outputs/bundle/release/app-release.aab`
 - Privacy policy: https://edulabrador.github.io/sushicounter/privacy-policy.html
@@ -22,7 +22,7 @@ Sushi Tracker is a simple offline counter for sushi and anything else you want t
 
 Tap the sushi to add one. Use Undo or long-press to correct a count. See how long your current session has lasted, then end it to save the session.
 
-Review saved sessions in History and add what each meal cost. Check lifetime totals, averages, records, weekly streaks, cost per piece, and a trend chart in Statistics. Long-press the app icon to add a sushi straight away, and keep the screen on while you count.
+Review saved sessions in History and note the restaurant and what each meal cost. Check lifetime totals, averages, records, weekly streaks, cost per piece, a trend chart, per-restaurant stats and achievements in Statistics. Long-press the app icon to add a sushi straight away, and keep the screen on while you count.
 
 Back up your history to a file and restore it on another phone. Available in English and Spanish. Your counts stay on your device. No account or ads, and no internet connection is required.
 
@@ -42,7 +42,7 @@ Sushi Tracker es un contador sencillo y sin conexión para sushi y cualquier otr
 
 Toca el sushi para sumar uno. Usa Deshacer o mantén pulsado para corregir. Mira cuánto dura la sesión actual y termínala para guardarla.
 
-Revisa tus sesiones en el Historial y anota cuánto costó cada comida. Consulta totales, medias, récords, rachas semanales, coste por pieza y la evolución en Estadísticas. Mantén pulsado el icono de la app para sumar un sushi al momento, y deja la pantalla encendida mientras cuentas.
+Revisa tus sesiones en el Historial y anota el restaurante y cuánto costó cada comida. Consulta totales, medias, récords, rachas semanales, coste por pieza, la evolución, estadísticas por restaurante y logros en Estadísticas. Mantén pulsado el icono de la app para sumar un sushi al momento, y deja la pantalla encendida mientras cuentas.
 
 Guarda una copia de tu historial en un archivo y recupérala en otro móvil. Disponible en español e inglés. Tus datos se quedan en tu dispositivo. Sin cuentas ni anuncios, y no necesita internet.
 
@@ -124,18 +124,12 @@ The current privacy policy lists:
 ## Screenshots
 
 Repository assets already prepared:
-- `assets/play-store/store-icon.png`
-- `assets/play-store/feature-graphic.png`
+- `assets/play-store/store-icon.png` (512×512)
+- `assets/play-store/feature-graphic.png` (1024×500, English) and `assets/play-store/feature-graphic-es.png` (Spanish)
+- `assets/play-store/screenshots/en/` and `assets/play-store/screenshots/es/`: five 1080×1920 phone screenshots per language (counter, history, statistics, achievements, light theme)
 - `assets/icon/app_icon.png`
 
-Still needed:
-- genuine final-app phone screenshots
-
-Recommended screenshots:
-1. Counter at zero
-2. Counter with active session and timer
-3. History with saved sessions
-4. Statistics with trend chart
+The screenshots show the real app UI with sample data, rendered from the web design preview (`tool/design_preview.dart`, script `tool/store/render_screenshots.js`). They have no Android status bar; replace them with on-device captures if you prefer. The feature graphic is rendered from `tool/store/feature_graphic.html` with `tool/store/render_feature_graphic.js`.
 
 ## Production signing — EDU / LOCAL MACHINE REQUIRED
 
@@ -195,13 +189,13 @@ After installing the Play-distributed build, verify:
 ## Suggested publication sequence
 
 1. Confirm/create the Play Console app with package `dev.edulabrador.sushiscore`.
-2. Confirm version code 6 has never been uploaded. If it has, increment it.
+2. Confirm version code 11 has never been uploaded. If it has, increment it.
 3. Build the production AAB with the real upload key.
 4. Upload to Internal testing.
 5. Install from Google Play and smoke-test.
 6. Complete Store listing.
 7. Complete App content declarations.
-8. Add genuine screenshots.
+8. Upload the screenshots and feature graphic for each language.
 9. Configure pricing and countries/regions.
 10. If required, run the 12-tester / 14-day closed test.
 11. Apply for production access if required.

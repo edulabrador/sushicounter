@@ -35,6 +35,7 @@ String encodeBackup(BackupData data, {DateTime? exportedAt}) =>
             'durationSeconds': session.durationSeconds,
             'epoch': session.contributionEpoch,
             if (session.priceCents != null) 'priceCents': session.priceCents,
+            if (session.restaurant != null) 'restaurant': session.restaurant,
           },
       ],
     });
@@ -109,7 +110,16 @@ Session _session(Map<dynamic, dynamic> raw) {
     priceCents: raw['priceCents'] == null
         ? null
         : _nonNegative(raw['priceCents']),
+    restaurant: _restaurant(raw['restaurant']),
   );
+}
+
+String? _restaurant(Object? value) {
+  if (value == null) return null;
+  if (value is! String || value.length > Session.maxRestaurantLength) {
+    throw const FormatException('Invalid restaurant');
+  }
+  return Session.normalizeRestaurant(value);
 }
 
 int _int(Object? value) {
