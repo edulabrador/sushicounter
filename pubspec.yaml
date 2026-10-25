@@ -33,7 +33,12 @@ flutter:
   assets:
     - assets/icon/app_icon.png
 
+# Icons are rendered from the in-app nigiri; see tool/icons/render_icons_test.dart.
 flutter_launcher_icons:
   android: true
   ios: true
   image_path: "assets/icon/app_icon.png"
+  remove_alpha_ios: true
+  adaptive_icon_background: "#0F172A"
+  adaptive_icon_foreground: "assets/icon/app_icon_foreground.png"
+  adaptive_icon_monochrome: "assets/icon/app_icon_monochrome.png"
