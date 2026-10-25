@@ -11,7 +11,9 @@ import '../../../shared/art/sushi_art.dart';
 ///
 /// Recreated in vector (CustomPaint) rather than embedding a bitmap so it
 /// scales crisply at any size and carries no asset weight. Each tap fires a
-/// little jump-and-flip animation plus a burst of fireworks.
+/// little jump-and-flip animation, a burst of fireworks and a rising "+1".
+/// The tap that beats [record] sets off a bigger golden burst, a "New
+/// record!" badge and a strong vibration.
 class SushiButton extends StatefulWidget {
   const SushiButton({
     super.key,
@@ -20,6 +22,8 @@ class SushiButton extends StatefulWidget {
     this.size = 200,
     this.enabled = true,
     this.mood = SushiMood.happy,
+    this.count = 0,
+    this.record = 0,
   });
 
   final VoidCallback onTap;
@@ -30,13 +34,21 @@ class SushiButton extends StatefulWidget {
   /// The face it pulls; starry while the session beats the record.
   final SushiMood mood;
 
+  /// The session's count and the best saved session, to celebrate the moment
+  /// the count first goes past the record.
+  final int count;
+  final int record;
+
   @override
   State<SushiButton> createState() => _SushiButtonState();
 }
 
 class _SushiButtonState extends State<SushiButton>
-    with SingleTickerProviderStateMixin {
+    with TickerProviderStateMixin {
   late final AnimationController _controller;
+  late final AnimationController _celebration;
+  final List<AnimationController> _floaters = [];
+  List<_Spark> _bigSparks = const [];
   final FocusNode _focusNode = FocusNode(debugLabel: 'Sushi counter button');
   final math.Random _rnd = math.Random();
   List<_Spark> _sparks = const [];
@@ -59,11 +71,28 @@ class _SushiButtonState extends State<SushiButton>
       vsync: this,
       duration: const Duration(milliseconds: 480),
     );
+    _celebration = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 1600),
+    );
+  }
+
+  @override
+  void didUpdateWidget(SushiButton oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    final record = widget.record;
+    if (record > 0 && oldWidget.count <= record && widget.count == record + 1) {
+      _celebrate();
+    }
   }
 
   @override
   void dispose() {
     _controller.dispose();
+    _celebration.dispose();
+    for (final floater in _floaters) {
+      floater.dispose();
+    }
     _focusNode.dispose();
     super.dispose();
   }
@@ -106,7 +135,47 @@ class _SushiButtonState extends State<SushiButton>
     // Replay from the start on every tap, even mid-flight, so rapid tapping
     // keeps hopping and sparking.
     _controller.forward(from: 0);
+    _float();
   }
+
+  /// A "+1" that rises and fades; several can be in the air at once.
+  void _float() {
+    final floater = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 750),
+    );
+    floater.addStatusListener((status) {
+      if (status != AnimationStatus.completed || !mounted) return;
+      setState(() => _floaters.remove(floater));
+      floater.dispose();
+    });
+    setState(() => _floaters.add(floater));
+    floater.forward();
+  }
+
+  void _celebrate() {
+    HapticFeedback.heavyImpact();
+    const count = 36;
+    _bigSparks = List.generate(count, (i) {
+      final angle = (i / count) * 2 * math.pi + _rnd.nextDouble() * 0.3;
+      return _Spark(
+        angle: angle,
+        distance: widget.size * (0.7 + _rnd.nextDouble() * 0.5),
+        radius: widget.size * (0.016 + _rnd.nextDouble() * 0.022),
+        color: _goldColors[_rnd.nextInt(_goldColors.length)],
+      );
+    });
+    // With reduced motion only the badge shows, without the burst.
+    if (MediaQuery.disableAnimationsOf(context)) _bigSparks = const [];
+    _celebration.forward(from: 0);
+  }
+
+  static const _goldColors = [
+    Color(0xFFFFD93D),
+    Color(0xFFFFC107),
+    Color(0xFFF7A072),
+    Color(0xFFFFF3B0),
+  ];
 
   void _handleLongPress() {
     if (!widget.enabled) return;
@@ -184,12 +253,30 @@ class _SushiButtonState extends State<SushiButton>
                           painter: _FireworksPainter(v, _sparks),
                         ),
                       ),
+                      Positioned.fill(
+                        child: AnimatedBuilder(
+                          animation: _celebration,
+                          builder: (context, _) => CustomPaint(
+                            painter: _FireworksPainter(
+                              _celebration.value,
+                              _bigSparks,
+                            ),
+                          ),
+                        ),
+                      ),
                       Transform.translate(
                         offset: Offset(0, jump),
                         child: Transform.rotate(
                           angle: spin,
                           child: Transform.scale(scale: scale, child: child),
                         ),
+                      ),
+                      for (final floater in _floaters)
+                        _PlusOne(animation: floater, size: widget.size),
+                      _RecordBadge(
+                        animation: _celebration,
+                        size: widget.size,
+                        label: l10n.recordBurst,
                       ),
                     ],
                   ),
@@ -200,6 +287,103 @@ class _SushiButtonState extends State<SushiButton>
                 height: widget.size,
                 child: CustomPaint(painter: NigiriPainter(mood: widget.mood)),
               ),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+/// "+1" rising from the top of the nigiri.
+class _PlusOne extends StatelessWidget {
+  const _PlusOne({required this.animation, required this.size});
+
+  final Animation<double> animation;
+  final double size;
+
+  @override
+  Widget build(BuildContext context) {
+    return AnimatedBuilder(
+      animation: animation,
+      builder: (context, child) {
+        final v = Curves.easeOut.transform(animation.value);
+        return Positioned(
+          top: -size * 0.05 - v * size * 0.3,
+          child: Opacity(
+            opacity: (1 - animation.value).clamp(0, 1),
+            child: child,
+          ),
+        );
+      },
+      child: ExcludeSemantics(
+        child: Text(
+          '+1',
+          style: TextStyle(
+            color: context.colors.accent,
+            fontSize: size * 0.14,
+            fontWeight: FontWeight.w800,
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+/// "New record!" popping above the nigiri, then fading.
+class _RecordBadge extends StatelessWidget {
+  const _RecordBadge({
+    required this.animation,
+    required this.size,
+    required this.label,
+  });
+
+  final Animation<double> animation;
+  final double size;
+  final String label;
+
+  @override
+  Widget build(BuildContext context) {
+    final colors = context.colors;
+    return AnimatedBuilder(
+      animation: animation,
+      builder: (context, child) {
+        final v = animation.value;
+        if (animation.status != AnimationStatus.forward) {
+          return const SizedBox.shrink();
+        }
+        final pop = Curves.elasticOut.transform((v / 0.3).clamp(0, 1));
+        final fade = v < 0.8 ? 1.0 : (1 - (v - 0.8) / 0.2);
+        return Positioned(
+          top: -size * 0.32,
+          child: Opacity(
+            opacity: fade.clamp(0, 1),
+            child: Transform.scale(scale: 0.6 + 0.4 * pop, child: child),
+          ),
+        );
+      },
+      child: Semantics(
+        liveRegion: true,
+        child: DecoratedBox(
+          decoration: BoxDecoration(
+            color: colors.accent,
+            borderRadius: BorderRadius.circular(999),
+          ),
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Icon(Icons.star_rounded, size: 18, color: colors.onAccent),
+                const SizedBox(width: 6),
+                Text(
+                  label,
+                  style: TextStyle(
+                    color: colors.onAccent,
+                    fontWeight: FontWeight.w800,
+                  ),
+                ),
+              ],
             ),
           ),
         ),

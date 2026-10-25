@@ -178,5 +178,6 @@
   "sessionStart": "Inicio",
   "countInvalid": "Escribe un número entero del 1 al {max}.",
   "sessionInFuture": "Una sesión no puede terminar en el futuro.",
-  "couldNotSaveSession": "No se pudieron guardar los cambios."
+  "couldNotSaveSession": "No se pudieron guardar los cambios.",
+  "recordBurst": "¡Nuevo récord!"
 }

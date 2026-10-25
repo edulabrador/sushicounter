@@ -175,6 +175,8 @@ class CounterView extends ConsumerWidget {
                               ref.read(counterProvider.notifier).decrement(),
                           size: sushiSize,
                           enabled: counterState.canEdit,
+                          count: counterState.count,
+                          record: best,
                         ),
                         const SizedBox(height: 4),
                         TextButton.icon(

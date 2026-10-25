@@ -1171,6 +1171,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Could not save the changes.'**
   String get couldNotSaveSession;
+
+  /// No description provided for @recordBurst.
+  ///
+  /// In en, this message translates to:
+  /// **'New record!'**
+  String get recordBurst;
 }
 
 class _AppLocalizationsDelegate

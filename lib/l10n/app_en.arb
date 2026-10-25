@@ -420,5 +420,6 @@
     }
   },
   "sessionInFuture": "A session cannot end in the future.",
-  "couldNotSaveSession": "Could not save the changes."
+  "couldNotSaveSession": "Could not save the changes.",
+  "recordBurst": "New record!"
 }

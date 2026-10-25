@@ -698,4 +698,7 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get couldNotSaveSession => 'No se pudieron guardar los cambios.';
+
+  @override
+  String get recordBurst => '¡Nuevo récord!';
 }

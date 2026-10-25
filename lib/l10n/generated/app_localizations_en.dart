@@ -694,4 +694,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get couldNotSaveSession => 'Could not save the changes.';
+
+  @override
+  String get recordBurst => 'New record!';
 }
