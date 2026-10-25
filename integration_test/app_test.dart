@@ -17,14 +17,19 @@ void main() {
   const screen = MethodChannel('dev.edulabrador.sushiscore/screen');
   const widgetChannel = MethodChannel('dev.edulabrador.sushiscore/widget');
 
+  // Progress markers in the CI log, to see where a stuck run stopped.
+  void step(String name) => debugPrint('integration step: $name');
+
   String? count(WidgetTester tester) =>
       tester.widget<Text>(find.byKey(counterCurrentCountKey)).data;
 
   testWidgets('count, keep the screen on, save, and find it in history', (
     tester,
   ) async {
+    step('app launched');
     await tester.pumpWidget(const StartupApp());
     await tester.pumpAndSettle();
+    step('started');
     final container = ProviderScope.containerOf(
       tester.element(find.byType(CounterView)),
     );
@@ -39,16 +44,19 @@ void main() {
     await tester.pumpAndSettle();
     expect(count(tester), '${start + 3}');
     expect(repository.getOngoingCount(), start + 3);
+    step('counted');
 
     // The home screen widget's store got the count (after its short batch).
     await Future<void>.delayed(const Duration(milliseconds: 800));
     expect(await widgetChannel.invokeMethod<int>('storedCount'), start + 3);
+    step('widget updated');
 
     // The Kotlin side really set FLAG_KEEP_SCREEN_ON on the window.
     expect(await screen.invokeMethod<bool>('isKeepScreenOn'), isTrue);
 
     await tester.tap(find.byKey(counterEndSessionButtonKey));
     await tester.pumpAndSettle();
+    step('session ended');
     expect(count(tester), '0');
     expect(await screen.invokeMethod<bool>('isKeepScreenOn'), isFalse);
     expect(repository.getAllSessions(), hasLength(sessionsBefore + 1));
@@ -64,6 +72,7 @@ void main() {
     await tester.tap(find.text('History'));
     await tester.pumpAndSettle();
     expect(find.text('No sessions yet.'), findsNothing);
+    step('history shown');
 
     // Frame timings for 100 quick taps, kept in the test report and printed
     // to the CI log. Emulator numbers are only comparable run to run.
@@ -76,9 +85,9 @@ void main() {
       }
       await tester.pumpAndSettle();
     }, reportKey: 'tap_frames');
+    step('benchmark done');
     expect(count(tester), '100');
-    // ignore: avoid_print
-    print('tap_frames: ${binding.reportData?['tap_frames']}');
+    debugPrint('tap_frames: ${binding.reportData?['tap_frames']}');
     await container.read(counterProvider.notifier).resetCurrent();
     await tester.pumpAndSettle();
     expect(repository.getOngoingCount(), 0);

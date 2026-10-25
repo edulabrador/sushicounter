@@ -181,7 +181,7 @@ jobs:
     # The real app on an emulator: Hive on device storage and the Kotlin
     # method channels, which unit and widget tests can only simulate.
     runs-on: ubuntu-latest
-    timeout-minutes: 45
+    timeout-minutes: 35
     steps:
       - uses: actions/checkout@v4
       - uses: subosito/flutter-action@v2
@@ -207,4 +207,6 @@ jobs:
           target: google_apis
           disable-animations: true
           emulator-options: -no-window -gpu swiftshader_indirect -noaudio -no-boot-anim -camera-back none
-          script: flutter test integration_test --device-id emulator-5554
+          # A stuck run stops after 15 minutes and prints what the device saw:
+          # the foreground activity and the app's log.
+          script: timeout 15m flutter test integration_test --device-id emulator-5554 --reporter expanded || (adb shell dumpsys activity activities | grep -E "ResumedActivity|mFocusedApp" ; adb logcat -d | grep -iE "flutter|AndroidRuntime|FATAL|sushiscore|ANR" | tail -300 ; exit 1)
