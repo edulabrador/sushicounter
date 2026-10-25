@@ -36,6 +36,8 @@ String encodeBackup(BackupData data, {DateTime? exportedAt}) =>
             'epoch': session.contributionEpoch,
             if (session.priceCents != null) 'priceCents': session.priceCents,
             if (session.restaurant != null) 'restaurant': session.restaurant,
+            if (session.companions.isNotEmpty)
+              'companions': [for (final c in session.companions) c.toMap()],
           },
       ],
     });
@@ -111,7 +113,17 @@ Session _session(Map<dynamic, dynamic> raw) {
         ? null
         : _nonNegative(raw['priceCents']),
     restaurant: _restaurant(raw['restaurant']),
+    companions: _companions(raw['companions']),
   );
+}
+
+List<Companion> _companions(Object? value) {
+  final companions = Companion.listFromRaw(value);
+  final names = {for (final c in companions) c.name.toLowerCase()};
+  if (names.length != companions.length) {
+    throw const FormatException('Duplicate companion');
+  }
+  return companions;
 }
 
 String? _restaurant(Object? value) {

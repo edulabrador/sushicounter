@@ -337,6 +337,7 @@ class HiveRepository {
     'epoch': value.contributionEpoch,
     'priceCents': value.priceCents,
     'restaurant': value.restaurant,
+    'companions': [for (final c in value.companions) c.toMap()],
   };
   Session _sessionFromMap(Map<dynamic, dynamic> value) => Session(
     id: value['id'] as String,
@@ -347,6 +348,7 @@ class HiveRepository {
     contributionEpoch: value['epoch'] as int? ?? 0,
     priceCents: value['priceCents'] as int?,
     restaurant: value['restaurant'] as String?,
+    companions: Companion.listFromRaw(value['companions']),
   );
 
   int getOngoingCount() => _ongoing()['count'] as int;
@@ -377,10 +379,25 @@ class HiveRepository {
     });
   }
 
-  Future<void> saveOngoingSession(int count, DateTime? startedAt) => _serial(
+  /// People counted with you in the unsaved session.
+  List<Companion> getOngoingCompanions() {
+    try {
+      return Companion.listFromRaw(_ongoing()['companions']);
+    } on FormatException {
+      return const [];
+    }
+  }
+
+  Future<void> saveOngoingSession(
+    int count,
+    DateTime? startedAt, {
+    List<Companion> companions = const [],
+  }) => _serial(
     () => _appStateBox.put(_ongoingKey, {
       'count': count,
       'startedAt': startedAt?.millisecondsSinceEpoch,
+      if (companions.isNotEmpty)
+        'companions': [for (final c in companions) c.toMap()],
     }),
   );
 }

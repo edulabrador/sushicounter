@@ -55,10 +55,19 @@ class PreviewRepository extends HiveRepository {
   @override
   DateTime? getOngoingStartedAt() => started;
   @override
-  Future<void> saveOngoingSession(int count, DateTime? startedAt) async {
+  Future<void> saveOngoingSession(
+    int count,
+    DateTime? startedAt, {
+    List<Companion> companions = const [],
+  }) async {
     ongoing = count;
     started = startedAt;
+    table = companions;
   }
+
+  List<Companion> table = const [];
+  @override
+  List<Companion> getOngoingCompanions() => table;
 }
 
 class _StartupRepository extends HiveRepository {

@@ -147,6 +147,15 @@ class SessionShareCard extends StatelessWidget {
       if (pace != null)
         (Icons.speed, l10n.paceValue(NumberFormat('0.0', locale).format(pace))),
       if (price != null) (Icons.payments_outlined, formatMoney(context, price)),
+      if (session.companions.isNotEmpty)
+        (
+          Icons.group_outlined,
+          l10n.tableTotal(
+            l10n.piecesCount(
+              session.count + companionsTotal(session.companions),
+            ),
+          ),
+        ),
     ];
     return MediaQuery.withNoTextScaling(
       child: Container(

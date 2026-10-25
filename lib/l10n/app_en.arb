@@ -458,5 +458,76 @@
     }
   },
   "summaryCopied": "Summary copied to the clipboard.",
-  "couldNotShare": "Could not share the session."
+  "couldNotShare": "Could not share the session.",
+  "tableTitle": "At the table",
+  "tableTotal": "Table total: {pieces}",
+  "@tableTotal": {
+    "placeholders": {
+      "pieces": {
+        "type": "String"
+      }
+    }
+  },
+  "addCompanion": "Add someone at your table",
+  "addCompanionShort": "Add someone",
+  "companionDialogTitle": "Who is eating with you?",
+  "companionNameHint": "Name",
+  "companionDuplicate": "That name is already at the table.",
+  "companionAddOne": "Add one for {name}",
+  "@companionAddOne": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "companionTakeOne": "Take one from {name}",
+  "@companionTakeOne": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "companionRemove": "Remove {name}",
+  "@companionRemove": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "companionRemoveConfirm": "Remove {name} and their {pieces}?",
+  "@companionRemoveConfirm": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      },
+      "pieces": {
+        "type": "String"
+      }
+    }
+  },
+  "companionCountSemantics": "{name}: {pieces}",
+  "@companionCountSemantics": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      },
+      "pieces": {
+        "type": "String"
+      }
+    }
+  },
+  "remove": "Remove",
+  "add": "Add",
+  "you": "You",
+  "tablePeople": "{count, plural, =1{1 more person at the table} other{{count} more people at the table}}",
+  "@tablePeople": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  }
 }

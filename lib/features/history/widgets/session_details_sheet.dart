@@ -233,6 +233,10 @@ class SessionDetailsSheet extends ConsumerWidget {
                 );
               },
             ),
+            if (session.companions.isNotEmpty) ...[
+              const SizedBox(height: 12),
+              _TableList(session: session),
+            ],
             if (!inLifetime) ...[
               const SizedBox(height: 12),
               Text(
@@ -271,6 +275,81 @@ class SessionDetailsSheet extends ConsumerWidget {
             ),
           ],
         ),
+      ),
+    );
+  }
+}
+
+/// Everyone at the table, most pieces first, with the table total.
+class _TableList extends StatelessWidget {
+  const _TableList({required this.session});
+
+  final Session session;
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = context.l10n;
+    final colors = context.colors;
+    final people = [
+      (name: l10n.you, count: session.count, isYou: true),
+      for (final c in session.companions)
+        (name: c.name, count: c.count, isYou: false),
+    ]..sort((a, b) => b.count.compareTo(a.count));
+    final total = people.fold(0, (sum, p) => sum + p.count);
+    return Container(
+      padding: const EdgeInsets.fromLTRB(12, 10, 12, 6),
+      decoration: BoxDecoration(
+        color: colors.background,
+        borderRadius: BorderRadius.circular(16),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          Row(
+            children: [
+              Icon(Icons.group_outlined, size: 20, color: colors.accent),
+              const SizedBox(width: 10),
+              Expanded(
+                child: Text(
+                  l10n.tableTitle,
+                  style: const TextStyle(fontWeight: FontWeight.w600),
+                ),
+              ),
+              Text(
+                l10n.tableTotal(l10n.piecesCount(total)),
+                style: TextStyle(color: colors.textMuted, fontSize: 13),
+              ),
+            ],
+          ),
+          const SizedBox(height: 6),
+          for (final person in people)
+            MergeSemantics(
+              child: Padding(
+                padding: const EdgeInsets.symmetric(vertical: 4),
+                child: Row(
+                  children: [
+                    Expanded(
+                      child: Text(
+                        person.name,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: TextStyle(
+                          fontWeight: person.isYou
+                              ? FontWeight.w700
+                              : FontWeight.w500,
+                          color: person.isYou ? colors.accent : colors.text,
+                        ),
+                      ),
+                    ),
+                    Text(
+                      l10n.piecesCount(person.count),
+                      style: const TextStyle(fontWeight: FontWeight.w700),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+        ],
       ),
     );
   }

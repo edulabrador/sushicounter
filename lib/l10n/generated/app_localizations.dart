@@ -1219,6 +1219,102 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Could not share the session.'**
   String get couldNotShare;
+
+  /// No description provided for @tableTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'At the table'**
+  String get tableTitle;
+
+  /// No description provided for @tableTotal.
+  ///
+  /// In en, this message translates to:
+  /// **'Table total: {pieces}'**
+  String tableTotal(String pieces);
+
+  /// No description provided for @addCompanion.
+  ///
+  /// In en, this message translates to:
+  /// **'Add someone at your table'**
+  String get addCompanion;
+
+  /// No description provided for @addCompanionShort.
+  ///
+  /// In en, this message translates to:
+  /// **'Add someone'**
+  String get addCompanionShort;
+
+  /// No description provided for @companionDialogTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Who is eating with you?'**
+  String get companionDialogTitle;
+
+  /// No description provided for @companionNameHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Name'**
+  String get companionNameHint;
+
+  /// No description provided for @companionDuplicate.
+  ///
+  /// In en, this message translates to:
+  /// **'That name is already at the table.'**
+  String get companionDuplicate;
+
+  /// No description provided for @companionAddOne.
+  ///
+  /// In en, this message translates to:
+  /// **'Add one for {name}'**
+  String companionAddOne(String name);
+
+  /// No description provided for @companionTakeOne.
+  ///
+  /// In en, this message translates to:
+  /// **'Take one from {name}'**
+  String companionTakeOne(String name);
+
+  /// No description provided for @companionRemove.
+  ///
+  /// In en, this message translates to:
+  /// **'Remove {name}'**
+  String companionRemove(String name);
+
+  /// No description provided for @companionRemoveConfirm.
+  ///
+  /// In en, this message translates to:
+  /// **'Remove {name} and their {pieces}?'**
+  String companionRemoveConfirm(String name, String pieces);
+
+  /// No description provided for @companionCountSemantics.
+  ///
+  /// In en, this message translates to:
+  /// **'{name}: {pieces}'**
+  String companionCountSemantics(String name, String pieces);
+
+  /// No description provided for @remove.
+  ///
+  /// In en, this message translates to:
+  /// **'Remove'**
+  String get remove;
+
+  /// No description provided for @add.
+  ///
+  /// In en, this message translates to:
+  /// **'Add'**
+  String get add;
+
+  /// No description provided for @you.
+  ///
+  /// In en, this message translates to:
+  /// **'You'**
+  String get you;
+
+  /// No description provided for @tablePeople.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 more person at the table} other{{count} more people at the table}}'**
+  String tablePeople(int count);
 }
 
 class _AppLocalizationsDelegate

@@ -52,9 +52,13 @@ class FailingCompletionRepository extends FakeRepository {
 
 class FailingOngoingRepository extends FakeRepository {
   @override
-  Future<void> saveOngoingSession(int count, DateTime? startedAt) async {
+  Future<void> saveOngoingSession(
+    int count,
+    DateTime? startedAt, {
+    List<Companion> companions = const [],
+  }) async {
     if (count > 0) throw StateError('ongoing write failed');
-    await super.saveOngoingSession(count, startedAt);
+    await super.saveOngoingSession(count, startedAt, companions: companions);
   }
 }
 

@@ -150,10 +150,19 @@ class FakeRepository extends HiveRepository {
   DateTime? getOngoingStartedAt() => _ongoingStartedAt;
 
   @override
-  Future<void> saveOngoingSession(int count, DateTime? startedAt) async {
+  Future<void> saveOngoingSession(
+    int count,
+    DateTime? startedAt, {
+    List<Companion> companions = const [],
+  }) async {
     _ongoingCount = count;
     _ongoingStartedAt = startedAt;
+    _ongoingCompanions = companions;
   }
+
+  @override
+  List<Companion> getOngoingCompanions() => _ongoingCompanions;
+  List<Companion> _ongoingCompanions = const [];
 }
 
 class DelayedResetRepository extends FakeRepository {
@@ -161,12 +170,16 @@ class DelayedResetRepository extends FakeRepository {
   int resetWrites = 0;
 
   @override
-  Future<void> saveOngoingSession(int count, DateTime? startedAt) async {
+  Future<void> saveOngoingSession(
+    int count,
+    DateTime? startedAt, {
+    List<Companion> companions = const [],
+  }) async {
     if (count == 0) {
       resetWrites++;
       await resetGate.future;
     }
-    await super.saveOngoingSession(count, startedAt);
+    await super.saveOngoingSession(count, startedAt, companions: companions);
   }
 }
 
@@ -174,9 +187,13 @@ class DelayedOngoingRepository extends FakeRepository {
   final writeGate = Completer<void>();
 
   @override
-  Future<void> saveOngoingSession(int count, DateTime? startedAt) async {
+  Future<void> saveOngoingSession(
+    int count,
+    DateTime? startedAt, {
+    List<Companion> companions = const [],
+  }) async {
     await writeGate.future;
-    await super.saveOngoingSession(count, startedAt);
+    await super.saveOngoingSession(count, startedAt, companions: companions);
   }
 }
 

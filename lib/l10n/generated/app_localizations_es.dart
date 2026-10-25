@@ -734,4 +734,72 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get couldNotShare => 'No se pudo compartir la sesión.';
+
+  @override
+  String get tableTitle => 'En la mesa';
+
+  @override
+  String tableTotal(String pieces) {
+    return 'Total de la mesa: $pieces';
+  }
+
+  @override
+  String get addCompanion => 'Añadir a alguien de tu mesa';
+
+  @override
+  String get addCompanionShort => 'Añadir a alguien';
+
+  @override
+  String get companionDialogTitle => '¿Quién come contigo?';
+
+  @override
+  String get companionNameHint => 'Nombre';
+
+  @override
+  String get companionDuplicate => 'Ese nombre ya está en la mesa.';
+
+  @override
+  String companionAddOne(String name) {
+    return 'Sumar una a $name';
+  }
+
+  @override
+  String companionTakeOne(String name) {
+    return 'Restar una a $name';
+  }
+
+  @override
+  String companionRemove(String name) {
+    return 'Quitar a $name';
+  }
+
+  @override
+  String companionRemoveConfirm(String name, String pieces) {
+    return '¿Quitar a $name y sus $pieces?';
+  }
+
+  @override
+  String companionCountSemantics(String name, String pieces) {
+    return '$name: $pieces';
+  }
+
+  @override
+  String get remove => 'Quitar';
+
+  @override
+  String get add => 'Añadir';
+
+  @override
+  String get you => 'Tú';
+
+  @override
+  String tablePeople(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count personas más en la mesa',
+      one: '1 persona más en la mesa',
+    );
+    return '$_temp0';
+  }
 }

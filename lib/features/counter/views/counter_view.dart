@@ -6,6 +6,7 @@ import 'package:sushiscore/features/counter/widgets/session_timer.dart';
 import 'package:sushiscore/core/theme/app_colors.dart';
 import 'package:sushiscore/features/history/providers/session_provider.dart';
 import 'package:sushiscore/features/settings/views/settings_view.dart';
+import 'package:sushiscore/features/counter/widgets/table_section.dart';
 import 'package:sushiscore/features/stats/achievements.dart';
 import 'package:sushiscore/features/stats/widgets/achievements_grid.dart';
 import 'package:sushiscore/features/stats/providers/records_provider.dart';
@@ -290,6 +291,8 @@ class CounterView extends ConsumerWidget {
                       ),
                     ),
                   ),
+                  const SizedBox(height: 12),
+                  const TableSection(),
                 ],
               ),
             );

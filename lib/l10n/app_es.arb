@@ -186,5 +186,21 @@
   "shareTextAt": "Me comí {pieces} de sushi en {place} el {date}. Contado con Sushi Tracker.",
   "piecesLabel": "{count, plural, =1{pieza} other{piezas}}",
   "summaryCopied": "Resumen copiado al portapapeles.",
-  "couldNotShare": "No se pudo compartir la sesión."
+  "couldNotShare": "No se pudo compartir la sesión.",
+  "tableTitle": "En la mesa",
+  "tableTotal": "Total de la mesa: {pieces}",
+  "addCompanion": "Añadir a alguien de tu mesa",
+  "addCompanionShort": "Añadir a alguien",
+  "companionDialogTitle": "¿Quién come contigo?",
+  "companionNameHint": "Nombre",
+  "companionDuplicate": "Ese nombre ya está en la mesa.",
+  "companionAddOne": "Sumar una a {name}",
+  "companionTakeOne": "Restar una a {name}",
+  "companionRemove": "Quitar a {name}",
+  "companionRemoveConfirm": "¿Quitar a {name} y sus {pieces}?",
+  "companionCountSemantics": "{name}: {pieces}",
+  "remove": "Quitar",
+  "add": "Añadir",
+  "you": "Tú",
+  "tablePeople": "{count, plural, =1{1 persona más en la mesa} other{{count} personas más en la mesa}}"
 }
