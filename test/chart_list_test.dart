@@ -66,9 +66,11 @@ void main() {
 
   testWidgets('weekly pieces read as eight labelled weeks', (tester) async {
     await openStats(tester);
-    await tester.ensureVisible(find.byTooltip('Show as list').last);
+    // Trend, then weekly, then the calendar.
+    final weekly = find.byTooltip('Show as list').at(1);
+    await tester.ensureVisible(weekly);
     await tester.pumpAndSettle();
-    await tester.tap(find.byTooltip('Show as list').last);
+    await tester.tap(weekly);
     await tester.pumpAndSettle();
 
     expect(find.byType(BarChart), findsNothing);

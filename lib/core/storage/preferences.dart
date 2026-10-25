@@ -12,12 +12,20 @@ abstract class Preferences {
   /// Dark unless the user chose otherwise, so updates never change the look.
   Appearance get appearance;
   Future<void> setAppearance(Appearance value);
+
+  /// Pieces to aim for in each session, or null when off.
+  int? get sessionGoal;
+  Future<void> setSessionGoal(int? value);
+
+  /// Largest goal the settings accept.
+  static const maxSessionGoal = 999;
 }
 
 class InMemoryPreferences implements Preferences {
   InMemoryPreferences({
     this.keepScreenOn = true,
     this.appearance = Appearance.dark,
+    this.sessionGoal,
   });
 
   @override
@@ -31,6 +39,12 @@ class InMemoryPreferences implements Preferences {
 
   @override
   Future<void> setAppearance(Appearance value) async => appearance = value;
+
+  @override
+  int? sessionGoal;
+
+  @override
+  Future<void> setSessionGoal(int? value) async => sessionGoal = value;
 }
 
 /// Stored in the app-state box, where 0.3.0 already saved the setting.
@@ -39,6 +53,7 @@ class HivePreferences implements Preferences {
 
   static const _keepScreenOnKey = 'keep_screen_on';
   static const _appearanceKey = 'appearance';
+  static const _sessionGoalKey = 'session_goal';
   final Box _box;
 
   @override
@@ -57,4 +72,17 @@ class HivePreferences implements Preferences {
   @override
   Future<void> setAppearance(Appearance value) =>
       _box.put(_appearanceKey, value.name);
+
+  @override
+  int? get sessionGoal {
+    final value = _box.get(_sessionGoalKey);
+    return value is int && value > 0 && value <= Preferences.maxSessionGoal
+        ? value
+        : null;
+  }
+
+  @override
+  Future<void> setSessionGoal(int? value) => value == null
+      ? _box.delete(_sessionGoalKey)
+      : _box.put(_sessionGoalKey, value);
 }

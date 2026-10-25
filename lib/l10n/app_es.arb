@@ -202,5 +202,15 @@
   "remove": "Quitar",
   "add": "Añadir",
   "you": "Tú",
-  "tablePeople": "{count, plural, =1{1 persona más en la mesa} other{{count} personas más en la mesa}}"
+  "tablePeople": "{count, plural, =1{1 persona más en la mesa} other{{count} personas más en la mesa}}",
+  "sessionGoalTitle": "Objetivo por sesión",
+  "sessionGoalOff": "Desactivado",
+  "sessionGoalDialogTitle": "Piezas que quieres alcanzar",
+  "goalToGo": "Objetivo {goal} · te faltan {remaining}",
+  "goalReached": "¡Objetivo de {goal} conseguido!",
+  "turnOff": "Desactivar",
+  "calendarTitle": "Calendario",
+  "calendarSemantics": "Piezas por día en las últimas {weeks} semanas",
+  "calendarLess": "Menos",
+  "calendarMore": "Más"
 }

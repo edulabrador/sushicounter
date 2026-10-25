@@ -798,4 +798,40 @@ class AppLocalizationsEn extends AppLocalizations {
     );
     return '$_temp0';
   }
+
+  @override
+  String get sessionGoalTitle => 'Session goal';
+
+  @override
+  String get sessionGoalOff => 'Off';
+
+  @override
+  String get sessionGoalDialogTitle => 'Pieces to aim for';
+
+  @override
+  String goalToGo(int goal, int remaining) {
+    return 'Goal $goal · $remaining to go';
+  }
+
+  @override
+  String goalReached(int goal) {
+    return 'Goal of $goal reached!';
+  }
+
+  @override
+  String get turnOff => 'Turn off';
+
+  @override
+  String get calendarTitle => 'Calendar';
+
+  @override
+  String calendarSemantics(int weeks) {
+    return 'Pieces per day over the last $weeks weeks';
+  }
+
+  @override
+  String get calendarLess => 'Less';
+
+  @override
+  String get calendarMore => 'More';
 }

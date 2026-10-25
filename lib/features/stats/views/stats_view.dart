@@ -1,3 +1,4 @@
+import 'package:clock/clock.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
@@ -10,6 +11,7 @@ import 'package:sushiscore/shared/art/sushi_art.dart';
 
 import 'package:sushiscore/features/stats/providers/stats_provider.dart';
 import 'package:sushiscore/features/stats/widgets/achievements_grid.dart';
+import 'package:sushiscore/features/stats/widgets/calendar_heatmap.dart';
 import 'package:sushiscore/features/stats/widgets/kpi_grid.dart';
 import 'package:sushiscore/features/stats/widgets/restaurant_list.dart';
 import 'package:sushiscore/features/stats/widgets/stats_section.dart';
@@ -169,6 +171,38 @@ class StatsView extends ConsumerWidget {
                           height: 200,
                           child: WeeklyChart(weeks: weekly),
                         ),
+                      ),
+                    ),
+                  ],
+                  if (lifetime.isNotEmpty) ...[
+                    const SizedBox(height: 16),
+                    StatsSection(
+                      title: l10n.calendarTitle,
+                      rows: [
+                        for (final day
+                            in data.days.keys.toList()
+                              ..sort((a, b) => b.compareTo(a)))
+                          (
+                            label: DateFormat.yMMMEd(locale).format(day),
+                            value: l10n.piecesCount(data.days[day]!),
+                          ),
+                      ],
+                      child: LayoutBuilder(
+                        builder: (context, box) {
+                          final weeks = calendarWeeksFor(box.maxWidth);
+                          return Semantics(
+                            label: l10n.calendarSemantics(weeks),
+                            child: SingleChildScrollView(
+                              scrollDirection: Axis.horizontal,
+                              reverse: true,
+                              child: CalendarHeatmap(
+                                days: data.days,
+                                now: clock.now(),
+                                weeks: weeks,
+                              ),
+                            ),
+                          );
+                        },
                       ),
                     ),
                   ],

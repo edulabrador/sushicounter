@@ -1315,6 +1315,66 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'{count, plural, =1{1 more person at the table} other{{count} more people at the table}}'**
   String tablePeople(int count);
+
+  /// No description provided for @sessionGoalTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Session goal'**
+  String get sessionGoalTitle;
+
+  /// No description provided for @sessionGoalOff.
+  ///
+  /// In en, this message translates to:
+  /// **'Off'**
+  String get sessionGoalOff;
+
+  /// No description provided for @sessionGoalDialogTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Pieces to aim for'**
+  String get sessionGoalDialogTitle;
+
+  /// No description provided for @goalToGo.
+  ///
+  /// In en, this message translates to:
+  /// **'Goal {goal} · {remaining} to go'**
+  String goalToGo(int goal, int remaining);
+
+  /// No description provided for @goalReached.
+  ///
+  /// In en, this message translates to:
+  /// **'Goal of {goal} reached!'**
+  String goalReached(int goal);
+
+  /// No description provided for @turnOff.
+  ///
+  /// In en, this message translates to:
+  /// **'Turn off'**
+  String get turnOff;
+
+  /// No description provided for @calendarTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Calendar'**
+  String get calendarTitle;
+
+  /// No description provided for @calendarSemantics.
+  ///
+  /// In en, this message translates to:
+  /// **'Pieces per day over the last {weeks} weeks'**
+  String calendarSemantics(int weeks);
+
+  /// No description provided for @calendarLess.
+  ///
+  /// In en, this message translates to:
+  /// **'Less'**
+  String get calendarLess;
+
+  /// No description provided for @calendarMore.
+  ///
+  /// In en, this message translates to:
+  /// **'More'**
+  String get calendarMore;
 }
 
 class _AppLocalizationsDelegate

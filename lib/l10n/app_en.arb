@@ -529,5 +529,39 @@
         "type": "int"
       }
     }
-  }
+  },
+  "sessionGoalTitle": "Session goal",
+  "sessionGoalOff": "Off",
+  "sessionGoalDialogTitle": "Pieces to aim for",
+  "goalToGo": "Goal {goal} · {remaining} to go",
+  "@goalToGo": {
+    "placeholders": {
+      "goal": {
+        "type": "int"
+      },
+      "remaining": {
+        "type": "int"
+      }
+    }
+  },
+  "goalReached": "Goal of {goal} reached!",
+  "@goalReached": {
+    "placeholders": {
+      "goal": {
+        "type": "int"
+      }
+    }
+  },
+  "turnOff": "Turn off",
+  "calendarTitle": "Calendar",
+  "calendarSemantics": "Pieces per day over the last {weeks} weeks",
+  "@calendarSemantics": {
+    "placeholders": {
+      "weeks": {
+        "type": "int"
+      }
+    }
+  },
+  "calendarLess": "Less",
+  "calendarMore": "More"
 }

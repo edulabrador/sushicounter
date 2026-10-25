@@ -45,6 +45,26 @@ final appearanceProvider = NotifierProvider<AppearanceNotifier, Appearance>(
   AppearanceNotifier.new,
 );
 
+class SessionGoalNotifier extends Notifier<int?> {
+  @override
+  int? build() => ref.watch(storageProvider).preferences.sessionGoal;
+
+  Future<void> set(int? value) async {
+    final previous = state;
+    state = value;
+    try {
+      await ref.read(storageProvider).preferences.setSessionGoal(value);
+    } catch (_) {
+      if (ref.mounted) state = previous;
+      rethrow;
+    }
+  }
+}
+
+final sessionGoalProvider = NotifierProvider<SessionGoalNotifier, int?>(
+  SessionGoalNotifier.new,
+);
+
 final themeModeProvider = Provider<ThemeMode>(
   (ref) => switch (ref.watch(appearanceProvider)) {
     Appearance.dark => ThemeMode.dark,

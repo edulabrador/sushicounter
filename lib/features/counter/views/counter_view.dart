@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:sushiscore/features/counter/providers/counter_provider.dart';
 import 'package:sushiscore/features/counter/widgets/sushi_button.dart';
@@ -6,6 +7,7 @@ import 'package:sushiscore/features/counter/widgets/session_timer.dart';
 import 'package:sushiscore/core/theme/app_colors.dart';
 import 'package:sushiscore/features/history/providers/session_provider.dart';
 import 'package:sushiscore/features/settings/views/settings_view.dart';
+import 'package:sushiscore/features/settings/providers/preferences_provider.dart';
 import 'package:sushiscore/features/counter/widgets/table_section.dart';
 import 'package:sushiscore/features/stats/achievements.dart';
 import 'package:sushiscore/features/stats/widgets/achievements_grid.dart';
@@ -112,6 +114,7 @@ class CounterView extends ConsumerWidget {
     final startedAt = counterState.startedAt;
     final error = counterState.persistenceError;
     final best = ref.watch(lifetimeBestProvider);
+    final goal = ref.watch(sessionGoalProvider);
     final beatingRecord = best > 0 && counterState.count > best;
     return Scaffold(
       appBar: AppBar(
@@ -158,6 +161,10 @@ class CounterView extends ConsumerWidget {
                             fontSize: 16,
                           ),
                         ),
+                        if (goal != null) ...[
+                          const SizedBox(height: 16),
+                          _GoalProgress(count: counterState.count, goal: goal),
+                        ],
                         if (best > 0 && counterState.count > 0) ...[
                           const SizedBox(height: 16),
                           _RecordProgress(
@@ -170,8 +177,13 @@ class CounterView extends ConsumerWidget {
                           mood: beatingRecord
                               ? SushiMood.starry
                               : SushiMood.happy,
-                          onTap: () =>
-                              ref.read(counterProvider.notifier).increment(),
+                          onTap: () {
+                            ref.read(counterProvider.notifier).increment();
+                            if (goal != null &&
+                                ref.read(counterProvider).count == goal) {
+                              HapticFeedback.mediumImpact();
+                            }
+                          },
                           onLongPress: () =>
                               ref.read(counterProvider.notifier).decrement(),
                           size: sushiSize,
@@ -339,6 +351,60 @@ class _Metric extends StatelessWidget {
 }
 
 /// How close the session is to the best one of this lifetime.
+class _GoalProgress extends StatelessWidget {
+  const _GoalProgress({required this.count, required this.goal});
+
+  final int count;
+  final int goal;
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = context.l10n;
+    final colors = context.colors;
+    final reached = count >= goal;
+    final label = reached
+        ? l10n.goalReached(goal)
+        : l10n.goalToGo(goal, goal - count);
+    return ConstrainedBox(
+      constraints: const BoxConstraints(maxWidth: 320),
+      child: Column(
+        children: [
+          Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Icon(
+                reached ? Icons.check_circle : Icons.flag_outlined,
+                size: 16,
+                color: colors.accent,
+              ),
+              const SizedBox(width: 6),
+              Flexible(
+                child: Text(
+                  label,
+                  textAlign: TextAlign.center,
+                  style: TextStyle(
+                    color: reached ? colors.accent : colors.textMuted,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 8),
+          ClipRRect(
+            borderRadius: BorderRadius.circular(8),
+            child: LinearProgressIndicator(
+              value: (count / goal).clamp(0.0, 1.0),
+              minHeight: 8,
+              semanticsLabel: label,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
 class _RecordProgress extends StatelessWidget {
   const _RecordProgress({required this.count, required this.best});
 
