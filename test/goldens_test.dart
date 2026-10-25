@@ -11,9 +11,11 @@ import 'package:sushiscore/core/platform/backup_files.dart';
 import 'package:sushiscore/core/platform/screen_awake.dart';
 import 'package:sushiscore/core/providers/storage_provider.dart';
 import 'package:sushiscore/core/storage/preferences.dart';
+import 'package:sushiscore/features/history/widgets/share_session_dialog.dart';
 import 'package:sushiscore/main.dart';
 
 import 'fakes.dart';
+import 'test_app.dart';
 import 'widget_test.dart' show FakeRepository;
 
 final _now = DateTime(2026, 10, 24, 21, 30);
@@ -96,4 +98,32 @@ void main() {
       });
     });
   }
+
+  testWidgets('the shared session card', (tester) async {
+    final ended = DateTime(2026, 10, 24, 21, 30);
+    await tester.pumpWidget(
+      localizedTestApp(
+        Center(
+          child: RepaintBoundary(
+            child: SessionShareCard(
+              session: Session(
+                id: 'a',
+                startedAt: ended.subtract(const Duration(minutes: 52)),
+                endedAt: ended,
+                count: 41,
+                durationSeconds: 3120,
+                priceCents: 2490,
+                restaurant: 'Sakura',
+              ),
+              isRecord: true,
+            ),
+          ),
+        ),
+      ),
+    );
+    await expectLater(
+      find.byType(SessionShareCard),
+      matchesGoldenFile('goldens/share_card.png'),
+    );
+  });
 }

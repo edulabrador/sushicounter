@@ -701,4 +701,37 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get recordBurst => '¡Nuevo récord!';
+
+  @override
+  String get shareSession => 'Compartir sesión';
+
+  @override
+  String get share => 'Compartir';
+
+  @override
+  String shareText(String pieces, String date) {
+    return 'Me comí $pieces de sushi el $date. Contado con Sushi Tracker.';
+  }
+
+  @override
+  String shareTextAt(String pieces, String place, String date) {
+    return 'Me comí $pieces de sushi en $place el $date. Contado con Sushi Tracker.';
+  }
+
+  @override
+  String piecesLabel(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'piezas',
+      one: 'pieza',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get summaryCopied => 'Resumen copiado al portapapeles.';
+
+  @override
+  String get couldNotShare => 'No se pudo compartir la sesión.';
 }

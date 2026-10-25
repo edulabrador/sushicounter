@@ -1,6 +1,7 @@
 package dev.edulabrador.sushiscore
 
 import android.app.Activity
+import android.content.ClipData
 import android.content.ActivityNotFoundException
 import android.content.Intent
 import android.net.Uri
@@ -72,6 +73,40 @@ class MainActivity : FlutterActivity() {
 
         MethodChannel(messenger, "dev.edulabrador.sushiscore/files")
             .setMethodCallHandler { call, result -> handleFileCall(call, result) }
+
+        MethodChannel(messenger, "dev.edulabrador.sushiscore/share")
+            .setMethodCallHandler { call, result -> handleShareCall(call, result) }
+    }
+
+    /** Opens the share sheet with a session image served by ShareImageProvider. */
+    private fun handleShareCall(call: MethodCall, result: MethodChannel.Result) {
+        if (call.method != "shareImage") return result.notImplemented()
+        val bytes = call.argument<ByteArray>("bytes")
+        val name = call.argument<String>("name")
+        if (bytes == null || name == null || !ShareImages.isSafeName(name)) {
+            return result.error("args", "Bad share request", null)
+        }
+        try {
+            ShareImages.write(cacheDir, name, bytes)
+            val uri = Uri.Builder()
+                .scheme("content")
+                .authority("$packageName.share")
+                .appendPath(name)
+                .build()
+            val send = Intent(Intent.ACTION_SEND)
+                .setType("image/png")
+                .putExtra(Intent.EXTRA_STREAM, uri)
+                .putExtra(Intent.EXTRA_TEXT, call.argument<String>("text"))
+                .addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
+            // The grant travels with the clip data through the chooser.
+            send.clipData = ClipData.newRawUri(null, uri)
+            startActivity(Intent.createChooser(send, call.argument<String>("title")))
+            result.success(true)
+        } catch (e: ActivityNotFoundException) {
+            result.error("unavailable", "No app can share images", null)
+        } catch (e: IOException) {
+            result.error("io", e.message, null)
+        }
     }
 
     override fun cleanUpFlutterEngine(flutterEngine: FlutterEngine) {

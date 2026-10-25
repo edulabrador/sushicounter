@@ -13,6 +13,7 @@ import 'package:intl/intl.dart';
 import 'package:sushiscore/features/history/history_entries.dart';
 import 'package:sushiscore/features/stats/stats_logic.dart';
 import 'package:sushiscore/features/history/widgets/edit_session_dialog.dart';
+import 'package:sushiscore/features/history/widgets/share_session_dialog.dart';
 
 /// Watches the session list so a price change shows up immediately.
 class SessionDetailsSheet extends ConsumerWidget {
@@ -94,6 +95,27 @@ class SessionDetailsSheet extends ConsumerWidget {
     }
   }
 
+  Future<void> _share(
+    BuildContext context,
+    Session session, {
+    required bool isRecord,
+  }) async {
+    final l10n = context.l10n;
+    final messenger = ScaffoldMessenger.of(context);
+    final result = await showDialog<ShareResult>(
+      context: context,
+      builder: (_) => ShareSessionDialog(session: session, isRecord: isRecord),
+    );
+    final message = switch (result) {
+      ShareResult.copied => l10n.summaryCopied,
+      ShareResult.failed => l10n.couldNotShare,
+      ShareResult.shared || null => null,
+    };
+    if (message != null) {
+      messenger.showSnackBar(SnackBar(content: Text(message)));
+    }
+  }
+
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final l10n = context.l10n;
@@ -148,6 +170,11 @@ class SessionDetailsSheet extends ConsumerWidget {
                       ),
                     ],
                   ),
+                ),
+                IconButton(
+                  onPressed: () => _share(context, session, isRecord: isRecord),
+                  tooltip: l10n.shareSession,
+                  icon: const Icon(Icons.share_outlined),
                 ),
                 IconButton(
                   onPressed: () => _editSession(context, ref, session),

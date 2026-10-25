@@ -421,5 +421,42 @@
   },
   "sessionInFuture": "A session cannot end in the future.",
   "couldNotSaveSession": "Could not save the changes.",
-  "recordBurst": "New record!"
+  "recordBurst": "New record!",
+  "shareSession": "Share session",
+  "share": "Share",
+  "shareText": "I ate {pieces} of sushi on {date}. Counted with Sushi Tracker.",
+  "@shareText": {
+    "placeholders": {
+      "pieces": {
+        "type": "String"
+      },
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "shareTextAt": "I ate {pieces} of sushi at {place} on {date}. Counted with Sushi Tracker.",
+  "@shareTextAt": {
+    "placeholders": {
+      "pieces": {
+        "type": "String"
+      },
+      "place": {
+        "type": "String"
+      },
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "piecesLabel": "{count, plural, =1{piece} other{pieces}}",
+  "@piecesLabel": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "summaryCopied": "Summary copied to the clipboard.",
+  "couldNotShare": "Could not share the session."
 }

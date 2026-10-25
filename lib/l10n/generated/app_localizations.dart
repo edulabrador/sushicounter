@@ -1177,6 +1177,48 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'New record!'**
   String get recordBurst;
+
+  /// No description provided for @shareSession.
+  ///
+  /// In en, this message translates to:
+  /// **'Share session'**
+  String get shareSession;
+
+  /// No description provided for @share.
+  ///
+  /// In en, this message translates to:
+  /// **'Share'**
+  String get share;
+
+  /// No description provided for @shareText.
+  ///
+  /// In en, this message translates to:
+  /// **'I ate {pieces} of sushi on {date}. Counted with Sushi Tracker.'**
+  String shareText(String pieces, String date);
+
+  /// No description provided for @shareTextAt.
+  ///
+  /// In en, this message translates to:
+  /// **'I ate {pieces} of sushi at {place} on {date}. Counted with Sushi Tracker.'**
+  String shareTextAt(String pieces, String place, String date);
+
+  /// No description provided for @piecesLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{piece} other{pieces}}'**
+  String piecesLabel(int count);
+
+  /// No description provided for @summaryCopied.
+  ///
+  /// In en, this message translates to:
+  /// **'Summary copied to the clipboard.'**
+  String get summaryCopied;
+
+  /// No description provided for @couldNotShare.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not share the session.'**
+  String get couldNotShare;
 }
 
 class _AppLocalizationsDelegate

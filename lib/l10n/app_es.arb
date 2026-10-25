@@ -179,5 +179,12 @@
   "countInvalid": "Escribe un número entero del 1 al {max}.",
   "sessionInFuture": "Una sesión no puede terminar en el futuro.",
   "couldNotSaveSession": "No se pudieron guardar los cambios.",
-  "recordBurst": "¡Nuevo récord!"
+  "recordBurst": "¡Nuevo récord!",
+  "shareSession": "Compartir sesión",
+  "share": "Compartir",
+  "shareText": "Me comí {pieces} de sushi el {date}. Contado con Sushi Tracker.",
+  "shareTextAt": "Me comí {pieces} de sushi en {place} el {date}. Contado con Sushi Tracker.",
+  "piecesLabel": "{count, plural, =1{pieza} other{piezas}}",
+  "summaryCopied": "Resumen copiado al portapapeles.",
+  "couldNotShare": "No se pudo compartir la sesión."
 }
