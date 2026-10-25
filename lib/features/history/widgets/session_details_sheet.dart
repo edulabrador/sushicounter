@@ -12,6 +12,7 @@ import 'package:sushiscore/shared/art/sushi_art.dart';
 import 'package:intl/intl.dart';
 import 'package:sushiscore/features/history/history_entries.dart';
 import 'package:sushiscore/features/stats/stats_logic.dart';
+import 'package:sushiscore/features/history/widgets/edit_session_dialog.dart';
 
 /// Watches the session list so a price change shows up immediately.
 class SessionDetailsSheet extends ConsumerWidget {
@@ -70,6 +71,29 @@ class SessionDetailsSheet extends ConsumerWidget {
     }
   }
 
+  Future<void> _editSession(
+    BuildContext context,
+    WidgetRef ref,
+    Session session,
+  ) async {
+    final l10n = context.l10n;
+    final messenger = ScaffoldMessenger.of(context);
+    final result = await showDialog<SessionEdit>(
+      context: context,
+      builder: (_) => EditSessionDialog(session: session),
+    );
+    if (result == null) return;
+    try {
+      await ref
+          .read(storageProvider)
+          .editSession(id, count: result.count, startedAt: result.startedAt);
+      ref.read(globalStateProvider.notifier).reload();
+      ref.read(sessionListProvider.notifier).reload();
+    } catch (_) {
+      messenger.showSnackBar(SnackBar(content: Text(l10n.couldNotSaveSession)));
+    }
+  }
+
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final l10n = context.l10n;
@@ -124,6 +148,11 @@ class SessionDetailsSheet extends ConsumerWidget {
                       ),
                     ],
                   ),
+                ),
+                IconButton(
+                  onPressed: () => _editSession(context, ref, session),
+                  tooltip: l10n.editSession,
+                  icon: const Icon(Icons.edit_outlined),
                 ),
               ],
             ),

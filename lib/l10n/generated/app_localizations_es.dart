@@ -681,4 +681,21 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get appearanceSystem => 'Sistema';
+
+  @override
+  String get editSession => 'Editar sesión';
+
+  @override
+  String get sessionStart => 'Inicio';
+
+  @override
+  String countInvalid(int max) {
+    return 'Escribe un número entero del 1 al $max.';
+  }
+
+  @override
+  String get sessionInFuture => 'Una sesión no puede terminar en el futuro.';
+
+  @override
+  String get couldNotSaveSession => 'No se pudieron guardar los cambios.';
 }

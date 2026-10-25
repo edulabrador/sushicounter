@@ -107,6 +107,27 @@ class FakeRepository extends HiveRepository {
   }
 
   @override
+  Future<Session?> editSession(
+    String id, {
+    required int count,
+    required DateTime startedAt,
+  }) async {
+    final session = sessions[id];
+    if (session == null) return null;
+    if (session.contributionEpoch == _global.epoch) {
+      await adjustGlobalState(
+        tapsDelta: count - session.count,
+        sessionsDelta: 0,
+      );
+    }
+    return sessions[id] = session.copyWith(
+      count: count,
+      startedAt: startedAt,
+      endedAt: startedAt.add(Duration(seconds: session.durationSeconds)),
+    );
+  }
+
+  @override
   Future<Session?> setSessionRestaurant(String id, String? restaurant) async {
     final session = sessions[id];
     if (session == null) return null;

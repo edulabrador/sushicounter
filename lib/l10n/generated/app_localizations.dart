@@ -1141,6 +1141,36 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'System'**
   String get appearanceSystem;
+
+  /// No description provided for @editSession.
+  ///
+  /// In en, this message translates to:
+  /// **'Edit session'**
+  String get editSession;
+
+  /// No description provided for @sessionStart.
+  ///
+  /// In en, this message translates to:
+  /// **'Start'**
+  String get sessionStart;
+
+  /// No description provided for @countInvalid.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter a whole number from 1 to {max}.'**
+  String countInvalid(int max);
+
+  /// No description provided for @sessionInFuture.
+  ///
+  /// In en, this message translates to:
+  /// **'A session cannot end in the future.'**
+  String get sessionInFuture;
+
+  /// No description provided for @couldNotSaveSession.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not save the changes.'**
+  String get couldNotSaveSession;
 }
 
 class _AppLocalizationsDelegate

@@ -408,5 +408,17 @@
   "appearanceTitle": "Appearance",
   "appearanceDark": "Dark",
   "appearanceLight": "Light",
-  "appearanceSystem": "System"
+  "appearanceSystem": "System",
+  "editSession": "Edit session",
+  "sessionStart": "Start",
+  "countInvalid": "Enter a whole number from 1 to {max}.",
+  "@countInvalid": {
+    "placeholders": {
+      "max": {
+        "type": "int"
+      }
+    }
+  },
+  "sessionInFuture": "A session cannot end in the future.",
+  "couldNotSaveSession": "Could not save the changes."
 }

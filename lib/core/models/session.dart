@@ -16,6 +16,9 @@ class Session extends HiveObject {
   /// Where the session happened, if recorded.
   final String? restaurant;
 
+  /// Most pieces a session can be edited to.
+  static const maxCount = 9999;
+
   /// Longest restaurant name accepted from the UI and from backups.
   static const maxRestaurantLength = 60;
 
@@ -37,14 +40,17 @@ class Session extends HiveObject {
   });
 
   Session copyWith({
+    int? count,
+    DateTime? startedAt,
+    DateTime? endedAt,
     int? contributionEpoch,
     Object? priceCents = _keep,
     Object? restaurant = _keep,
   }) => Session(
     id: id,
-    startedAt: startedAt,
-    endedAt: endedAt,
-    count: count,
+    startedAt: startedAt ?? this.startedAt,
+    endedAt: endedAt ?? this.endedAt,
+    count: count ?? this.count,
     durationSeconds: durationSeconds,
     contributionEpoch: contributionEpoch ?? this.contributionEpoch,
     priceCents: identical(priceCents, _keep)

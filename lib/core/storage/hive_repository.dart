@@ -173,6 +173,38 @@ class HiveRepository {
         return updated;
       });
 
+  /// Corrects a saved session's pieces and moves it to start at
+  /// [startedAt], keeping its duration. Lifetime totals follow the new count
+  /// when the session belongs to the current lifetime. Returns null if the
+  /// session no longer exists.
+  Future<Session?> editSession(
+    String id, {
+    required int count,
+    required DateTime startedAt,
+  }) => _serial(() async {
+    final session = _sessionBox.get(id);
+    if (session == null) return null;
+    if (count < 1 || count > Session.maxCount) {
+      throw ArgumentError.value(count, 'count');
+    }
+    final updated = session.copyWith(
+      count: count,
+      startedAt: startedAt,
+      endedAt: startedAt.add(Duration(seconds: session.durationSeconds)),
+    );
+    final current = getGlobalState();
+    await _runJournal({
+      'kind': 'update',
+      'session': _sessionMap(updated),
+      'global': _globalMap(
+        session.contributionEpoch == current.epoch
+            ? _adjust(current, count - session.count, 0)
+            : current,
+      ),
+    });
+    return updated;
+  });
+
   BackupData exportBackup() =>
       BackupData(global: getGlobalState(), sessions: getAllSessions());
 
@@ -218,6 +250,9 @@ class HiveRepository {
         break;
       case 'delete':
         if (session != null) await _sessionBox.delete(session.id);
+        break;
+      case 'update':
+        if (session != null) await _sessionBox.put(session.id, session);
         break;
       case 'replace':
         final sessions = [
