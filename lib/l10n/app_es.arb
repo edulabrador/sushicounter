@@ -166,5 +166,8 @@
   "achPriceWatcher": "Cazaofertas",
   "achPriceWatcherDesc": "Añade el precio a 5 sesiones",
   "achExplorer": "Explorador",
-  "achExplorerDesc": "Come en 3 restaurantes distintos"
+  "achExplorerDesc": "Come en 3 restaurantes distintos",
+  "showAsList": "Ver como lista",
+  "showAsChart": "Ver como gráfico",
+  "weekOf": "Semana del {date}"
 }

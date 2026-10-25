@@ -654,4 +654,15 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get achExplorerDesc => 'Eat at 3 different restaurants';
+
+  @override
+  String get showAsList => 'Show as list';
+
+  @override
+  String get showAsChart => 'Show as chart';
+
+  @override
+  String weekOf(String date) {
+    return 'Week of $date';
+  }
 }

@@ -658,4 +658,15 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get achExplorerDesc => 'Come en 3 restaurantes distintos';
+
+  @override
+  String get showAsList => 'Ver como lista';
+
+  @override
+  String get showAsChart => 'Ver como gráfico';
+
+  @override
+  String weekOf(String date) {
+    return 'Semana del $date';
+  }
 }

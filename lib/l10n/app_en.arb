@@ -394,5 +394,15 @@
   "achPriceWatcher": "Bargain hunter",
   "achPriceWatcherDesc": "Add the price to 5 sessions",
   "achExplorer": "Explorer",
-  "achExplorerDesc": "Eat at 3 different restaurants"
+  "achExplorerDesc": "Eat at 3 different restaurants",
+  "showAsList": "Show as list",
+  "showAsChart": "Show as chart",
+  "weekOf": "Week of {date}",
+  "@weekOf": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  }
 }

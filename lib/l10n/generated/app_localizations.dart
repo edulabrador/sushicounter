@@ -1099,6 +1099,24 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Eat at 3 different restaurants'**
   String get achExplorerDesc;
+
+  /// No description provided for @showAsList.
+  ///
+  /// In en, this message translates to:
+  /// **'Show as list'**
+  String get showAsList;
+
+  /// No description provided for @showAsChart.
+  ///
+  /// In en, this message translates to:
+  /// **'Show as chart'**
+  String get showAsChart;
+
+  /// No description provided for @weekOf.
+  ///
+  /// In en, this message translates to:
+  /// **'Week of {date}'**
+  String weekOf(String date);
 }
 
 class _AppLocalizationsDelegate

@@ -50,6 +50,7 @@ class _StatsViewState extends ConsumerState<StatsView> {
     final records = computeRecords(lifetime, now);
     final costPerPiece = summary.costPerPieceCents;
     final achievements = computeAchievements(sessions);
+    final weekly = weeklyPieces(lifetime, now);
     final theme = Theme.of(context);
     final resetAt = global.lastResetAt;
     final range = _filter.label(l10n);
@@ -132,6 +133,17 @@ class _StatsViewState extends ConsumerState<StatsView> {
                   const SizedBox(height: 16),
                   StatsSection(
                     title: l10n.sessionTrend,
+                    rows: summary.sessions.isEmpty
+                        ? null
+                        : [
+                            for (final session in summary.sessions.reversed)
+                              (
+                                label: DateFormat.yMMMd(
+                                  locale,
+                                ).add_Hm().format(session.endedAt),
+                                value: l10n.tapsCount(session.count),
+                              ),
+                          ],
                     trailing: summary.sessions.isEmpty
                         ? null
                         : AverageLegend(
@@ -175,13 +187,20 @@ class _StatsViewState extends ConsumerState<StatsView> {
                     const SizedBox(height: 16),
                     StatsSection(
                       title: l10n.weeklyTitle,
+                      rows: [
+                        for (final week in weekly.reversed)
+                          (
+                            label: l10n.weekOf(
+                              DateFormat.MMMd(locale).format(week.weekStart),
+                            ),
+                            value: l10n.piecesCount(week.pieces),
+                          ),
+                      ],
                       child: Semantics(
                         label: l10n.weeklySemantics(8),
                         child: SizedBox(
                           height: 200,
-                          child: WeeklyChart(
-                            weeks: weeklyPieces(lifetime, now),
-                          ),
+                          child: WeeklyChart(weeks: weekly),
                         ),
                       ),
                     ),
