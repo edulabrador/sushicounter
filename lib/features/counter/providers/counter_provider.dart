@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:clock/clock.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:uuid/uuid.dart';
 import 'package:sushiscore/core/models/session.dart';
@@ -95,7 +96,7 @@ class CounterNotifier extends Notifier<CounterState> {
     // Older installs could persist a count without a start time.
     return CounterState(
       count: count,
-      startedAt: repo.getOngoingStartedAt() ?? DateTime.now(),
+      startedAt: repo.getOngoingStartedAt() ?? clock.now(),
     );
   }
 
@@ -141,7 +142,7 @@ class CounterNotifier extends Notifier<CounterState> {
     if (!state.canEdit) return;
     state = state.copyWith(
       count: state.count + 1,
-      startedAt: state.startedAt ?? DateTime.now(),
+      startedAt: state.startedAt ?? clock.now(),
     );
     _persistOngoing();
   }
@@ -194,7 +195,7 @@ class CounterNotifier extends Notifier<CounterState> {
     if (state.isEnding || state.isPersisting || state.count == 0) return;
     state = state.copyWith(phase: CounterPhase.ending);
     try {
-      final endedAt = DateTime.now();
+      final endedAt = clock.now();
       final startedAt = state.startedAt ?? endedAt;
       final rawDuration = endedAt.difference(startedAt).inSeconds;
       final duration = rawDuration < 0 ? 0 : rawDuration;

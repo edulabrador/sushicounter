@@ -1,3 +1,4 @@
+import 'package:clock/clock.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
@@ -46,7 +47,7 @@ class _StatsViewState extends ConsumerState<StatsView> {
     final sessions = ref.watch(sessionListProvider);
     final lifetime = lifetimeSessions(sessions, global.epoch);
     final summary = summarizeSessions(sessions, _filter, epoch: global.epoch);
-    final now = DateTime.now();
+    final now = clock.now();
     final records = computeRecords(lifetime, now);
     final costPerPiece = summary.costPerPieceCents;
     final achievements = computeAchievements(sessions);
