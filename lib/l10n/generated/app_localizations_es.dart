@@ -580,4 +580,82 @@ class AppLocalizationsEs extends AppLocalizations {
   String perPiece(String value) {
     return '$value/pieza';
   }
+
+  @override
+  String get achievementsTitle => 'Logros';
+
+  @override
+  String achievementsCount(int unlocked, int total) {
+    return '$unlocked de $total';
+  }
+
+  @override
+  String achievementUnlocked(String name) {
+    return 'Logro desbloqueado: $name';
+  }
+
+  @override
+  String achievementProgress(int progress, int target) {
+    return '$progress/$target';
+  }
+
+  @override
+  String get achFirstSession => 'Primer bocado';
+
+  @override
+  String get achFirstSessionDesc => 'Guarda tu primera sesión';
+
+  @override
+  String get achTenSessions => 'Cliente habitual';
+
+  @override
+  String get achTenSessionsDesc => 'Guarda 10 sesiones';
+
+  @override
+  String get achFiftySessions => 'Veterano del sushi';
+
+  @override
+  String get achFiftySessionsDesc => 'Guarda 50 sesiones';
+
+  @override
+  String get achBigAppetite => 'Buen saque';
+
+  @override
+  String get achBigAppetiteDesc => '30 piezas en una sesión';
+
+  @override
+  String get achSushiMaster => 'Maestro sushi';
+
+  @override
+  String get achSushiMasterDesc => '50 piezas en una sesión';
+
+  @override
+  String get achHundredPieces => 'Centenario';
+
+  @override
+  String get achHundredPiecesDesc => '100 piezas en total';
+
+  @override
+  String get achThousandPieces => 'Club de los mil';
+
+  @override
+  String get achThousandPiecesDesc => '1.000 piezas en total';
+
+  @override
+  String get achRegular => 'Cada semana';
+
+  @override
+  String get achRegularDesc => '4 semanas seguidas con sesión';
+
+  @override
+  String get achPriceWatcher => 'Cazaofertas';
+
+  @override
+  String get achPriceWatcherDesc => 'Añade el precio a 5 sesiones';
+
+  @override
+  String get achExplorer => 'Explorador';
+
+  @override
+  String get achExplorerDesc => 'Come en 3 restaurantes distintos';
 }

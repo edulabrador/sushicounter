@@ -955,6 +955,150 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'{value}/piece'**
   String perPiece(String value);
+
+  /// No description provided for @achievementsTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Achievements'**
+  String get achievementsTitle;
+
+  /// No description provided for @achievementsCount.
+  ///
+  /// In en, this message translates to:
+  /// **'{unlocked} of {total}'**
+  String achievementsCount(int unlocked, int total);
+
+  /// No description provided for @achievementUnlocked.
+  ///
+  /// In en, this message translates to:
+  /// **'Achievement unlocked: {name}'**
+  String achievementUnlocked(String name);
+
+  /// No description provided for @achievementProgress.
+  ///
+  /// In en, this message translates to:
+  /// **'{progress}/{target}'**
+  String achievementProgress(int progress, int target);
+
+  /// No description provided for @achFirstSession.
+  ///
+  /// In en, this message translates to:
+  /// **'First bite'**
+  String get achFirstSession;
+
+  /// No description provided for @achFirstSessionDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Save your first session'**
+  String get achFirstSessionDesc;
+
+  /// No description provided for @achTenSessions.
+  ///
+  /// In en, this message translates to:
+  /// **'Regular customer'**
+  String get achTenSessions;
+
+  /// No description provided for @achTenSessionsDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Save 10 sessions'**
+  String get achTenSessionsDesc;
+
+  /// No description provided for @achFiftySessions.
+  ///
+  /// In en, this message translates to:
+  /// **'Sushi veteran'**
+  String get achFiftySessions;
+
+  /// No description provided for @achFiftySessionsDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Save 50 sessions'**
+  String get achFiftySessionsDesc;
+
+  /// No description provided for @achBigAppetite.
+  ///
+  /// In en, this message translates to:
+  /// **'Big appetite'**
+  String get achBigAppetite;
+
+  /// No description provided for @achBigAppetiteDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'30 pieces in one session'**
+  String get achBigAppetiteDesc;
+
+  /// No description provided for @achSushiMaster.
+  ///
+  /// In en, this message translates to:
+  /// **'Sushi master'**
+  String get achSushiMaster;
+
+  /// No description provided for @achSushiMasterDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'50 pieces in one session'**
+  String get achSushiMasterDesc;
+
+  /// No description provided for @achHundredPieces.
+  ///
+  /// In en, this message translates to:
+  /// **'Century'**
+  String get achHundredPieces;
+
+  /// No description provided for @achHundredPiecesDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'100 pieces in total'**
+  String get achHundredPiecesDesc;
+
+  /// No description provided for @achThousandPieces.
+  ///
+  /// In en, this message translates to:
+  /// **'Thousand club'**
+  String get achThousandPieces;
+
+  /// No description provided for @achThousandPiecesDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'1,000 pieces in total'**
+  String get achThousandPiecesDesc;
+
+  /// No description provided for @achRegular.
+  ///
+  /// In en, this message translates to:
+  /// **'Every week'**
+  String get achRegular;
+
+  /// No description provided for @achRegularDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'4 weeks in a row with a session'**
+  String get achRegularDesc;
+
+  /// No description provided for @achPriceWatcher.
+  ///
+  /// In en, this message translates to:
+  /// **'Bargain hunter'**
+  String get achPriceWatcher;
+
+  /// No description provided for @achPriceWatcherDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Add the price to 5 sessions'**
+  String get achPriceWatcherDesc;
+
+  /// No description provided for @achExplorer.
+  ///
+  /// In en, this message translates to:
+  /// **'Explorer'**
+  String get achExplorer;
+
+  /// No description provided for @achExplorerDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Eat at 3 different restaurants'**
+  String get achExplorerDesc;
 }
 
 class _AppLocalizationsDelegate

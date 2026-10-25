@@ -9,6 +9,8 @@ import 'package:sushiscore/features/stats/stats_logic.dart';
 import 'package:sushiscore/l10n/l10n.dart';
 import 'package:sushiscore/shared/art/sushi_art.dart';
 
+import 'package:sushiscore/features/stats/achievements.dart';
+import 'package:sushiscore/features/stats/widgets/achievements_grid.dart';
 import 'package:sushiscore/features/stats/widgets/kpi_grid.dart';
 import 'package:sushiscore/features/stats/widgets/restaurant_list.dart';
 import 'package:sushiscore/features/stats/widgets/stats_section.dart';
@@ -47,6 +49,7 @@ class _StatsViewState extends ConsumerState<StatsView> {
     final now = DateTime.now();
     final records = computeRecords(lifetime, now);
     final costPerPiece = summary.costPerPieceCents;
+    final achievements = computeAchievements(sessions);
     final theme = Theme.of(context);
     final resetAt = global.lastResetAt;
     final range = _filter.label(l10n);
@@ -218,6 +221,29 @@ class _StatsViewState extends ConsumerState<StatsView> {
                         '${records.piecesThisMonth}',
                       ),
                     ],
+                  ),
+                  const SizedBox(height: 24),
+                  Wrap(
+                    crossAxisAlignment: WrapCrossAlignment.end,
+                    spacing: 8,
+                    children: [
+                      Text(
+                        l10n.achievementsTitle,
+                        style: theme.textTheme.titleLarge,
+                      ),
+                      Text(
+                        l10n.achievementsCount(
+                          achievements.where((a) => a.unlocked).length,
+                          achievements.length,
+                        ),
+                        style: theme.textTheme.bodyMedium,
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 12),
+                  AchievementsGrid(
+                    achievements: achievements,
+                    width: constraints.maxWidth,
                   ),
                 ],
               ),

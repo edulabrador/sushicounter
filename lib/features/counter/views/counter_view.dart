@@ -4,7 +4,10 @@ import 'package:sushiscore/features/counter/providers/counter_provider.dart';
 import 'package:sushiscore/features/counter/widgets/sushi_button.dart';
 import 'package:sushiscore/features/counter/widgets/session_timer.dart';
 import 'package:sushiscore/core/theme/app_colors.dart';
+import 'package:sushiscore/features/history/providers/session_provider.dart';
 import 'package:sushiscore/features/settings/views/settings_view.dart';
+import 'package:sushiscore/features/stats/achievements.dart';
+import 'package:sushiscore/features/stats/widgets/achievements_grid.dart';
 import 'package:sushiscore/features/stats/providers/records_provider.dart';
 import 'package:sushiscore/shared/art/sushi_art.dart';
 import 'package:sushiscore/l10n/l10n.dart';
@@ -26,12 +29,38 @@ String counterErrorMessage(AppLocalizations l10n, CounterError error) =>
 class CounterView extends ConsumerWidget {
   const CounterView({super.key});
 
-  Future<void> _endSession(WidgetRef ref) async {
+  Future<void> _endSession(BuildContext context, WidgetRef ref) async {
+    final l10n = context.l10n;
+    final messenger = ScaffoldMessenger.of(context);
+    final before = computeAchievements(ref.read(sessionListProvider));
     try {
       await ref.read(counterProvider.notifier).endSession();
     } catch (_) {
       // The provider exposes the error and keeps the session for retry.
+      return;
     }
+    final unlocked = newlyUnlocked(
+      before,
+      computeAchievements(ref.read(sessionListProvider)),
+    );
+    if (unlocked.isEmpty) return;
+    messenger.showSnackBar(
+      SnackBar(
+        content: Row(
+          children: [
+            const SushiArt(size: 32, mood: SushiMood.starry),
+            const SizedBox(width: 12),
+            Expanded(
+              child: Text(
+                l10n.achievementUnlocked(
+                  unlocked.map((id) => id.title(l10n)).join(', '),
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
   }
 
   Future<void> _discardSession(BuildContext context, WidgetRef ref) async {
@@ -171,7 +200,7 @@ class CounterView extends ConsumerWidget {
                                 counterState.count > 0 &&
                                     !counterState.isEnding &&
                                     !counterState.isPersisting
-                                ? () => _endSession(ref)
+                                ? () => _endSession(context, ref)
                                 : null,
                             icon: counterState.isEnding
                                 ? const SizedBox(
