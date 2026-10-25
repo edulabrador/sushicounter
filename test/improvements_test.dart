@@ -23,6 +23,7 @@ import 'package:sushiscore/features/stats/views/stats_view.dart';
 import 'package:sushiscore/main.dart';
 
 import 'fakes.dart';
+import 'settings_helpers.dart';
 import 'widget_test.dart' show FakeRepository, makeContainer;
 
 Session _session(
@@ -452,7 +453,7 @@ void main() {
       await tester.tap(find.byTooltip('Settings'));
       await tester.pumpAndSettle();
 
-      await tester.tap(find.text('Export data'));
+      await tapSetting(tester, 'Export data');
       await tester.pumpAndSettle();
       expect(decodeBackup(clipboard!).sessions.single.id, 'a');
 
@@ -460,7 +461,7 @@ void main() {
       // Let the export snackbar time out; it floats over the last rows.
       await tester.pump(const Duration(seconds: 5));
       await tester.pumpAndSettle();
-      await tester.tap(find.text('Import data'));
+      await tapSetting(tester, 'Import data');
       await tester.pumpAndSettle();
       await tester.tap(find.byTooltip('Paste'));
       await tester.pumpAndSettle();
@@ -479,7 +480,7 @@ void main() {
       await tester.pumpWidget(_app(repo));
       await tester.tap(find.byTooltip('Settings'));
       await tester.pumpAndSettle();
-      await tester.tap(find.text('Import data'));
+      await tapSetting(tester, 'Import data');
       await tester.pumpAndSettle();
       await tester.enterText(find.byType(TextField), 'hello');
       await tester.tap(find.text('Continue'));

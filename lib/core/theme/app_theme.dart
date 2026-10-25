@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 
 import '../../shared/art/sushi_art.dart';
 import 'app_colors.dart';
@@ -6,15 +7,18 @@ import 'app_colors.dart';
 export 'app_colors.dart';
 
 class AppTheme {
-  static ThemeData get darkTheme {
-    const colors = AppColors.dark;
+  static ThemeData get darkTheme => build(AppColors.dark);
+  static ThemeData get lightTheme => build(AppColors.light);
+
+  static ThemeData build(AppColors colors) {
+    final dark = colors.brightness == Brightness.dark;
     final rounded = RoundedRectangleBorder(
       borderRadius: BorderRadius.circular(20),
     );
     return ThemeData(
-      brightness: Brightness.dark,
+      brightness: colors.brightness,
       primaryColor: colors.accent,
-      colorScheme: ColorScheme.dark(
+      colorScheme: (dark ? ColorScheme.dark : ColorScheme.light)(
         primary: colors.accent,
         onPrimary: colors.onAccent,
         secondary: SushiPalette.salmonStripe,
@@ -23,12 +27,15 @@ class AppTheme {
         error: colors.danger,
       ),
       scaffoldBackgroundColor: colors.background,
-      extensions: const [colors],
+      extensions: [colors],
       appBarTheme: AppBarTheme(
         backgroundColor: Colors.transparent,
         surfaceTintColor: Colors.transparent,
         elevation: 0,
         centerTitle: true,
+        systemOverlayStyle: dark
+            ? SystemUiOverlayStyle.light
+            : SystemUiOverlayStyle.dark,
         iconTheme: IconThemeData(color: colors.textMuted),
         titleTextStyle: TextStyle(
           color: colors.text,
@@ -43,7 +50,7 @@ class AppTheme {
         margin: EdgeInsets.zero,
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(24),
-          side: const BorderSide(color: Colors.white10, width: 1),
+          side: BorderSide(color: colors.outline, width: 1),
         ),
       ),
       filledButtonTheme: FilledButtonThemeData(
@@ -60,7 +67,7 @@ class AppTheme {
           selectedBackgroundColor: colors.accent,
           selectedForegroundColor: colors.onAccent,
           foregroundColor: colors.textMuted,
-          side: const BorderSide(color: Colors.white24),
+          side: BorderSide(color: colors.outlineStrong),
         ),
       ),
       navigationBarTheme: NavigationBarThemeData(
@@ -87,13 +94,13 @@ class AppTheme {
       ),
       progressIndicatorTheme: ProgressIndicatorThemeData(
         color: colors.accent,
-        linearTrackColor: Colors.white12,
+        linearTrackColor: colors.outline,
       ),
       snackBarTheme: SnackBarThemeData(
         behavior: SnackBarBehavior.floating,
         shape: rounded,
       ),
-      dividerTheme: const DividerThemeData(color: Colors.white10),
+      dividerTheme: DividerThemeData(color: colors.outline),
       dialogTheme: DialogThemeData(
         backgroundColor: colors.surface,
         surfaceTintColor: Colors.transparent,
@@ -113,7 +120,7 @@ class AppTheme {
         backgroundColor: colors.surface,
         surfaceTintColor: Colors.transparent,
         showDragHandle: true,
-        dragHandleColor: Colors.white24,
+        dragHandleColor: colors.outlineStrong,
         shape: const RoundedRectangleBorder(
           borderRadius: BorderRadius.vertical(top: Radius.circular(28)),
         ),
@@ -154,11 +161,11 @@ class AppTheme {
         hintStyle: TextStyle(color: colors.textMuted.withValues(alpha: 0.6)),
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(14),
-          borderSide: const BorderSide(color: Colors.white24),
+          borderSide: BorderSide(color: colors.outlineStrong),
         ),
         enabledBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(14),
-          borderSide: const BorderSide(color: Colors.white24),
+          borderSide: BorderSide(color: colors.outlineStrong),
         ),
         focusedBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(14),

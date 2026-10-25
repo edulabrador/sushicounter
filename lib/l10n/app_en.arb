@@ -404,5 +404,9 @@
         "type": "String"
       }
     }
-  }
+  },
+  "appearanceTitle": "Appearance",
+  "appearanceDark": "Dark",
+  "appearanceLight": "Light",
+  "appearanceSystem": "System"
 }

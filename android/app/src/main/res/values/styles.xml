@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <!-- Window theme while the process starts. The app is always dark, so the
-         launch background is the app's navy in light and dark system modes. -->
+    <!-- Window theme while the process starts. The app opens dark by default,
+         so the launch background is its navy in light and dark system modes. -->
     <style name="LaunchTheme" parent="@android:style/Theme.Light.NoTitleBar">
         <item name="android:windowBackground">@drawable/launch_background</item>
     </style>

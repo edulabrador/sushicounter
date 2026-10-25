@@ -3,6 +3,7 @@ import 'dart:math' as math;
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
+import '../../../core/theme/app_colors.dart';
 import '../../../l10n/l10n.dart';
 import '../../../shared/art/sushi_art.dart';
 
@@ -148,7 +149,7 @@ class _SushiButtonState extends State<SushiButton>
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(widget.size / 2),
             border: _showFocus
-                ? Border.all(color: Colors.white, width: 3)
+                ? Border.all(color: context.colors.text, width: 3)
                 : null,
           ),
           child: GestureDetector(

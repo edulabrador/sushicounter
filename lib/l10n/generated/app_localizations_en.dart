@@ -665,4 +665,16 @@ class AppLocalizationsEn extends AppLocalizations {
   String weekOf(String date) {
     return 'Week of $date';
   }
+
+  @override
+  String get appearanceTitle => 'Appearance';
+
+  @override
+  String get appearanceDark => 'Dark';
+
+  @override
+  String get appearanceLight => 'Light';
+
+  @override
+  String get appearanceSystem => 'System';
 }

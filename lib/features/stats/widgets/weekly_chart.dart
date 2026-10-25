@@ -28,10 +28,10 @@ class WeeklyChart extends StatelessWidget {
           show: true,
           drawVerticalLine: false,
           horizontalInterval: yStep.toDouble(),
-          getDrawingHorizontalLine: (_) => const FlLine(
-            color: Colors.white10,
+          getDrawingHorizontalLine: (_) => FlLine(
+            color: colors.outline,
             strokeWidth: 1,
-            dashArray: [4, 6],
+            dashArray: const [4, 6],
           ),
         ),
         barTouchData: BarTouchData(
@@ -109,7 +109,7 @@ class WeeklyChart extends StatelessWidget {
                   backDrawRodData: BackgroundBarChartRodData(
                     show: true,
                     toY: maxY,
-                    color: Colors.white.withValues(alpha: 0.04),
+                    color: colors.subtle,
                   ),
                 ),
               ],

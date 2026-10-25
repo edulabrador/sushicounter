@@ -17,6 +17,7 @@ import 'package:sushiscore/features/settings/views/sections/data_section.dart';
 import 'package:sushiscore/main.dart';
 
 import 'fakes.dart';
+import 'settings_helpers.dart';
 import 'widget_test.dart' show FakeRepository;
 
 Session _session(
@@ -225,7 +226,7 @@ void main() {
       );
       await tester.pumpWidget(_app(repo, files: files));
       await _openSettings(tester);
-      await tester.tap(find.text('Export data'));
+      await tapSetting(tester, 'Export data');
       await tester.pumpAndSettle();
 
       final saved = files.saved.single;
@@ -243,7 +244,7 @@ void main() {
       final files = FakeBackupFiles(supported: true, cancel: true);
       await tester.pumpWidget(_app(FakeRepository(), files: files));
       await _openSettings(tester);
-      await tester.tap(find.text('Export data'));
+      await tapSetting(tester, 'Export data');
       await tester.pumpAndSettle();
       expect(find.byType(SnackBar), findsNothing);
     });
@@ -252,7 +253,7 @@ void main() {
       final files = FakeBackupFiles(supported: true, fail: true);
       await tester.pumpWidget(_app(FakeRepository(), files: files));
       await _openSettings(tester);
-      await tester.tap(find.text('Export data'));
+      await tapSetting(tester, 'Export data');
       await tester.pumpAndSettle();
       expect(find.text('Could not save the file.'), findsOneWidget);
     });
@@ -271,14 +272,14 @@ void main() {
       await tester.pumpWidget(_app(repo, files: files));
       await _openSettings(tester);
 
-      await tester.tap(find.text('Import data'));
+      await tapSetting(tester, 'Import data');
       await tester.pumpAndSettle();
       expect(find.textContaining('which has 1 session'), findsOneWidget);
       await tester.tap(find.text('Cancel'));
       await tester.pumpAndSettle();
       expect(repo.sessions.keys, ['current']);
 
-      await tester.tap(find.text('Import data'));
+      await tapSetting(tester, 'Import data');
       await tester.pumpAndSettle();
       await tester.tap(find.text('Replace data'));
       await tester.pumpAndSettle();
@@ -295,7 +296,7 @@ void main() {
       final repo = FakeRepository();
       await tester.pumpWidget(_app(repo, files: files));
       await _openSettings(tester);
-      await tester.tap(find.text('Import data'));
+      await tapSetting(tester, 'Import data');
       await tester.pumpAndSettle();
       expect(
         find.text('This is not a valid Sushi Tracker backup.'),
@@ -308,7 +309,7 @@ void main() {
       final files = FakeBackupFiles(supported: true, fail: true);
       await tester.pumpWidget(_app(FakeRepository(), files: files));
       await _openSettings(tester);
-      await tester.tap(find.text('Import data'));
+      await tapSetting(tester, 'Import data');
       await tester.pumpAndSettle();
       expect(find.text('Could not read the file.'), findsOneWidget);
     });
@@ -319,7 +320,7 @@ void main() {
       await repo.saveOngoingSession(2, DateTime.now());
       await tester.pumpWidget(_app(repo, files: files));
       await _openSettings(tester);
-      await tester.tap(find.text('Import data'));
+      await tapSetting(tester, 'Import data');
       await tester.pumpAndSettle();
       expect(files.opens, 0);
     });
@@ -368,7 +369,11 @@ void main() {
       'Importar datos',
       'Política de privacidad',
     ]) {
-      await tester.scrollUntilVisible(find.text(label), 100);
+      await tester.scrollUntilVisible(
+        find.text(label),
+        100,
+        scrollable: find.byType(Scrollable).first,
+      );
       expect(find.text(label), findsOneWidget);
     }
     expect(tester.takeException(), isNull);

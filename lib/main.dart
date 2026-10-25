@@ -6,6 +6,7 @@ import 'core/storage/hive_repository.dart';
 import 'core/providers/storage_provider.dart';
 import 'core/theme/app_theme.dart';
 import 'l10n/l10n.dart';
+import 'features/settings/providers/preferences_provider.dart';
 import 'shared/art/sushi_art.dart';
 import 'shared/widgets/bottom_nav.dart';
 import 'shared/widgets/launch_action_controller.dart';
@@ -17,9 +18,15 @@ void main() {
 }
 
 /// Shared by the startup screens and the app so both speak the same language.
-MaterialApp _localizedApp({required Widget home, String? title}) => MaterialApp(
+MaterialApp _localizedApp({
+  required Widget home,
+  String? title,
+  ThemeMode themeMode = ThemeMode.dark,
+}) => MaterialApp(
   title: title ?? 'Sushi Tracker',
-  theme: AppTheme.darkTheme,
+  theme: AppTheme.lightTheme,
+  darkTheme: AppTheme.darkTheme,
+  themeMode: themeMode,
   home: home,
   debugShowCheckedModeBanner: false,
   localizationsDelegates: const [
@@ -139,12 +146,13 @@ class _StartupError extends StatelessWidget {
   );
 }
 
-class SushiScoreApp extends StatelessWidget {
+class SushiScoreApp extends ConsumerWidget {
   const SushiScoreApp({super.key});
 
   @override
-  Widget build(BuildContext context) => _localizedApp(
+  Widget build(BuildContext context, WidgetRef ref) => _localizedApp(
     title: 'Sushi Tracker',
+    themeMode: ref.watch(themeModeProvider),
     home: const LaunchActionController(
       child: ScreenAwakeController(child: RootNavigation()),
     ),
