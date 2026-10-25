@@ -543,4 +543,41 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get noValue => '—';
+
+  @override
+  String get addRestaurant => 'Añadir restaurante';
+
+  @override
+  String get editRestaurant => 'Cambiar restaurante';
+
+  @override
+  String get restaurantDialogTitle => '¿Dónde comiste?';
+
+  @override
+  String get restaurantHint => 'p. ej. Sushi Zen';
+
+  @override
+  String get removeRestaurant => 'Quitar';
+
+  @override
+  String get couldNotSaveRestaurant => 'No se pudo guardar el restaurante.';
+
+  @override
+  String get byRestaurantTitle => 'Por restaurante';
+
+  @override
+  String restaurantSummary(int sessions, String average) {
+    String _temp0 = intl.Intl.pluralLogic(
+      sessions,
+      locale: localeName,
+      other: '$sessions sesiones',
+      one: '1 sesión',
+    );
+    return '$_temp0 · media $average';
+  }
+
+  @override
+  String perPiece(String value) {
+    return '$value/pieza';
+  }
 }

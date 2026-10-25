@@ -901,6 +901,60 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'—'**
   String get noValue;
+
+  /// No description provided for @addRestaurant.
+  ///
+  /// In en, this message translates to:
+  /// **'Add restaurant'**
+  String get addRestaurant;
+
+  /// No description provided for @editRestaurant.
+  ///
+  /// In en, this message translates to:
+  /// **'Change restaurant'**
+  String get editRestaurant;
+
+  /// No description provided for @restaurantDialogTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Where did you eat?'**
+  String get restaurantDialogTitle;
+
+  /// No description provided for @restaurantHint.
+  ///
+  /// In en, this message translates to:
+  /// **'e.g. Sushi Zen'**
+  String get restaurantHint;
+
+  /// No description provided for @removeRestaurant.
+  ///
+  /// In en, this message translates to:
+  /// **'Remove'**
+  String get removeRestaurant;
+
+  /// No description provided for @couldNotSaveRestaurant.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not save the restaurant.'**
+  String get couldNotSaveRestaurant;
+
+  /// No description provided for @byRestaurantTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'By restaurant'**
+  String get byRestaurantTitle;
+
+  /// No description provided for @restaurantSummary.
+  ///
+  /// In en, this message translates to:
+  /// **'{sessions, plural, =1{1 session} other{{sessions} sessions}} · avg {average}'**
+  String restaurantSummary(int sessions, String average);
+
+  /// No description provided for @perPiece.
+  ///
+  /// In en, this message translates to:
+  /// **'{value}/piece'**
+  String perPiece(String value);
 }
 
 class _AppLocalizationsDelegate

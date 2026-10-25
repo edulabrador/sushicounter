@@ -133,5 +133,14 @@
   "detailPace": "Ritmo",
   "detailPrice": "Precio",
   "paceValue": "{pace}/min",
-  "noValue": "—"
+  "noValue": "—",
+  "addRestaurant": "Añadir restaurante",
+  "editRestaurant": "Cambiar restaurante",
+  "restaurantDialogTitle": "¿Dónde comiste?",
+  "restaurantHint": "p. ej. Sushi Zen",
+  "removeRestaurant": "Quitar",
+  "couldNotSaveRestaurant": "No se pudo guardar el restaurante.",
+  "byRestaurantTitle": "Por restaurante",
+  "restaurantSummary": "{sessions, plural, =1{1 sesión} other{{sessions} sesiones}} · media {average}",
+  "perPiece": "{value}/pieza"
 }

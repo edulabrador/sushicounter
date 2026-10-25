@@ -317,5 +317,31 @@
       }
     }
   },
-  "noValue": "—"
+  "noValue": "—",
+  "addRestaurant": "Add restaurant",
+  "editRestaurant": "Change restaurant",
+  "restaurantDialogTitle": "Where did you eat?",
+  "restaurantHint": "e.g. Sushi Zen",
+  "removeRestaurant": "Remove",
+  "couldNotSaveRestaurant": "Could not save the restaurant.",
+  "byRestaurantTitle": "By restaurant",
+  "restaurantSummary": "{sessions, plural, =1{1 session} other{{sessions} sessions}} · avg {average}",
+  "@restaurantSummary": {
+    "placeholders": {
+      "sessions": {
+        "type": "int"
+      },
+      "average": {
+        "type": "String"
+      }
+    }
+  },
+  "perPiece": "{value}/piece",
+  "@perPiece": {
+    "placeholders": {
+      "value": {
+        "type": "String"
+      }
+    }
+  }
 }

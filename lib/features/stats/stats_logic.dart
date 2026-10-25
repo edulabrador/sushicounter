@@ -148,3 +148,62 @@ List<({DateTime weekStart, int pieces})> weeklyPieces(
       (weekStart: weekStart(first + i), pieces: totals[i]),
   ];
 }
+
+class RestaurantStats {
+  const RestaurantStats({
+    required this.name,
+    required this.sessions,
+    required this.pieces,
+    this.costPerPieceCents,
+  });
+
+  final String name;
+  final int sessions;
+  final int pieces;
+  final double? costPerPieceCents;
+
+  double get averagePieces => pieces / sessions;
+}
+
+/// Sessions grouped by restaurant (ignoring case and spaces), busiest first.
+/// The display name is the one used most recently.
+List<RestaurantStats> restaurantStats(List<Session> sessions) {
+  final groups = <String, List<Session>>{};
+  for (final session in sessions) {
+    final name = Session.normalizeRestaurant(session.restaurant);
+    if (name == null) continue;
+    groups.putIfAbsent(name.toLowerCase(), () => []).add(session);
+  }
+  final result = [
+    for (final group in groups.values)
+      () {
+        group.sort((a, b) => b.endedAt.compareTo(a.endedAt));
+        final summary = StatsSummary(
+          group,
+          group.fold(0, (sum, s) => sum + s.count),
+          0,
+        );
+        return RestaurantStats(
+          name: group.first.restaurant!.trim(),
+          sessions: group.length,
+          pieces: summary.totalTaps,
+          costPerPieceCents: summary.costPerPieceCents,
+        );
+      }(),
+  ];
+  return result..sort((a, b) {
+    final bySessions = b.sessions.compareTo(a.sessions);
+    return bySessions != 0 ? bySessions : a.name.compareTo(b.name);
+  });
+}
+
+/// Restaurant names already used, most recent first, without duplicates.
+List<String> knownRestaurants(List<Session> sessions) {
+  final sorted = [...sessions]..sort((a, b) => b.endedAt.compareTo(a.endedAt));
+  final seen = <String>{};
+  return [
+    for (final session in sorted)
+      if (Session.normalizeRestaurant(session.restaurant) case final name?)
+        if (seen.add(name.toLowerCase())) name,
+  ];
+}

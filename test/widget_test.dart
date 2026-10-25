@@ -107,6 +107,15 @@ class FakeRepository extends HiveRepository {
   }
 
   @override
+  Future<Session?> setSessionRestaurant(String id, String? restaurant) async {
+    final session = sessions[id];
+    if (session == null) return null;
+    return sessions[id] = session.copyWith(
+      restaurant: Session.normalizeRestaurant(restaurant),
+    );
+  }
+
+  @override
   Future<Session?> setSessionPrice(String id, int? priceCents) async {
     final session = sessions[id];
     if (session == null) return null;

@@ -99,7 +99,9 @@ class SessionCard extends StatelessWidget {
                             : '$duration · ${l10n.beforeReset}',
                         style: TextStyle(color: colors.textMuted, fontSize: 13),
                       ),
-                      if (price != null || isRecord) ...[
+                      if (price != null ||
+                          isRecord ||
+                          session.restaurant != null) ...[
                         const SizedBox(height: 4),
                         Wrap(
                           spacing: 6,
@@ -110,6 +112,11 @@ class SessionCard extends StatelessWidget {
                                 icon: Icons.emoji_events,
                                 label: l10n.recordBadge,
                                 highlighted: true,
+                              ),
+                            if (session.restaurant case final name?)
+                              _Chip(
+                                icon: Icons.storefront_outlined,
+                                label: name,
                               ),
                             if (price != null)
                               _Chip(

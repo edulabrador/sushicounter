@@ -10,6 +10,7 @@ import 'package:sushiscore/l10n/l10n.dart';
 import 'package:sushiscore/shared/art/sushi_art.dart';
 
 import 'package:sushiscore/features/stats/widgets/kpi_grid.dart';
+import 'package:sushiscore/features/stats/widgets/restaurant_list.dart';
 import 'package:sushiscore/features/stats/widgets/stats_section.dart';
 import 'package:sushiscore/features/stats/widgets/trend_chart.dart';
 import 'package:sushiscore/features/stats/widgets/weekly_chart.dart';
@@ -180,6 +181,14 @@ class _StatsViewState extends ConsumerState<StatsView> {
                           ),
                         ),
                       ),
+                    ),
+                  ],
+                  if (restaurantStats(lifetime) case final restaurants
+                      when restaurants.isNotEmpty) ...[
+                    const SizedBox(height: 16),
+                    StatsSection(
+                      title: l10n.byRestaurantTitle,
+                      child: RestaurantList(restaurants: restaurants),
                     ),
                   ],
                   const SizedBox(height: 24),

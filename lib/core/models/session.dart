@@ -13,6 +13,18 @@ class Session extends HiveObject {
   /// What the meal cost, in hundredths of the local currency, if recorded.
   final int? priceCents;
 
+  /// Where the session happened, if recorded.
+  final String? restaurant;
+
+  /// Longest restaurant name accepted from the UI and from backups.
+  static const maxRestaurantLength = 60;
+
+  /// Trims [name] and turns blank names into null.
+  static String? normalizeRestaurant(String? name) {
+    final trimmed = name?.trim() ?? '';
+    return trimmed.isEmpty ? null : trimmed;
+  }
+
   Session({
     required this.id,
     required this.startedAt,
@@ -21,20 +33,27 @@ class Session extends HiveObject {
     required this.durationSeconds,
     this.contributionEpoch = 0,
     this.priceCents,
+    this.restaurant,
   });
 
-  Session copyWith({int? contributionEpoch, Object? priceCents = _keep}) =>
-      Session(
-        id: id,
-        startedAt: startedAt,
-        endedAt: endedAt,
-        count: count,
-        durationSeconds: durationSeconds,
-        contributionEpoch: contributionEpoch ?? this.contributionEpoch,
-        priceCents: identical(priceCents, _keep)
-            ? this.priceCents
-            : priceCents as int?,
-      );
+  Session copyWith({
+    int? contributionEpoch,
+    Object? priceCents = _keep,
+    Object? restaurant = _keep,
+  }) => Session(
+    id: id,
+    startedAt: startedAt,
+    endedAt: endedAt,
+    count: count,
+    durationSeconds: durationSeconds,
+    contributionEpoch: contributionEpoch ?? this.contributionEpoch,
+    priceCents: identical(priceCents, _keep)
+        ? this.priceCents
+        : priceCents as int?,
+    restaurant: identical(restaurant, _keep)
+        ? this.restaurant
+        : restaurant as String?,
+  );
 
   /// Epoch of legacy history whose totals could not be attributed safely.
   static const unattributedEpoch = -1;
@@ -83,13 +102,14 @@ class SessionAdapter extends TypeAdapter<Session> {
       durationSeconds: fields[4] as int,
       contributionEpoch: fields[5] as int? ?? 0,
       priceCents: fields[6] as int?,
+      restaurant: fields[7] as String?,
     );
   }
 
   @override
   void write(BinaryWriter writer, Session obj) {
     writer
-      ..writeByte(7)
+      ..writeByte(8)
       ..writeByte(0)
       ..write(obj.id)
       ..writeByte(1)
@@ -103,6 +123,8 @@ class SessionAdapter extends TypeAdapter<Session> {
       ..writeByte(5)
       ..write(obj.contributionEpoch)
       ..writeByte(6)
-      ..write(obj.priceCents);
+      ..write(obj.priceCents)
+      ..writeByte(7)
+      ..write(obj.restaurant);
   }
 }
