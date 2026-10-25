@@ -229,6 +229,12 @@ final counterProvider = NotifierProvider<CounterNotifier, CounterState>(
   CounterNotifier.new,
 );
 
+/// The counter as its screen shows it. The background-save flag only gates
+/// the lifetime reset in Settings, so dropping it here spares the counter
+/// two extra rebuilds on every tap (the flag turns on, then off).
+CounterState counterOnScreen(CounterState state) =>
+    state.isSavingOngoing ? state.copyWith(isSavingOngoing: false) : state;
+
 /// Saved lifetime taps plus the active session, so every screen agrees.
 final lifetimeTapsProvider = Provider<int>(
   (ref) =>

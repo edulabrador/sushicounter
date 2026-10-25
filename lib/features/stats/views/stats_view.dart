@@ -1,16 +1,14 @@
-import 'package:clock/clock.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 import 'package:sushiscore/core/format/money.dart';
 import 'package:sushiscore/features/counter/providers/counter_provider.dart';
 import 'package:sushiscore/features/global/providers/global_provider.dart';
-import 'package:sushiscore/features/history/providers/session_provider.dart';
 import 'package:sushiscore/features/stats/stats_logic.dart';
 import 'package:sushiscore/l10n/l10n.dart';
 import 'package:sushiscore/shared/art/sushi_art.dart';
 
-import 'package:sushiscore/features/stats/achievements.dart';
+import 'package:sushiscore/features/stats/providers/stats_provider.dart';
 import 'package:sushiscore/features/stats/widgets/achievements_grid.dart';
 import 'package:sushiscore/features/stats/widgets/kpi_grid.dart';
 import 'package:sushiscore/features/stats/widgets/restaurant_list.dart';
@@ -28,33 +26,25 @@ extension on StatsFilter {
   };
 }
 
-class StatsView extends ConsumerStatefulWidget {
+class StatsView extends ConsumerWidget {
   const StatsView({super.key});
 
   @override
-  ConsumerState<StatsView> createState() => _StatsViewState();
-}
-
-class _StatsViewState extends ConsumerState<StatsView> {
-  StatsFilter _filter = StatsFilter.all;
-
-  @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final l10n = context.l10n;
     final locale = context.localeName;
+    // Nothing here changes on a counter tap; only _LiveKpis watches taps.
     final global = ref.watch(globalStateProvider);
-    final lifetimeTaps = ref.watch(lifetimeTapsProvider);
-    final sessions = ref.watch(sessionListProvider);
-    final lifetime = lifetimeSessions(sessions, global.epoch);
-    final summary = summarizeSessions(sessions, _filter, epoch: global.epoch);
-    final now = clock.now();
-    final records = computeRecords(lifetime, now);
-    final costPerPiece = summary.costPerPieceCents;
-    final achievements = computeAchievements(sessions);
-    final weekly = weeklyPieces(lifetime, now);
+    final filter = ref.watch(statsFilterProvider);
+    final data = ref.watch(statsDataProvider);
+    final lifetime = data.lifetime;
+    final summary = data.summary;
+    final records = data.records;
+    final achievements = data.achievements;
+    final weekly = data.weekly;
     final theme = Theme.of(context);
     final resetAt = global.lastResetAt;
-    final range = _filter.label(l10n);
+    final range = filter.label(l10n);
     final decimal = NumberFormat('0.0', locale);
 
     return Scaffold(
@@ -75,36 +65,11 @@ class _StatsViewState extends ConsumerState<StatsView> {
                     ),
                     const SizedBox(height: 12),
                   ],
-                  KpiGrid(
+                  _LiveKpis(
                     width: constraints.maxWidth,
-                    items: [
-                      Kpi(
-                        Icons.all_inclusive,
-                        l10n.lifetimeTaps,
-                        '$lifetimeTaps',
-                      ),
-                      Kpi(
-                        Icons.event_available,
-                        l10n.lifetimeSessions,
-                        '${global.lifetimeTotalSessions}',
-                      ),
-                      Kpi(
-                        Icons.insights,
-                        l10n.averageKpi(range),
-                        decimal.format(summary.averageTaps),
-                      ),
-                      Kpi(
-                        Icons.emoji_events_outlined,
-                        l10n.bestKpi(range),
-                        '${summary.bestSession}',
-                      ),
-                      if (costPerPiece != null)
-                        Kpi(
-                          Icons.payments_outlined,
-                          l10n.costPerPiece(range),
-                          formatMoney(context, costPerPiece),
-                        ),
-                    ],
+                    lifetimeSessions: global.lifetimeTotalSessions,
+                    summary: summary,
+                    range: range,
                   ),
                   const SizedBox(height: 20),
                   Semantics(
@@ -124,9 +89,10 @@ class _StatsViewState extends ConsumerState<StatsView> {
                                 label: Text(filter.label(l10n)),
                               ),
                           ],
-                          selected: {_filter},
-                          onSelectionChanged: (selection) =>
-                              setState(() => _filter = selection.first),
+                          selected: {filter},
+                          onSelectionChanged: (selection) => ref
+                              .read(statsFilterProvider.notifier)
+                              .select(selection.first),
                         ),
                       ),
                     ),
@@ -206,7 +172,7 @@ class _StatsViewState extends ConsumerState<StatsView> {
                       ),
                     ),
                   ],
-                  if (restaurantStats(lifetime) case final restaurants
+                  if (data.restaurants case final restaurants
                       when restaurants.isNotEmpty) ...[
                     const SizedBox(height: 16),
                     StatsSection(
@@ -271,6 +237,55 @@ class _StatsViewState extends ConsumerState<StatsView> {
           ),
         ),
       ),
+    );
+  }
+}
+
+/// The top tiles, the only part of Stats that follows the live counter.
+class _LiveKpis extends ConsumerWidget {
+  const _LiveKpis({
+    required this.width,
+    required this.lifetimeSessions,
+    required this.summary,
+    required this.range,
+  });
+
+  final double width;
+  final int lifetimeSessions;
+  final StatsSummary summary;
+  final String range;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = context.l10n;
+    final decimal = NumberFormat('0.0', context.localeName);
+    final costPerPiece = summary.costPerPieceCents;
+    return KpiGrid(
+      width: width,
+      items: [
+        Kpi(
+          Icons.all_inclusive,
+          l10n.lifetimeTaps,
+          '${ref.watch(lifetimeTapsProvider)}',
+        ),
+        Kpi(Icons.event_available, l10n.lifetimeSessions, '$lifetimeSessions'),
+        Kpi(
+          Icons.insights,
+          l10n.averageKpi(range),
+          decimal.format(summary.averageTaps),
+        ),
+        Kpi(
+          Icons.emoji_events_outlined,
+          l10n.bestKpi(range),
+          '${summary.bestSession}',
+        ),
+        if (costPerPiece != null)
+          Kpi(
+            Icons.payments_outlined,
+            l10n.costPerPiece(range),
+            formatMoney(context, costPerPiece),
+          ),
+      ],
     );
   }
 }

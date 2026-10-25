@@ -106,7 +106,7 @@ class CounterView extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final l10n = context.l10n;
-    final counterState = ref.watch(counterProvider);
+    final counterState = ref.watch(counterProvider.select(counterOnScreen));
     final lifetimeTaps = ref.watch(lifetimeTapsProvider);
     final startedAt = counterState.startedAt;
     final error = counterState.persistenceError;

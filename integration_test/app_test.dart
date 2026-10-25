@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:integration_test/integration_test.dart';
 import 'package:sushiscore/core/providers/storage_provider.dart';
+import 'package:sushiscore/features/counter/providers/counter_provider.dart';
 import 'package:sushiscore/features/counter/views/counter_view.dart';
 import 'package:sushiscore/features/counter/widgets/sushi_button.dart';
 import 'package:sushiscore/main.dart';
@@ -12,7 +13,7 @@ import 'package:sushiscore/shared/widgets/launch_action_controller.dart';
 /// Runs the real app on a device or emulator: real Hive storage, real
 /// Android method channels. CI runs it on an emulator.
 void main() {
-  IntegrationTestWidgetsFlutterBinding.ensureInitialized();
+  final binding = IntegrationTestWidgetsFlutterBinding.ensureInitialized();
   const screen = MethodChannel('dev.edulabrador.sushiscore/screen');
 
   String? count(WidgetTester tester) =>
@@ -58,5 +59,23 @@ void main() {
     await tester.tap(find.text('History'));
     await tester.pumpAndSettle();
     expect(find.text('No sessions yet.'), findsNothing);
+
+    // Frame timings for 100 quick taps, kept in the test report and printed
+    // to the CI log. Emulator numbers are only comparable run to run.
+    await tester.tap(find.text('Counter'));
+    await tester.pumpAndSettle();
+    await binding.watchPerformance(() async {
+      for (var i = 0; i < 100; i++) {
+        await tester.tap(find.byType(SushiButton));
+        await tester.pump(const Duration(milliseconds: 80));
+      }
+      await tester.pumpAndSettle();
+    }, reportKey: 'tap_frames');
+    expect(count(tester), '100');
+    // ignore: avoid_print
+    print('tap_frames: ${binding.reportData?['tap_frames']}');
+    await container.read(counterProvider.notifier).resetCurrent();
+    await tester.pumpAndSettle();
+    expect(repository.getOngoingCount(), 0);
   });
 }
