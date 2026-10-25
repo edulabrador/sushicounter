@@ -2,4 +2,7 @@
 <resources>
     <string name="shortcut_add_sushi_short">Add sushi</string>
     <string name="shortcut_add_sushi_long">Add one sushi</string>
+    <string name="widget_label">This session</string>
+    <string name="widget_add">+1 sushi</string>
+    <string name="widget_description">Your current session count, with a button that adds one sushi.</string>
 </resources>

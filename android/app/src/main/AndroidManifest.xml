@@ -30,6 +30,17 @@
                 <category android:name="android.intent.category.LAUNCHER"/>
             </intent-filter>
         </activity>
+        <!-- Home screen widget with the session count and a +1 button. -->
+        <receiver
+            android:name=".SushiWidget"
+            android:exported="false">
+            <intent-filter>
+                <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
+            </intent-filter>
+            <meta-data
+                android:name="android.appwidget.provider"
+                android:resource="@xml/sushi_widget_info" />
+        </receiver>
         <!-- Serves a shared session image, read-only, through a URI grant. -->
         <provider
             android:name=".ShareImageProvider"

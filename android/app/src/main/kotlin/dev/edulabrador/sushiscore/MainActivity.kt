@@ -76,6 +76,18 @@ class MainActivity : FlutterActivity() {
 
         MethodChannel(messenger, "dev.edulabrador.sushiscore/share")
             .setMethodCallHandler { call, result -> handleShareCall(call, result) }
+
+        MethodChannel(messenger, "dev.edulabrador.sushiscore/widget")
+            .setMethodCallHandler { call, result ->
+                when (call.method) {
+                    "update" -> {
+                        SushiWidget.refresh(applicationContext, call.argument<Int>("count") ?: 0)
+                        result.success(null)
+                    }
+                    "storedCount" -> result.success(SushiWidget.storedCount(applicationContext))
+                    else -> result.notImplemented()
+                }
+            }
     }
 
     /** Opens the share sheet with a session image served by ShareImageProvider. */

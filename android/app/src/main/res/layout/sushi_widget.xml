@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Home screen widget: the session count and a button that opens the app
+     adding one sushi, like the launcher shortcut. -->
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/widget_root"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@drawable/widget_background"
+    android:gravity="center"
+    android:orientation="vertical"
+    android:padding="10dp">
+
+    <LinearLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:gravity="center_vertical"
+        android:orientation="horizontal">
+
+        <ImageView
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:importantForAccessibility="no"
+            android:scaleType="fitCenter"
+            android:src="@drawable/ic_launcher_foreground" />
+
+        <TextView
+            android:id="@+id/widget_count"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="4dp"
+            android:maxLines="1"
+            android:text="0"
+            android:textColor="#F7A072"
+            android:textSize="28sp"
+            android:textStyle="bold" />
+    </LinearLayout>
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:maxLines="1"
+        android:text="@string/widget_label"
+        android:textColor="#A6B0C0"
+        android:textSize="12sp" />
+
+    <TextView
+        android:id="@+id/widget_add"
+        android:layout_width="wrap_content"
+        android:layout_height="36dp"
+        android:layout_marginTop="6dp"
+        android:background="@drawable/widget_button"
+        android:contentDescription="@string/shortcut_add_sushi_long"
+        android:gravity="center"
+        android:minWidth="88dp"
+        android:paddingStart="14dp"
+        android:paddingEnd="14dp"
+        android:text="@string/widget_add"
+        android:textColor="#2A1810"
+        android:textSize="14sp"
+        android:textStyle="bold" />
+</LinearLayout>

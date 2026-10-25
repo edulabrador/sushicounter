@@ -9,6 +9,7 @@ import 'l10n/l10n.dart';
 import 'features/settings/providers/preferences_provider.dart';
 import 'shared/art/sushi_art.dart';
 import 'shared/widgets/bottom_nav.dart';
+import 'shared/widgets/home_widget_sync.dart';
 import 'shared/widgets/launch_action_controller.dart';
 import 'shared/widgets/screen_awake_controller.dart';
 
@@ -154,7 +155,9 @@ class SushiScoreApp extends ConsumerWidget {
     title: 'Sushi Tracker',
     themeMode: ref.watch(themeModeProvider),
     home: const LaunchActionController(
-      child: ScreenAwakeController(child: RootNavigation()),
+      child: HomeWidgetSync(
+        child: ScreenAwakeController(child: RootNavigation()),
+      ),
     ),
   );
 }

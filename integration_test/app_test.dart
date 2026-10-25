@@ -15,6 +15,7 @@ import 'package:sushiscore/shared/widgets/launch_action_controller.dart';
 void main() {
   final binding = IntegrationTestWidgetsFlutterBinding.ensureInitialized();
   const screen = MethodChannel('dev.edulabrador.sushiscore/screen');
+  const widgetChannel = MethodChannel('dev.edulabrador.sushiscore/widget');
 
   String? count(WidgetTester tester) =>
       tester.widget<Text>(find.byKey(counterCurrentCountKey)).data;
@@ -38,6 +39,10 @@ void main() {
     await tester.pumpAndSettle();
     expect(count(tester), '${start + 3}');
     expect(repository.getOngoingCount(), start + 3);
+
+    // The home screen widget's store got the count (after its short batch).
+    await Future<void>.delayed(const Duration(milliseconds: 800));
+    expect(await widgetChannel.invokeMethod<int>('storedCount'), start + 3);
 
     // The Kotlin side really set FLAG_KEEP_SCREEN_ON on the window.
     expect(await screen.invokeMethod<bool>('isKeepScreenOn'), isTrue);
