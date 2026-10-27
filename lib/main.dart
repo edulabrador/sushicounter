@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -15,6 +16,9 @@ import 'shared/widgets/screen_awake_controller.dart';
 
 void main() {
   WidgetsFlutterBinding.ensureInitialized();
+  // Draw behind the status and navigation bars, as Android 15 requires;
+  // screens keep their content clear of them with safe-area padding.
+  SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
   runApp(const StartupApp());
 }
 

@@ -40,14 +40,14 @@ class ShareImageProvider : ContentProvider() {
     ): Cursor? {
         val file = fileOf(uri) ?: return null
         val columns = projection ?: arrayOf(OpenableColumns.DISPLAY_NAME, OpenableColumns.SIZE)
-        val row = columns.map {
+        val row: List<Any?> = columns.map {
             when (it) {
                 OpenableColumns.DISPLAY_NAME -> file.name
                 OpenableColumns.SIZE -> file.length()
                 else -> null
             }
         }
-        return MatrixCursor(columns, 1).apply { addRow(row.toTypedArray()) }
+        return MatrixCursor(columns, 1).apply { addRow(row.toTypedArray<Any?>()) }
     }
 
     override fun insert(uri: Uri, values: ContentValues?): Uri? = null

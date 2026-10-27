@@ -1,3 +1,5 @@
+import 'dart:math' as math;
+
 import 'package:flutter/material.dart';
 import 'package:sushiscore/core/models/session.dart';
 import 'package:sushiscore/core/theme/app_colors.dart';
@@ -39,22 +41,28 @@ class _HistoryViewState extends ConsumerState<HistoryView> {
       appBar: AppBar(title: Text(l10n.historyTitle)),
       body: sessions.isEmpty
           ? EmptyState(title: l10n.noSessions, hint: l10n.emptyHistoryHint)
-          : ListView.builder(
-              padding: const EdgeInsets.fromLTRB(16, 0, 16, 24),
-              itemCount: entries.length,
-              itemBuilder: (context, index) => switch (entries[index]) {
-                MonthHeader header => MonthHeaderTile(header: header),
-                SessionEntry(:final session) => SessionCard(
-                  session: session,
-                  inLifetime: session.isInLifetime(epoch),
-                  isRecord:
-                      best > 0 &&
-                      session.count == best &&
-                      session.isInLifetime(epoch),
-                  deleting: _deleting,
-                  onTap: () => _showDetails(session.id),
-                  onDelete: () => _deleteSession(session.id),
-                ),
+          : LayoutBuilder(
+              builder: (context, box) {
+                // A readable column on wide screens, full width on phones.
+                final side = math.max(16.0, (box.maxWidth - 720) / 2);
+                return ListView.builder(
+                  padding: EdgeInsets.fromLTRB(side, 0, side, 24),
+                  itemCount: entries.length,
+                  itemBuilder: (context, index) => switch (entries[index]) {
+                    MonthHeader header => MonthHeaderTile(header: header),
+                    SessionEntry(:final session) => SessionCard(
+                      session: session,
+                      inLifetime: session.isInLifetime(epoch),
+                      isRecord:
+                          best > 0 &&
+                          session.count == best &&
+                          session.isInLifetime(epoch),
+                      deleting: _deleting,
+                      onTap: () => _showDetails(session.id),
+                      onDelete: () => _deleteSession(session.id),
+                    ),
+                  },
+                );
               },
             ),
     );

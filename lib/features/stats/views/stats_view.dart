@@ -100,120 +100,126 @@ class StatsView extends ConsumerWidget {
                     ),
                   ),
                   const SizedBox(height: 16),
-                  StatsSection(
-                    title: l10n.sessionTrend,
-                    rows: summary.sessions.isEmpty
-                        ? null
-                        : [
-                            for (final session in summary.sessions.reversed)
+                  // Two sections per row on wide screens.
+                  _SectionGrid(
+                    columns: constraints.maxWidth >= 720 ? 2 : 1,
+                    children: [
+                      StatsSection(
+                        title: l10n.sessionTrend,
+                        rows: summary.sessions.isEmpty
+                            ? null
+                            : [
+                                for (final session in summary.sessions.reversed)
+                                  (
+                                    label: DateFormat.yMMMd(
+                                      locale,
+                                    ).add_Hm().format(session.endedAt),
+                                    value: l10n.tapsCount(session.count),
+                                  ),
+                              ],
+                        trailing: summary.sessions.isEmpty
+                            ? null
+                            : AverageLegend(
+                                label: l10n.averageLine(
+                                  decimal.format(summary.averageTaps),
+                                ),
+                              ),
+                        child: summary.sessions.isEmpty
+                            ? Semantics(
+                                liveRegion: true,
+                                child: Padding(
+                                  padding: const EdgeInsets.symmetric(
+                                    vertical: 16,
+                                  ),
+                                  child: Column(
+                                    children: [
+                                      const SushiArt(
+                                        size: 96,
+                                        mood: SushiMood.sleepy,
+                                      ),
+                                      const SizedBox(height: 12),
+                                      Text(
+                                        l10n.noTrend,
+                                        textAlign: TextAlign.center,
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              )
+                            : Semantics(
+                                label: l10n.chartSemantics(
+                                  summary.sessions.length,
+                                ),
+                                child: SizedBox(
+                                  height: 260,
+                                  child: TrendChart(
+                                    sessions: summary.sessions,
+                                    best: summary.bestSession,
+                                    average: summary.averageTaps,
+                                  ),
+                                ),
+                              ),
+                      ),
+                      if (lifetime.isNotEmpty)
+                        StatsSection(
+                          title: l10n.weeklyTitle,
+                          rows: [
+                            for (final week in weekly.reversed)
                               (
-                                label: DateFormat.yMMMd(
-                                  locale,
-                                ).add_Hm().format(session.endedAt),
-                                value: l10n.tapsCount(session.count),
+                                label: l10n.weekOf(
+                                  DateFormat.MMMd(
+                                    locale,
+                                  ).format(week.weekStart),
+                                ),
+                                value: l10n.piecesCount(week.pieces),
                               ),
                           ],
-                    trailing: summary.sessions.isEmpty
-                        ? null
-                        : AverageLegend(
-                            label: l10n.averageLine(
-                              decimal.format(summary.averageTaps),
-                            ),
-                          ),
-                    child: summary.sessions.isEmpty
-                        ? Semantics(
-                            liveRegion: true,
-                            child: Padding(
-                              padding: const EdgeInsets.symmetric(vertical: 16),
-                              child: Column(
-                                children: [
-                                  const SushiArt(
-                                    size: 96,
-                                    mood: SushiMood.sleepy,
-                                  ),
-                                  const SizedBox(height: 12),
-                                  Text(
-                                    l10n.noTrend,
-                                    textAlign: TextAlign.center,
-                                  ),
-                                ],
-                              ),
-                            ),
-                          )
-                        : Semantics(
-                            label: l10n.chartSemantics(summary.sessions.length),
+                          child: Semantics(
+                            label: l10n.weeklySemantics(8),
                             child: SizedBox(
-                              height: 260,
-                              child: TrendChart(
-                                sessions: summary.sessions,
-                                best: summary.bestSession,
-                                average: summary.averageTaps,
-                              ),
+                              height: 200,
+                              child: WeeklyChart(weeks: weekly),
                             ),
                           ),
-                  ),
-                  if (lifetime.isNotEmpty) ...[
-                    const SizedBox(height: 16),
-                    StatsSection(
-                      title: l10n.weeklyTitle,
-                      rows: [
-                        for (final week in weekly.reversed)
-                          (
-                            label: l10n.weekOf(
-                              DateFormat.MMMd(locale).format(week.weekStart),
-                            ),
-                            value: l10n.piecesCount(week.pieces),
-                          ),
-                      ],
-                      child: Semantics(
-                        label: l10n.weeklySemantics(8),
-                        child: SizedBox(
-                          height: 200,
-                          child: WeeklyChart(weeks: weekly),
                         ),
-                      ),
-                    ),
-                  ],
-                  if (lifetime.isNotEmpty) ...[
-                    const SizedBox(height: 16),
-                    StatsSection(
-                      title: l10n.calendarTitle,
-                      rows: [
-                        for (final day
-                            in data.days.keys.toList()
-                              ..sort((a, b) => b.compareTo(a)))
-                          (
-                            label: DateFormat.yMMMEd(locale).format(day),
-                            value: l10n.piecesCount(data.days[day]!),
-                          ),
-                      ],
-                      child: LayoutBuilder(
-                        builder: (context, box) {
-                          final weeks = calendarWeeksFor(box.maxWidth);
-                          return Semantics(
-                            label: l10n.calendarSemantics(weeks),
-                            child: SingleChildScrollView(
-                              scrollDirection: Axis.horizontal,
-                              reverse: true,
-                              child: CalendarHeatmap(
-                                days: data.days,
-                                now: clock.now(),
-                                weeks: weeks,
+                      if (lifetime.isNotEmpty)
+                        StatsSection(
+                          title: l10n.calendarTitle,
+                          rows: [
+                            for (final day
+                                in data.days.keys.toList()
+                                  ..sort((a, b) => b.compareTo(a)))
+                              (
+                                label: DateFormat.yMMMEd(locale).format(day),
+                                value: l10n.piecesCount(data.days[day]!),
                               ),
-                            ),
-                          );
-                        },
-                      ),
-                    ),
-                  ],
-                  if (data.restaurants case final restaurants
-                      when restaurants.isNotEmpty) ...[
-                    const SizedBox(height: 16),
-                    StatsSection(
-                      title: l10n.byRestaurantTitle,
-                      child: RestaurantList(restaurants: restaurants),
-                    ),
-                  ],
+                          ],
+                          child: LayoutBuilder(
+                            builder: (context, box) {
+                              final weeks = calendarWeeksFor(box.maxWidth);
+                              return Semantics(
+                                label: l10n.calendarSemantics(weeks),
+                                child: SingleChildScrollView(
+                                  scrollDirection: Axis.horizontal,
+                                  reverse: true,
+                                  child: CalendarHeatmap(
+                                    days: data.days,
+                                    now: clock.now(),
+                                    weeks: weeks,
+                                  ),
+                                ),
+                              );
+                            },
+                          ),
+                        ),
+                      if (data.restaurants case final restaurants
+                          when restaurants.isNotEmpty)
+                        StatsSection(
+                          title: l10n.byRestaurantTitle,
+                          child: RestaurantList(restaurants: restaurants),
+                        ),
+                    ],
+                  ),
                   const SizedBox(height: 24),
                   Text(l10n.recordsTitle, style: theme.textTheme.titleLarge),
                   const SizedBox(height: 12),
@@ -319,6 +325,43 @@ class _LiveKpis extends ConsumerWidget {
             l10n.costPerPiece(range),
             formatMoney(context, costPerPiece),
           ),
+      ],
+    );
+  }
+}
+
+/// Lays sections out [columns] to a row, each row as tall as its tallest.
+class _SectionGrid extends StatelessWidget {
+  const _SectionGrid({required this.columns, required this.children});
+
+  final int columns;
+  final List<Widget> children;
+
+  @override
+  Widget build(BuildContext context) {
+    const gap = 16.0;
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        for (var start = 0; start < children.length; start += columns) ...[
+          if (start > 0) const SizedBox(height: gap),
+          if (columns == 1)
+            children[start]
+          else
+            Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                for (var i = start; i < start + columns; i++) ...[
+                  if (i > start) const SizedBox(width: gap),
+                  Expanded(
+                    child: i < children.length
+                        ? children[i]
+                        : const SizedBox.shrink(),
+                  ),
+                ],
+              ],
+            ),
+        ],
       ],
     );
   }

@@ -19,7 +19,10 @@ class SettingsView extends StatelessWidget {
     return Scaffold(
       appBar: AppBar(title: Text(l10n.settingsTitle)),
       body: ListView(
-        padding: const EdgeInsets.fromLTRB(16, 0, 16, 32),
+        // Clear of the system bars and any display cutout, edge to edge.
+        padding:
+            MediaQuery.paddingOf(context).copyWith(top: 0) +
+            const EdgeInsets.fromLTRB(16, 0, 16, 32),
         children: [
           Padding(
             padding: const EdgeInsets.symmetric(vertical: 8),

@@ -33,9 +33,18 @@ class AppTheme {
         surfaceTintColor: Colors.transparent,
         elevation: 0,
         centerTitle: true,
-        systemOverlayStyle: dark
-            ? SystemUiOverlayStyle.light
-            : SystemUiOverlayStyle.dark,
+        // Edge to edge: transparent bars with icons that read on the page.
+        systemOverlayStyle:
+            (dark ? SystemUiOverlayStyle.light : SystemUiOverlayStyle.dark)
+                .copyWith(
+                  statusBarColor: Colors.transparent,
+                  systemNavigationBarColor: Colors.transparent,
+                  systemNavigationBarDividerColor: Colors.transparent,
+                  systemNavigationBarIconBrightness: dark
+                      ? Brightness.light
+                      : Brightness.dark,
+                  systemNavigationBarContrastEnforced: false,
+                ),
         iconTheme: IconThemeData(color: colors.textMuted),
         titleTextStyle: TextStyle(
           color: colors.text,
@@ -90,6 +99,22 @@ class AppTheme {
                 ? colors.text
                 : colors.textMuted,
           ),
+        ),
+      ),
+      navigationRailTheme: NavigationRailThemeData(
+        backgroundColor: colors.surface,
+        indicatorColor: colors.accent.withValues(alpha: 0.22),
+        selectedIconTheme: IconThemeData(color: colors.accent),
+        unselectedIconTheme: IconThemeData(color: colors.textMuted),
+        selectedLabelTextStyle: TextStyle(
+          fontSize: 12,
+          fontWeight: FontWeight.w700,
+          color: colors.text,
+        ),
+        unselectedLabelTextStyle: TextStyle(
+          fontSize: 12,
+          fontWeight: FontWeight.w500,
+          color: colors.textMuted,
         ),
       ),
       progressIndicatorTheme: ProgressIndicatorThemeData(
