@@ -54,6 +54,7 @@ void main() {
 
     // The Kotlin side really set FLAG_KEEP_SCREEN_ON on the window.
     expect(await screen.invokeMethod<bool>('isKeepScreenOn'), isTrue);
+    step('screen kept on');
 
     await tester.tap(find.byKey(counterEndSessionButtonKey));
     await tester.pumpAndSettle();

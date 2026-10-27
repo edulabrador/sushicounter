@@ -18,6 +18,7 @@ All notable changes to this project will be documented in this file.
 - The app draws edge to edge behind transparent system bars, keeping content clear of them and of display cutouts.
 - The emulator test records frame timings for 100 taps and prints a marker per step; a stuck run stops after 15 minutes with the device log.
 - Fixed a Kotlin type inference error that failed the Android build.
+- Android keeps one Flutter engine for the whole process, so when the system recreates the activity (for example while it finishes processing an install) the app carries on instead of restarting; this was also what made the emulator test hang at random since 0.6.0.
 - Privacy policy and Play notes cover table names, the widget's stored count and user-started sharing.
 - App version is now `0.7.0+12`.
 

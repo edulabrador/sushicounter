@@ -209,4 +209,4 @@ jobs:
           emulator-options: -no-window -gpu swiftshader_indirect -noaudio -no-boot-anim -camera-back none
           # A stuck run stops after 15 minutes and prints what the device saw:
           # the foreground activity and the app's log.
-          script: timeout 15m flutter test integration_test --device-id emulator-5554 --reporter expanded || (adb shell dumpsys activity activities | grep -E "ResumedActivity|mFocusedApp" ; adb logcat -d | grep -iE "flutter|AndroidRuntime|FATAL|sushiscore|ANR" | tail -300 ; exit 1)
+          script: timeout 15m flutter test integration_test --device-id emulator-5554 --reporter expanded || (adb shell dumpsys activity activities | grep -E "ResumedActivity|mFocusedApp" ; adb logcat -d | grep -iE "flutter|AndroidRuntime|FATAL|sushiscore|ANR|relaunch|ApplicationInfo" | tail -300 ; exit 1)

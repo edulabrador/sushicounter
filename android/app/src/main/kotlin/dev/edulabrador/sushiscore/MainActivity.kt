@@ -2,6 +2,7 @@ package dev.edulabrador.sushiscore
 
 import android.app.Activity
 import android.content.ClipData
+import android.content.Context
 import android.content.ActivityNotFoundException
 import android.content.Intent
 import android.net.Uri
@@ -14,6 +15,23 @@ import io.flutter.plugin.common.MethodChannel
 import java.io.IOException
 
 class MainActivity : FlutterActivity() {
+    /**
+     * One engine for the whole process. Android can recreate the activity on
+     * its own (for example when it finishes processing an install or updates
+     * the app's resources); with the default per-activity engine that would
+     * restart the app from its splash screen. The new activity reattaches to
+     * the running engine instead.
+     */
+    override fun provideFlutterEngine(context: Context): FlutterEngine =
+        processEngine ?: FlutterEngine(
+            context.applicationContext,
+            flutterShellArgs.toArray(),
+            true, // register the generated plugins
+            shouldRestoreAndSaveState(),
+        ).also { processEngine = it }
+
+    override fun shouldDestroyEngineWithHost(): Boolean = false
+
     private val pendingLaunchActions = mutableListOf<String>()
     private var launchChannel: MethodChannel? = null
     private var pendingFileResult: MethodChannel.Result? = null
@@ -197,6 +215,7 @@ class MainActivity : FlutterActivity() {
     }
 
     private companion object {
+        var processEngine: FlutterEngine? = null
         const val EXPORT_REQUEST = 4101
         const val IMPORT_REQUEST = 4102
     }
