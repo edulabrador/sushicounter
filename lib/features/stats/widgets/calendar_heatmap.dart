@@ -58,7 +58,8 @@ class CalendarHeatmap extends StatelessWidget {
                   weekday
                       .format(mondays.first.add(Duration(days: offset)))
                       .characters
-                      .first,
+                      .first
+                      .toUpperCase(),
               ],
               textStyle: legend,
             ),
@@ -97,6 +98,19 @@ Color _levelColor(AppColors colors, int level) => switch (level) {
   3 => colors.accent.withValues(alpha: 0.75),
   _ => colors.accent,
 };
+
+/// Whether the month label goes above [column]: where a month starts, if
+/// there is room for it before the next label and the right edge. The first
+/// column only gets one when its month lasts long enough to be read.
+bool monthLabelAt(List<int> months, int column, int lastLabel) {
+  const room = 3;
+  if (column >= months.length - 1 || column - lastLabel < room) return false;
+  if (column == 0) {
+    return months.length > room &&
+        months.take(room).every((month) => month == months.first);
+  }
+  return months[column] != months[column - 1];
+}
 
 /// 0 for no pieces, then four steps up to the busiest day shown.
 int heatLevel(int pieces, int max) {
@@ -149,14 +163,14 @@ class _HeatmapPainter extends CustomPainter {
         Offset(0, _monthHeight + row * 2 * (_cell + _gap) - 1),
       );
     }
-    int? lastMonth;
+    final months = [for (final monday in mondays) _day(monday, 6).month];
+    var lastLabel = -3;
     for (final (column, monday) in mondays.indexed) {
       final x = _labelWidth + column * (_cell + _gap);
-      final weekEnd = _day(monday, 6);
-      if (weekEnd.month != lastMonth && column < mondays.length - 1) {
-        _text(canvas, month.format(weekEnd), Offset(x, 0));
+      if (monthLabelAt(months, column, lastLabel)) {
+        _text(canvas, month.format(_day(monday, 6)), Offset(x, 0));
+        lastLabel = column;
       }
-      lastMonth = weekEnd.month;
       for (var d = 0; d < 7; d++) {
         final day = _day(monday, d);
         if (day.isAfter(today)) continue;

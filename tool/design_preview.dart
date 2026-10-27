@@ -2,7 +2,8 @@ import 'dart:async';
 
 // Local design preview: the real app UI over in-memory sample data.
 // Build: flutter build web -t tool/design_preview.dart --no-web-resources-cdn
-// Query: count=N, appearance=light, empty=1, startup=loading|error.
+// Query: count=N, goal=N, table=1, appearance=light, empty=1,
+// startup=loading|error.
 // Store screenshots: tool/store/render_screenshots.js.
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -113,10 +114,17 @@ void main() {
   final repo = PreviewRepository(sessions)
     ..ongoing = int.tryParse(query['count'] ?? '') ?? 0
     ..started = now.subtract(const Duration(minutes: 23, seconds: 41))
+    ..table = query['table'] == '1'
+        ? const [
+            Companion(name: 'Ana', count: 12),
+            Companion(name: 'Leo', count: 9),
+          ]
+        : const []
     ..preferences = InMemoryPreferences(
       appearance: query['appearance'] == 'light'
           ? Appearance.light
           : Appearance.dark,
+      sessionGoal: int.tryParse(query['goal'] ?? ''),
     );
   runApp(
     ProviderScope(

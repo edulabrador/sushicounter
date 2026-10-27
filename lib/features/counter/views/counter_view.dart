@@ -137,6 +137,7 @@ class CounterView extends ConsumerWidget {
                 constraints.maxWidth > constraints.maxHeight * 1.3;
             final sushiSize = (constraints.maxHeight * (wide ? .34 : .23))
                 .clamp(96.0, 200.0);
+            final gap = wide ? 8.0 : 16.0;
             final hero = Center(
               child: Column(
                 mainAxisSize: MainAxisSize.min,
@@ -149,27 +150,32 @@ class CounterView extends ConsumerWidget {
                       semanticsLabel: l10n.currentSessionSemantics(
                         counterState.count,
                       ),
-                      style: Theme.of(context).textTheme.displayLarge,
+                      style: wide
+                          ? Theme.of(context).textTheme.displayMedium
+                          : Theme.of(context).textTheme.displayLarge,
                     ),
                   ),
-                  const SizedBox(height: 16),
-                  Text(
-                    counterState.count == 0 ? l10n.tapToStart : l10n.tapHint,
-                    textAlign: TextAlign.center,
-                    style: TextStyle(
-                      color: context.colors.textMuted,
-                      fontSize: 16,
-                    ),
-                  ),
-                  if (goal != null) ...[
+                  // Sideways the hint gives way so the nigiri stays in view.
+                  if (!wide) ...[
                     const SizedBox(height: 16),
+                    Text(
+                      counterState.count == 0 ? l10n.tapToStart : l10n.tapHint,
+                      textAlign: TextAlign.center,
+                      style: TextStyle(
+                        color: context.colors.textMuted,
+                        fontSize: 16,
+                      ),
+                    ),
+                  ],
+                  if (goal != null) ...[
+                    SizedBox(height: gap),
                     _GoalProgress(count: counterState.count, goal: goal),
                   ],
                   if (best > 0 && counterState.count > 0) ...[
-                    const SizedBox(height: 16),
+                    SizedBox(height: gap),
                     _RecordProgress(count: counterState.count, best: best),
                   ],
-                  const SizedBox(height: 24),
+                  SizedBox(height: wide ? 16 : 24),
                   SushiButton(
                     mood: beatingRecord ? SushiMood.starry : SushiMood.happy,
                     onTap: () {

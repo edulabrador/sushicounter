@@ -150,6 +150,18 @@ void main() {
       expect(heatLevel(5, 0), 0);
     });
 
+    test('month labels never crowd each other', () {
+      // A month that only shows for two columns at the start gets no label.
+      final months = [5, 5, 6, 6, 6, 6, 7, 7, 7, 7, 8];
+      final labelled = <int>[];
+      var last = -3;
+      for (var c = 0; c < months.length; c++) {
+        if (monthLabelAt(months, c, last)) labelled.add(last = c);
+      }
+      expect(labelled, [2, 6]);
+      expect(monthLabelAt([1, 1, 1, 1], 0, -3), isTrue);
+    });
+
     test('fits whole weeks in the width', () {
       expect(calendarWeeksFor(100), 8);
       expect(calendarWeeksFor(22 + 17 * 18 - 3), 18);
