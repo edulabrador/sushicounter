@@ -1,6 +1,8 @@
 package dev.edulabrador.sushiscore
 
 import android.app.Activity
+import android.content.ClipData
+import android.content.Context
 import android.content.ActivityNotFoundException
 import android.content.Intent
 import android.net.Uri
@@ -13,6 +15,23 @@ import io.flutter.plugin.common.MethodChannel
 import java.io.IOException
 
 class MainActivity : FlutterActivity() {
+    /**
+     * One engine for the whole process. Android can recreate the activity on
+     * its own (for example when it finishes processing an install or updates
+     * the app's resources); with the default per-activity engine that would
+     * restart the app from its splash screen. The new activity reattaches to
+     * the running engine instead.
+     */
+    override fun provideFlutterEngine(context: Context): FlutterEngine =
+        processEngine ?: FlutterEngine(
+            context.applicationContext,
+            flutterShellArgs.toArray(),
+            true, // register the generated plugins
+            shouldRestoreAndSaveState(),
+        ).also { processEngine = it }
+
+    override fun shouldDestroyEngineWithHost(): Boolean = false
+
     private val pendingLaunchActions = mutableListOf<String>()
     private var launchChannel: MethodChannel? = null
     private var pendingFileResult: MethodChannel.Result? = null
@@ -72,6 +91,52 @@ class MainActivity : FlutterActivity() {
 
         MethodChannel(messenger, "dev.edulabrador.sushiscore/files")
             .setMethodCallHandler { call, result -> handleFileCall(call, result) }
+
+        MethodChannel(messenger, "dev.edulabrador.sushiscore/share")
+            .setMethodCallHandler { call, result -> handleShareCall(call, result) }
+
+        MethodChannel(messenger, "dev.edulabrador.sushiscore/widget")
+            .setMethodCallHandler { call, result ->
+                when (call.method) {
+                    "update" -> {
+                        SushiWidget.refresh(applicationContext, call.argument<Int>("count") ?: 0)
+                        result.success(null)
+                    }
+                    "storedCount" -> result.success(SushiWidget.storedCount(applicationContext))
+                    else -> result.notImplemented()
+                }
+            }
+    }
+
+    /** Opens the share sheet with a session image served by ShareImageProvider. */
+    private fun handleShareCall(call: MethodCall, result: MethodChannel.Result) {
+        if (call.method != "shareImage") return result.notImplemented()
+        val bytes = call.argument<ByteArray>("bytes")
+        val name = call.argument<String>("name")
+        if (bytes == null || name == null || !ShareImages.isSafeName(name)) {
+            return result.error("args", "Bad share request", null)
+        }
+        try {
+            ShareImages.write(cacheDir, name, bytes)
+            val uri = Uri.Builder()
+                .scheme("content")
+                .authority("$packageName.share")
+                .appendPath(name)
+                .build()
+            val send = Intent(Intent.ACTION_SEND)
+                .setType("image/png")
+                .putExtra(Intent.EXTRA_STREAM, uri)
+                .putExtra(Intent.EXTRA_TEXT, call.argument<String>("text"))
+                .addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
+            // The grant travels with the clip data through the chooser.
+            send.clipData = ClipData.newRawUri(null, uri)
+            startActivity(Intent.createChooser(send, call.argument<String>("title")))
+            result.success(true)
+        } catch (e: ActivityNotFoundException) {
+            result.error("unavailable", "No app can share images", null)
+        } catch (e: IOException) {
+            result.error("io", e.message, null)
+        }
     }
 
     override fun cleanUpFlutterEngine(flutterEngine: FlutterEngine) {
@@ -150,6 +215,7 @@ class MainActivity : FlutterActivity() {
     }
 
     private companion object {
+        var processEngine: FlutterEngine? = null
         const val EXPORT_REQUEST = 4101
         const val IMPORT_REQUEST = 4102
     }

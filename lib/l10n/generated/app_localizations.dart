@@ -1141,6 +1141,240 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'System'**
   String get appearanceSystem;
+
+  /// No description provided for @editSession.
+  ///
+  /// In en, this message translates to:
+  /// **'Edit session'**
+  String get editSession;
+
+  /// No description provided for @sessionStart.
+  ///
+  /// In en, this message translates to:
+  /// **'Start'**
+  String get sessionStart;
+
+  /// No description provided for @countInvalid.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter a whole number from 1 to {max}.'**
+  String countInvalid(int max);
+
+  /// No description provided for @sessionInFuture.
+  ///
+  /// In en, this message translates to:
+  /// **'A session cannot end in the future.'**
+  String get sessionInFuture;
+
+  /// No description provided for @couldNotSaveSession.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not save the changes.'**
+  String get couldNotSaveSession;
+
+  /// No description provided for @recordBurst.
+  ///
+  /// In en, this message translates to:
+  /// **'New record!'**
+  String get recordBurst;
+
+  /// No description provided for @shareSession.
+  ///
+  /// In en, this message translates to:
+  /// **'Share session'**
+  String get shareSession;
+
+  /// No description provided for @share.
+  ///
+  /// In en, this message translates to:
+  /// **'Share'**
+  String get share;
+
+  /// No description provided for @shareText.
+  ///
+  /// In en, this message translates to:
+  /// **'I ate {pieces} of sushi on {date}. Counted with Sushi Tracker.'**
+  String shareText(String pieces, String date);
+
+  /// No description provided for @shareTextAt.
+  ///
+  /// In en, this message translates to:
+  /// **'I ate {pieces} of sushi at {place} on {date}. Counted with Sushi Tracker.'**
+  String shareTextAt(String pieces, String place, String date);
+
+  /// No description provided for @piecesLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{piece} other{pieces}}'**
+  String piecesLabel(int count);
+
+  /// No description provided for @summaryCopied.
+  ///
+  /// In en, this message translates to:
+  /// **'Summary copied to the clipboard.'**
+  String get summaryCopied;
+
+  /// No description provided for @couldNotShare.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not share the session.'**
+  String get couldNotShare;
+
+  /// No description provided for @tableTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'At the table'**
+  String get tableTitle;
+
+  /// No description provided for @tableTotal.
+  ///
+  /// In en, this message translates to:
+  /// **'Table total: {pieces}'**
+  String tableTotal(String pieces);
+
+  /// No description provided for @addCompanion.
+  ///
+  /// In en, this message translates to:
+  /// **'Add someone at your table'**
+  String get addCompanion;
+
+  /// No description provided for @addCompanionShort.
+  ///
+  /// In en, this message translates to:
+  /// **'Add someone'**
+  String get addCompanionShort;
+
+  /// No description provided for @companionDialogTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Who is eating with you?'**
+  String get companionDialogTitle;
+
+  /// No description provided for @companionNameHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Name'**
+  String get companionNameHint;
+
+  /// No description provided for @companionDuplicate.
+  ///
+  /// In en, this message translates to:
+  /// **'That name is already at the table.'**
+  String get companionDuplicate;
+
+  /// No description provided for @companionAddOne.
+  ///
+  /// In en, this message translates to:
+  /// **'Add one for {name}'**
+  String companionAddOne(String name);
+
+  /// No description provided for @companionTakeOne.
+  ///
+  /// In en, this message translates to:
+  /// **'Take one from {name}'**
+  String companionTakeOne(String name);
+
+  /// No description provided for @companionRemove.
+  ///
+  /// In en, this message translates to:
+  /// **'Remove {name}'**
+  String companionRemove(String name);
+
+  /// No description provided for @companionRemoveConfirm.
+  ///
+  /// In en, this message translates to:
+  /// **'Remove {name} and their {pieces}?'**
+  String companionRemoveConfirm(String name, String pieces);
+
+  /// No description provided for @companionCountSemantics.
+  ///
+  /// In en, this message translates to:
+  /// **'{name}: {pieces}'**
+  String companionCountSemantics(String name, String pieces);
+
+  /// No description provided for @remove.
+  ///
+  /// In en, this message translates to:
+  /// **'Remove'**
+  String get remove;
+
+  /// No description provided for @add.
+  ///
+  /// In en, this message translates to:
+  /// **'Add'**
+  String get add;
+
+  /// No description provided for @you.
+  ///
+  /// In en, this message translates to:
+  /// **'You'**
+  String get you;
+
+  /// No description provided for @tablePeople.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 more person at the table} other{{count} more people at the table}}'**
+  String tablePeople(int count);
+
+  /// No description provided for @sessionGoalTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Session goal'**
+  String get sessionGoalTitle;
+
+  /// No description provided for @sessionGoalOff.
+  ///
+  /// In en, this message translates to:
+  /// **'Off'**
+  String get sessionGoalOff;
+
+  /// No description provided for @sessionGoalDialogTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Pieces to aim for'**
+  String get sessionGoalDialogTitle;
+
+  /// No description provided for @goalToGo.
+  ///
+  /// In en, this message translates to:
+  /// **'Goal {goal} · {remaining} to go'**
+  String goalToGo(int goal, int remaining);
+
+  /// No description provided for @goalReached.
+  ///
+  /// In en, this message translates to:
+  /// **'Goal of {goal} reached!'**
+  String goalReached(int goal);
+
+  /// No description provided for @turnOff.
+  ///
+  /// In en, this message translates to:
+  /// **'Turn off'**
+  String get turnOff;
+
+  /// No description provided for @calendarTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Calendar'**
+  String get calendarTitle;
+
+  /// No description provided for @calendarSemantics.
+  ///
+  /// In en, this message translates to:
+  /// **'Pieces per day over the last {weeks} weeks'**
+  String calendarSemantics(int weeks);
+
+  /// No description provided for @calendarLess.
+  ///
+  /// In en, this message translates to:
+  /// **'Less'**
+  String get calendarLess;
+
+  /// No description provided for @calendarMore.
+  ///
+  /// In en, this message translates to:
+  /// **'More'**
+  String get calendarMore;
 }
 
 class _AppLocalizationsDelegate

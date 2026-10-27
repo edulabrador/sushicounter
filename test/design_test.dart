@@ -337,15 +337,14 @@ void _moreTests() {
       await tester.pumpWidget(_app(FakeRepository()));
       await tester.tap(find.byTooltip('Settings'));
       await tester.pumpAndSettle();
-      for (final title in ['SESSION', 'PREFERENCES', 'YOUR DATA']) {
+      for (final title in ['SESSION', 'PREFERENCES', 'YOUR DATA', 'ABOUT']) {
+        await tester.scrollUntilVisible(
+          find.text(title),
+          200,
+          scrollable: find.byType(Scrollable).first,
+        );
         expect(find.text(title), findsOneWidget);
       }
-      await tester.scrollUntilVisible(
-        find.text('ABOUT'),
-        200,
-        scrollable: find.byType(Scrollable).first,
-      );
-      expect(find.text('ABOUT'), findsOneWidget);
       expect(tester.takeException(), isNull);
     });
 

@@ -101,7 +101,8 @@ class SessionCard extends StatelessWidget {
                       ),
                       if (price != null ||
                           isRecord ||
-                          session.restaurant != null) ...[
+                          session.restaurant != null ||
+                          session.companions.isNotEmpty) ...[
                         const SizedBox(height: 4),
                         Wrap(
                           spacing: 6,
@@ -122,6 +123,14 @@ class SessionCard extends StatelessWidget {
                               _Chip(
                                 icon: Icons.payments_outlined,
                                 label: formatMoney(context, price),
+                              ),
+                            if (session.companions.isNotEmpty)
+                              _Chip(
+                                icon: Icons.group_outlined,
+                                label: '+${session.companions.length}',
+                                semanticsLabel: l10n.tablePeople(
+                                  session.companions.length,
+                                ),
                               ),
                           ],
                         ),
@@ -165,11 +174,13 @@ class _Chip extends StatelessWidget {
     required this.icon,
     required this.label,
     this.highlighted = false,
+    this.semanticsLabel,
   });
 
   final IconData icon;
   final String label;
   final bool highlighted;
+  final String? semanticsLabel;
 
   @override
   Widget build(BuildContext context) {
@@ -188,6 +199,7 @@ class _Chip extends StatelessWidget {
           const SizedBox(width: 4),
           Text(
             label,
+            semanticsLabel: semanticsLabel,
             style: TextStyle(
               color: color,
               fontSize: 12,

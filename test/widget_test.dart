@@ -107,6 +107,27 @@ class FakeRepository extends HiveRepository {
   }
 
   @override
+  Future<Session?> editSession(
+    String id, {
+    required int count,
+    required DateTime startedAt,
+  }) async {
+    final session = sessions[id];
+    if (session == null) return null;
+    if (session.contributionEpoch == _global.epoch) {
+      await adjustGlobalState(
+        tapsDelta: count - session.count,
+        sessionsDelta: 0,
+      );
+    }
+    return sessions[id] = session.copyWith(
+      count: count,
+      startedAt: startedAt,
+      endedAt: startedAt.add(Duration(seconds: session.durationSeconds)),
+    );
+  }
+
+  @override
   Future<Session?> setSessionRestaurant(String id, String? restaurant) async {
     final session = sessions[id];
     if (session == null) return null;
@@ -129,10 +150,19 @@ class FakeRepository extends HiveRepository {
   DateTime? getOngoingStartedAt() => _ongoingStartedAt;
 
   @override
-  Future<void> saveOngoingSession(int count, DateTime? startedAt) async {
+  Future<void> saveOngoingSession(
+    int count,
+    DateTime? startedAt, {
+    List<Companion> companions = const [],
+  }) async {
     _ongoingCount = count;
     _ongoingStartedAt = startedAt;
+    _ongoingCompanions = companions;
   }
+
+  @override
+  List<Companion> getOngoingCompanions() => _ongoingCompanions;
+  List<Companion> _ongoingCompanions = const [];
 }
 
 class DelayedResetRepository extends FakeRepository {
@@ -140,12 +170,16 @@ class DelayedResetRepository extends FakeRepository {
   int resetWrites = 0;
 
   @override
-  Future<void> saveOngoingSession(int count, DateTime? startedAt) async {
+  Future<void> saveOngoingSession(
+    int count,
+    DateTime? startedAt, {
+    List<Companion> companions = const [],
+  }) async {
     if (count == 0) {
       resetWrites++;
       await resetGate.future;
     }
-    await super.saveOngoingSession(count, startedAt);
+    await super.saveOngoingSession(count, startedAt, companions: companions);
   }
 }
 
@@ -153,9 +187,13 @@ class DelayedOngoingRepository extends FakeRepository {
   final writeGate = Completer<void>();
 
   @override
-  Future<void> saveOngoingSession(int count, DateTime? startedAt) async {
+  Future<void> saveOngoingSession(
+    int count,
+    DateTime? startedAt, {
+    List<Companion> companions = const [],
+  }) async {
     await writeGate.future;
-    await super.saveOngoingSession(count, startedAt);
+    await super.saveOngoingSession(count, startedAt, companions: companions);
   }
 }
 

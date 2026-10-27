@@ -2,6 +2,26 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.7.0] - 2026-10-27
+### Added
+- Group mode: count up to eight people at your table under your own counter. The table is kept with the unsaved session, saved with it, carried by backups, and shown in History and the details. Only your own pieces count towards your totals and stats.
+- Edit a saved session's pieces and start time from its details; lifetime totals follow the change.
+- Share a session as a 1080 px image with the nigiri, pieces, restaurant, duration, pace, price and table total, through the Android share sheet (served by a small read-only content provider, no permission). Elsewhere the summary is copied.
+- Home screen widget with the current session count; its +1 button opens the app adding one sushi, like the launcher shortcut.
+- Session goal in Settings, with progress on the counter and a vibration when reached.
+- Calendar in Stats: recent weeks shaded by pieces per day, also readable as a list.
+- Beating your record sets off a golden burst, a "New record!" badge and a strong vibration; each tap floats a small +1. Reduced motion keeps only the badge.
+- Tablets and sideways phones: navigation rail, side-by-side counter, two-column Stats and a centred History.
+
+### Changed
+- Stats derive their figures once per change to history instead of on every counter tap, and the counter screen rebuilds once per tap instead of three times.
+- The app draws edge to edge behind transparent system bars, keeping content clear of them and of display cutouts.
+- The emulator test records frame timings for 100 taps and prints a marker per step; a stuck run stops after 15 minutes with the device log.
+- Fixed a Kotlin type inference error that failed the Android build.
+- Android keeps one Flutter engine for the whole process, so when the system recreates the activity (for example while it finishes processing an install) the app carries on instead of restarting; this was also what made the emulator test hang at random since 0.6.0.
+- Privacy policy and Play notes cover table names, the widget's stored count and user-started sharing.
+- App version is now `0.7.0+12`.
+
 ## [0.6.0] - 2026-10-25
 ### Added
 - Restaurant per session: name it from the session details, with suggestions from earlier sessions. History shows it on each card, and Stats gains "By restaurant" with sessions, average pieces and cost per piece, plus a trophy for the cheapest per piece.

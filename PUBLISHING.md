@@ -4,7 +4,7 @@
 
 - Android app label and display branding: **Sushi Tracker**.
 - Android `applicationId`: `dev.edulabrador.sushiscore` (unchanged). Android namespace: `dev.edulabrador.sushiscore`.
-- Release version in `pubspec.yaml`: `0.6.0+11`. Confirm that version code 11 exceeds the latest code in Play Console before uploading.
+- Release version in `pubspec.yaml`: `0.7.0+12`. Confirm that version code 12 exceeds the latest code in Play Console before uploading.
 - Android uses AGP 9.0.1 with Flutter 3.47.5, compile/target SDK 36, and Kotlin Gradle Plugin 2.3.20. `android.builtInKotlin=false` and `android.newDsl=false` remain enabled for the temporary legacy mode.
 - The current resolved Android plugin graph was reviewed for KGP usage. `path_provider_android` delegates Android integration through `jni_flutter`; its Android module applies only `com.android.library` and contains no Kotlin Gradle Plugin usage.
 - Built-in Kotlin migration is deferred: AGP 9.0.1 supplies KGP 2.2.10, below Flutter 3.47.5's minimum 2.2.20, and an attempted migration failed the Android debug build. The existing legacy-mode build emits Flutter's future-migration warning; it is non-blocking for this release and must be revisited after a compatible toolchain is available.
@@ -12,7 +12,7 @@
 - Release signing requires `android/key.properties` and an existing upload keystore. There is no debug signing fallback. Keep the properties file and keystore out of Git.
 - CI generates a disposable JKS and temporary `android/key.properties` only to smoke-test the signed release AAB path. That AAB is not uploaded or retained as a production artifact, and its key must never be used for Play Console.
 - Store icon: `assets/play-store/store-icon.png` (512×512). Feature graphics: `assets/play-store/feature-graphic.png` (1024×500, English) and `feature-graphic-es.png` (Spanish). Phone screenshots: `assets/play-store/screenshots/{en,es}/` (1080×1920). Launcher source: `assets/icon/app_icon.png`, rendered from the in-app nigiri by `tool/icons/render_icons_test.dart`; the adaptive icon and native splash are generated from it.
-- Privacy policy source: `docs/privacy-policy.html`, last updated 23 September 2026. The intended public URL is `https://edulabrador.github.io/sushicounter/privacy-policy.html`; its live availability has not been verified from this environment.
+- Privacy policy source: `docs/privacy-policy.html`, last updated 27 October 2026. The intended public URL is `https://edulabrador.github.io/sushicounter/privacy-policy.html`; its live availability has not been verified from this environment.
 
 ## Repository and CI validation
 
@@ -26,7 +26,7 @@ A production AAB still requires Eduardo's private Play upload key in `android/ke
 
 ## External Play Console steps
 
-1. Confirm the app/package exists in Play Console and that `0.6.0+11` uses a version code greater than every uploaded release.
+1. Confirm the app/package exists in Play Console and that `0.7.0+12` uses a version code greater than every uploaded release.
 2. Obtain the real upload keystore for this app, populate `android/key.properties`, and build/sign `build/app/outputs/bundle/release/app-release.aab`. Do not generate a replacement key if the package already has an upload key. In Windows `.properties` files, prefer forward slashes for `storeFile`, for example `C:/Users/Edu/path/upload-keystore.jks`; backslashes can be interpreted as escapes. Never commit the real path or passwords.
 3. Verify the public privacy-policy URL opens without authentication and points to the current policy. Publish the policy if the URL is unavailable.
 4. Review the phone screenshots in `assets/play-store/screenshots/`. They show the real UI with sample data, rendered from the web preview without an Android status bar; capture on-device replacements if you prefer.

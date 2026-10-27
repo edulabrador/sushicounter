@@ -149,6 +149,17 @@ List<({DateTime weekStart, int pieces})> weeklyPieces(
   ];
 }
 
+/// Pieces per local calendar day a session ended on, for the calendar.
+Map<DateTime, int> piecesByDay(List<Session> sessions) {
+  final days = <DateTime, int>{};
+  for (final session in sessions) {
+    final ended = session.endedAt.toLocal();
+    final day = DateTime(ended.year, ended.month, ended.day);
+    days[day] = (days[day] ?? 0) + session.count;
+  }
+  return days;
+}
+
 class RestaurantStats {
   const RestaurantStats({
     required this.name,

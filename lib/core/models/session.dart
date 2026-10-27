@@ -1,5 +1,9 @@
 import 'package:hive_ce/hive.dart';
 
+import 'companion.dart';
+
+export 'companion.dart';
+
 const _keep = Object();
 
 class Session extends HiveObject {
@@ -15,6 +19,12 @@ class Session extends HiveObject {
 
   /// Where the session happened, if recorded.
   final String? restaurant;
+
+  /// Others counted at the same table; your own pieces are [count].
+  final List<Companion> companions;
+
+  /// Most pieces a session can be edited to.
+  static const maxCount = 9999;
 
   /// Longest restaurant name accepted from the UI and from backups.
   static const maxRestaurantLength = 60;
@@ -34,17 +44,22 @@ class Session extends HiveObject {
     this.contributionEpoch = 0,
     this.priceCents,
     this.restaurant,
+    this.companions = const [],
   });
 
   Session copyWith({
+    int? count,
+    DateTime? startedAt,
+    DateTime? endedAt,
     int? contributionEpoch,
     Object? priceCents = _keep,
     Object? restaurant = _keep,
+    List<Companion>? companions,
   }) => Session(
     id: id,
-    startedAt: startedAt,
-    endedAt: endedAt,
-    count: count,
+    startedAt: startedAt ?? this.startedAt,
+    endedAt: endedAt ?? this.endedAt,
+    count: count ?? this.count,
     durationSeconds: durationSeconds,
     contributionEpoch: contributionEpoch ?? this.contributionEpoch,
     priceCents: identical(priceCents, _keep)
@@ -53,6 +68,7 @@ class Session extends HiveObject {
     restaurant: identical(restaurant, _keep)
         ? this.restaurant
         : restaurant as String?,
+    companions: companions ?? this.companions,
   );
 
   /// Epoch of legacy history whose totals could not be attributed safely.
@@ -103,13 +119,14 @@ class SessionAdapter extends TypeAdapter<Session> {
       contributionEpoch: fields[5] as int? ?? 0,
       priceCents: fields[6] as int?,
       restaurant: fields[7] as String?,
+      companions: Companion.listFromRaw(fields[8]),
     );
   }
 
   @override
   void write(BinaryWriter writer, Session obj) {
     writer
-      ..writeByte(8)
+      ..writeByte(9)
       ..writeByte(0)
       ..write(obj.id)
       ..writeByte(1)
@@ -125,6 +142,8 @@ class SessionAdapter extends TypeAdapter<Session> {
       ..writeByte(6)
       ..write(obj.priceCents)
       ..writeByte(7)
-      ..write(obj.restaurant);
+      ..write(obj.restaurant)
+      ..writeByte(8)
+      ..write([for (final companion in obj.companions) companion.toMap()]);
   }
 }

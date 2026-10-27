@@ -15,9 +15,13 @@ class DelayedOngoingRepository extends FakeRepository {
   final gate = Completer<void>();
 
   @override
-  Future<void> saveOngoingSession(int count, DateTime? startedAt) async {
+  Future<void> saveOngoingSession(
+    int count,
+    DateTime? startedAt, {
+    List<Companion> companions = const [],
+  }) async {
     await gate.future;
-    await super.saveOngoingSession(count, startedAt);
+    await super.saveOngoingSession(count, startedAt, companions: companions);
   }
 }
 
@@ -33,8 +37,11 @@ class DelayedCompletionRepository extends FakeRepository {
 
 class FailingOngoingRepository extends FakeRepository {
   @override
-  Future<void> saveOngoingSession(int count, DateTime? startedAt) =>
-      Future<void>.error(StateError('write failed'));
+  Future<void> saveOngoingSession(
+    int count,
+    DateTime? startedAt, {
+    List<Companion> companions = const [],
+  }) => Future<void>.error(StateError('write failed'));
 }
 
 void main() {

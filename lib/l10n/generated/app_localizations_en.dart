@@ -677,4 +677,161 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get appearanceSystem => 'System';
+
+  @override
+  String get editSession => 'Edit session';
+
+  @override
+  String get sessionStart => 'Start';
+
+  @override
+  String countInvalid(int max) {
+    return 'Enter a whole number from 1 to $max.';
+  }
+
+  @override
+  String get sessionInFuture => 'A session cannot end in the future.';
+
+  @override
+  String get couldNotSaveSession => 'Could not save the changes.';
+
+  @override
+  String get recordBurst => 'New record!';
+
+  @override
+  String get shareSession => 'Share session';
+
+  @override
+  String get share => 'Share';
+
+  @override
+  String shareText(String pieces, String date) {
+    return 'I ate $pieces of sushi on $date. Counted with Sushi Tracker.';
+  }
+
+  @override
+  String shareTextAt(String pieces, String place, String date) {
+    return 'I ate $pieces of sushi at $place on $date. Counted with Sushi Tracker.';
+  }
+
+  @override
+  String piecesLabel(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'pieces',
+      one: 'piece',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get summaryCopied => 'Summary copied to the clipboard.';
+
+  @override
+  String get couldNotShare => 'Could not share the session.';
+
+  @override
+  String get tableTitle => 'At the table';
+
+  @override
+  String tableTotal(String pieces) {
+    return 'Table total: $pieces';
+  }
+
+  @override
+  String get addCompanion => 'Add someone at your table';
+
+  @override
+  String get addCompanionShort => 'Add someone';
+
+  @override
+  String get companionDialogTitle => 'Who is eating with you?';
+
+  @override
+  String get companionNameHint => 'Name';
+
+  @override
+  String get companionDuplicate => 'That name is already at the table.';
+
+  @override
+  String companionAddOne(String name) {
+    return 'Add one for $name';
+  }
+
+  @override
+  String companionTakeOne(String name) {
+    return 'Take one from $name';
+  }
+
+  @override
+  String companionRemove(String name) {
+    return 'Remove $name';
+  }
+
+  @override
+  String companionRemoveConfirm(String name, String pieces) {
+    return 'Remove $name and their $pieces?';
+  }
+
+  @override
+  String companionCountSemantics(String name, String pieces) {
+    return '$name: $pieces';
+  }
+
+  @override
+  String get remove => 'Remove';
+
+  @override
+  String get add => 'Add';
+
+  @override
+  String get you => 'You';
+
+  @override
+  String tablePeople(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count more people at the table',
+      one: '1 more person at the table',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get sessionGoalTitle => 'Session goal';
+
+  @override
+  String get sessionGoalOff => 'Off';
+
+  @override
+  String get sessionGoalDialogTitle => 'Pieces to aim for';
+
+  @override
+  String goalToGo(int goal, int remaining) {
+    return 'Goal $goal · $remaining to go';
+  }
+
+  @override
+  String goalReached(int goal) {
+    return 'Goal of $goal reached!';
+  }
+
+  @override
+  String get turnOff => 'Turn off';
+
+  @override
+  String get calendarTitle => 'Calendar';
+
+  @override
+  String calendarSemantics(int weeks) {
+    return 'Pieces per day over the last $weeks weeks';
+  }
+
+  @override
+  String get calendarLess => 'Less';
+
+  @override
+  String get calendarMore => 'More';
 }

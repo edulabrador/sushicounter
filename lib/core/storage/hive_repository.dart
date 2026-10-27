@@ -173,6 +173,38 @@ class HiveRepository {
         return updated;
       });
 
+  /// Corrects a saved session's pieces and moves it to start at
+  /// [startedAt], keeping its duration. Lifetime totals follow the new count
+  /// when the session belongs to the current lifetime. Returns null if the
+  /// session no longer exists.
+  Future<Session?> editSession(
+    String id, {
+    required int count,
+    required DateTime startedAt,
+  }) => _serial(() async {
+    final session = _sessionBox.get(id);
+    if (session == null) return null;
+    if (count < 1 || count > Session.maxCount) {
+      throw ArgumentError.value(count, 'count');
+    }
+    final updated = session.copyWith(
+      count: count,
+      startedAt: startedAt,
+      endedAt: startedAt.add(Duration(seconds: session.durationSeconds)),
+    );
+    final current = getGlobalState();
+    await _runJournal({
+      'kind': 'update',
+      'session': _sessionMap(updated),
+      'global': _globalMap(
+        session.contributionEpoch == current.epoch
+            ? _adjust(current, count - session.count, 0)
+            : current,
+      ),
+    });
+    return updated;
+  });
+
   BackupData exportBackup() =>
       BackupData(global: getGlobalState(), sessions: getAllSessions());
 
@@ -218,6 +250,9 @@ class HiveRepository {
         break;
       case 'delete':
         if (session != null) await _sessionBox.delete(session.id);
+        break;
+      case 'update':
+        if (session != null) await _sessionBox.put(session.id, session);
         break;
       case 'replace':
         final sessions = [
@@ -302,6 +337,7 @@ class HiveRepository {
     'epoch': value.contributionEpoch,
     'priceCents': value.priceCents,
     'restaurant': value.restaurant,
+    'companions': [for (final c in value.companions) c.toMap()],
   };
   Session _sessionFromMap(Map<dynamic, dynamic> value) => Session(
     id: value['id'] as String,
@@ -312,6 +348,7 @@ class HiveRepository {
     contributionEpoch: value['epoch'] as int? ?? 0,
     priceCents: value['priceCents'] as int?,
     restaurant: value['restaurant'] as String?,
+    companions: Companion.listFromRaw(value['companions']),
   );
 
   int getOngoingCount() => _ongoing()['count'] as int;
@@ -342,10 +379,25 @@ class HiveRepository {
     });
   }
 
-  Future<void> saveOngoingSession(int count, DateTime? startedAt) => _serial(
+  /// People counted with you in the unsaved session.
+  List<Companion> getOngoingCompanions() {
+    try {
+      return Companion.listFromRaw(_ongoing()['companions']);
+    } on FormatException {
+      return const [];
+    }
+  }
+
+  Future<void> saveOngoingSession(
+    int count,
+    DateTime? startedAt, {
+    List<Companion> companions = const [],
+  }) => _serial(
     () => _appStateBox.put(_ongoingKey, {
       'count': count,
       'startedAt': startedAt?.millisecondsSinceEpoch,
+      if (companions.isNotEmpty)
+        'companions': [for (final c in companions) c.toMap()],
     }),
   );
 }

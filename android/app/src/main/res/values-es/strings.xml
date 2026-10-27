@@ -2,4 +2,7 @@
 <resources>
     <string name="shortcut_add_sushi_short">Sumar sushi</string>
     <string name="shortcut_add_sushi_long">Sumar un sushi</string>
+    <string name="widget_label">Esta sesión</string>
+    <string name="widget_add">+1 sushi</string>
+    <string name="widget_description">Las piezas de tu sesión actual, con un botón para sumar un sushi.</string>
 </resources>

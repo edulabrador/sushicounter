@@ -408,5 +408,160 @@
   "appearanceTitle": "Appearance",
   "appearanceDark": "Dark",
   "appearanceLight": "Light",
-  "appearanceSystem": "System"
+  "appearanceSystem": "System",
+  "editSession": "Edit session",
+  "sessionStart": "Start",
+  "countInvalid": "Enter a whole number from 1 to {max}.",
+  "@countInvalid": {
+    "placeholders": {
+      "max": {
+        "type": "int"
+      }
+    }
+  },
+  "sessionInFuture": "A session cannot end in the future.",
+  "couldNotSaveSession": "Could not save the changes.",
+  "recordBurst": "New record!",
+  "shareSession": "Share session",
+  "share": "Share",
+  "shareText": "I ate {pieces} of sushi on {date}. Counted with Sushi Tracker.",
+  "@shareText": {
+    "placeholders": {
+      "pieces": {
+        "type": "String"
+      },
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "shareTextAt": "I ate {pieces} of sushi at {place} on {date}. Counted with Sushi Tracker.",
+  "@shareTextAt": {
+    "placeholders": {
+      "pieces": {
+        "type": "String"
+      },
+      "place": {
+        "type": "String"
+      },
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "piecesLabel": "{count, plural, =1{piece} other{pieces}}",
+  "@piecesLabel": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "summaryCopied": "Summary copied to the clipboard.",
+  "couldNotShare": "Could not share the session.",
+  "tableTitle": "At the table",
+  "tableTotal": "Table total: {pieces}",
+  "@tableTotal": {
+    "placeholders": {
+      "pieces": {
+        "type": "String"
+      }
+    }
+  },
+  "addCompanion": "Add someone at your table",
+  "addCompanionShort": "Add someone",
+  "companionDialogTitle": "Who is eating with you?",
+  "companionNameHint": "Name",
+  "companionDuplicate": "That name is already at the table.",
+  "companionAddOne": "Add one for {name}",
+  "@companionAddOne": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "companionTakeOne": "Take one from {name}",
+  "@companionTakeOne": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "companionRemove": "Remove {name}",
+  "@companionRemove": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "companionRemoveConfirm": "Remove {name} and their {pieces}?",
+  "@companionRemoveConfirm": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      },
+      "pieces": {
+        "type": "String"
+      }
+    }
+  },
+  "companionCountSemantics": "{name}: {pieces}",
+  "@companionCountSemantics": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      },
+      "pieces": {
+        "type": "String"
+      }
+    }
+  },
+  "remove": "Remove",
+  "add": "Add",
+  "you": "You",
+  "tablePeople": "{count, plural, =1{1 more person at the table} other{{count} more people at the table}}",
+  "@tablePeople": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "sessionGoalTitle": "Session goal",
+  "sessionGoalOff": "Off",
+  "sessionGoalDialogTitle": "Pieces to aim for",
+  "goalToGo": "Goal {goal} · {remaining} to go",
+  "@goalToGo": {
+    "placeholders": {
+      "goal": {
+        "type": "int"
+      },
+      "remaining": {
+        "type": "int"
+      }
+    }
+  },
+  "goalReached": "Goal of {goal} reached!",
+  "@goalReached": {
+    "placeholders": {
+      "goal": {
+        "type": "int"
+      }
+    }
+  },
+  "turnOff": "Turn off",
+  "calendarTitle": "Calendar",
+  "calendarSemantics": "Pieces per day over the last {weeks} weeks",
+  "@calendarSemantics": {
+    "placeholders": {
+      "weeks": {
+        "type": "int"
+      }
+    }
+  },
+  "calendarLess": "Less",
+  "calendarMore": "More"
 }

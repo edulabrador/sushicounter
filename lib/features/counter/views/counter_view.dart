@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:sushiscore/features/counter/providers/counter_provider.dart';
 import 'package:sushiscore/features/counter/widgets/sushi_button.dart';
@@ -6,6 +7,8 @@ import 'package:sushiscore/features/counter/widgets/session_timer.dart';
 import 'package:sushiscore/core/theme/app_colors.dart';
 import 'package:sushiscore/features/history/providers/session_provider.dart';
 import 'package:sushiscore/features/settings/views/settings_view.dart';
+import 'package:sushiscore/features/settings/providers/preferences_provider.dart';
+import 'package:sushiscore/features/counter/widgets/table_section.dart';
 import 'package:sushiscore/features/stats/achievements.dart';
 import 'package:sushiscore/features/stats/widgets/achievements_grid.dart';
 import 'package:sushiscore/features/stats/providers/records_provider.dart';
@@ -106,11 +109,12 @@ class CounterView extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final l10n = context.l10n;
-    final counterState = ref.watch(counterProvider);
+    final counterState = ref.watch(counterProvider.select(counterOnScreen));
     final lifetimeTaps = ref.watch(lifetimeTapsProvider);
     final startedAt = counterState.startedAt;
     final error = counterState.persistenceError;
     final best = ref.watch(lifetimeBestProvider);
+    final goal = ref.watch(sessionGoalProvider);
     final beatingRecord = best > 0 && counterState.count > best;
     return Scaffold(
       appBar: AppBar(
@@ -126,170 +130,204 @@ class CounterView extends ConsumerWidget {
       body: SafeArea(
         child: LayoutBuilder(
           builder: (context, constraints) {
-            final sushiSize = (constraints.maxHeight * .23).clamp(96.0, 200.0);
-            return SingleChildScrollView(
-              padding: const EdgeInsets.fromLTRB(16, 8, 16, 16),
+            // Side by side on wide, short screens (landscape phones and
+            // tablets): the nigiri on the left, the figures on the right.
+            final wide =
+                constraints.maxWidth >= 600 &&
+                constraints.maxWidth > constraints.maxHeight * 1.3;
+            final sushiSize = (constraints.maxHeight * (wide ? .34 : .23))
+                .clamp(96.0, 200.0);
+            final gap = wide ? 8.0 : 16.0;
+            final hero = Center(
               child: Column(
+                mainAxisSize: MainAxisSize.min,
                 children: [
-                  Center(
-                    child: Column(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        FittedBox(
-                          fit: BoxFit.scaleDown,
-                          child: Text(
-                            '${counterState.count}',
-                            key: counterCurrentCountKey,
-                            semanticsLabel: l10n.currentSessionSemantics(
-                              counterState.count,
-                            ),
-                            style: Theme.of(context).textTheme.displayLarge,
-                          ),
-                        ),
-                        const SizedBox(height: 16),
-                        Text(
-                          counterState.count == 0
-                              ? l10n.tapToStart
-                              : l10n.tapHint,
-                          textAlign: TextAlign.center,
-                          style: TextStyle(
-                            color: context.colors.textMuted,
-                            fontSize: 16,
-                          ),
-                        ),
-                        if (best > 0 && counterState.count > 0) ...[
-                          const SizedBox(height: 16),
-                          _RecordProgress(
-                            count: counterState.count,
-                            best: best,
-                          ),
-                        ],
-                        const SizedBox(height: 24),
-                        SushiButton(
-                          mood: beatingRecord
-                              ? SushiMood.starry
-                              : SushiMood.happy,
-                          onTap: () =>
-                              ref.read(counterProvider.notifier).increment(),
-                          onLongPress: () =>
-                              ref.read(counterProvider.notifier).decrement(),
-                          size: sushiSize,
-                          enabled: counterState.canEdit,
-                        ),
-                        const SizedBox(height: 4),
-                        TextButton.icon(
-                          key: counterUndoButtonKey,
-                          onPressed:
-                              counterState.count > 0 && counterState.canEdit
-                              ? () => ref
-                                    .read(counterProvider.notifier)
-                                    .decrement()
-                              : null,
-                          icon: const Icon(Icons.undo, size: 18),
-                          label: Text(l10n.undo),
-                          style: TextButton.styleFrom(
-                            foregroundColor: context.colors.textMuted,
-                          ),
-                        ),
-                        const SizedBox(height: 4),
-                        SizedBox(
-                          width: double.infinity,
-                          child: FilledButton.icon(
-                            key: counterEndSessionButtonKey,
-                            onPressed:
-                                counterState.count > 0 &&
-                                    !counterState.isEnding &&
-                                    !counterState.isPersisting
-                                ? () => _endSession(context, ref)
-                                : null,
-                            icon: counterState.isEnding
-                                ? const SizedBox(
-                                    width: 18,
-                                    height: 18,
-                                    child: CircularProgressIndicator(
-                                      strokeWidth: 2,
-                                    ),
-                                  )
-                                : const Icon(Icons.check),
-                            label: Text(l10n.endSession),
-                          ),
-                        ),
-                        if (counterState.isCompletionPending)
-                          TextButton.icon(
-                            key: counterDiscardButtonKey,
-                            onPressed: () => _discardSession(context, ref),
-                            icon: const Icon(Icons.delete_outline, size: 18),
-                            label: Text(l10n.discardSession),
-                            style: TextButton.styleFrom(
-                              foregroundColor: context.colors.danger,
-                            ),
-                          ),
-                      ],
+                  FittedBox(
+                    fit: BoxFit.scaleDown,
+                    child: Text(
+                      '${counterState.count}',
+                      key: counterCurrentCountKey,
+                      semanticsLabel: l10n.currentSessionSemantics(
+                        counterState.count,
+                      ),
+                      style: wide
+                          ? Theme.of(context).textTheme.displayMedium
+                          : Theme.of(context).textTheme.displayLarge,
                     ),
                   ),
-                  Padding(
-                    padding: const EdgeInsets.only(top: 24),
-                    child: Card(
-                      child: Padding(
-                        padding: const EdgeInsets.symmetric(
-                          vertical: 16,
-                          horizontal: 12,
-                        ),
-                        child: Column(
-                          children: [
-                            IntrinsicHeight(
-                              child: Row(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Expanded(
-                                    child: _Metric(
-                                      icon: Icons.restaurant,
-                                      label: l10n.thisSession,
-                                      value: '${counterState.count}',
-                                      valueKey: counterSessionTotalKey,
-                                    ),
-                                  ),
-                                  const VerticalDivider(width: 16),
-                                  Expanded(
-                                    child: _Metric(
-                                      icon: Icons.all_inclusive,
-                                      label: l10n.lifetimeTotal,
-                                      value: '$lifetimeTaps',
-                                      valueKey: counterLifetimeTotalKey,
-                                    ),
-                                  ),
-                                  if (counterState.count > 0 &&
-                                      startedAt != null) ...[
-                                    const VerticalDivider(width: 16),
-                                    Expanded(
-                                      child: SessionElapsedTimer(
-                                        startedAt: startedAt,
-                                      ),
-                                    ),
-                                  ],
-                                ],
-                              ),
-                            ),
-                            if (error != null) ...[
-                              const SizedBox(height: 12),
-                              Semantics(
-                                liveRegion: true,
-                                child: Text(
-                                  counterErrorMessage(l10n, error),
-                                  textAlign: TextAlign.center,
-                                  style: TextStyle(
-                                    color: context.colors.danger,
-                                  ),
-                                ),
-                              ),
-                            ],
-                          ],
-                        ),
+                  // Sideways the hint gives way so the nigiri stays in view.
+                  if (!wide) ...[
+                    const SizedBox(height: 16),
+                    Text(
+                      counterState.count == 0 ? l10n.tapToStart : l10n.tapHint,
+                      textAlign: TextAlign.center,
+                      style: TextStyle(
+                        color: context.colors.textMuted,
+                        fontSize: 16,
                       ),
                     ),
+                  ],
+                  if (goal != null) ...[
+                    SizedBox(height: gap),
+                    _GoalProgress(count: counterState.count, goal: goal),
+                  ],
+                  if (best > 0 && counterState.count > 0) ...[
+                    SizedBox(height: gap),
+                    _RecordProgress(count: counterState.count, best: best),
+                  ],
+                  SizedBox(height: wide ? 16 : 24),
+                  SushiButton(
+                    mood: beatingRecord ? SushiMood.starry : SushiMood.happy,
+                    onTap: () {
+                      ref.read(counterProvider.notifier).increment();
+                      if (goal != null &&
+                          ref.read(counterProvider).count == goal) {
+                        HapticFeedback.mediumImpact();
+                      }
+                    },
+                    onLongPress: () =>
+                        ref.read(counterProvider.notifier).decrement(),
+                    size: sushiSize,
+                    enabled: counterState.canEdit,
+                    count: counterState.count,
+                    record: best,
                   ),
                 ],
               ),
+            );
+            final actions = Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                const SizedBox(height: 4),
+                TextButton.icon(
+                  key: counterUndoButtonKey,
+                  onPressed: counterState.count > 0 && counterState.canEdit
+                      ? () => ref.read(counterProvider.notifier).decrement()
+                      : null,
+                  icon: const Icon(Icons.undo, size: 18),
+                  label: Text(l10n.undo),
+                  style: TextButton.styleFrom(
+                    foregroundColor: context.colors.textMuted,
+                  ),
+                ),
+                const SizedBox(height: 4),
+                SizedBox(
+                  width: double.infinity,
+                  child: FilledButton.icon(
+                    key: counterEndSessionButtonKey,
+                    onPressed:
+                        counterState.count > 0 &&
+                            !counterState.isEnding &&
+                            !counterState.isPersisting
+                        ? () => _endSession(context, ref)
+                        : null,
+                    icon: counterState.isEnding
+                        ? const SizedBox(
+                            width: 18,
+                            height: 18,
+                            child: CircularProgressIndicator(strokeWidth: 2),
+                          )
+                        : const Icon(Icons.check),
+                    label: Text(l10n.endSession),
+                  ),
+                ),
+                if (counterState.isCompletionPending)
+                  TextButton.icon(
+                    key: counterDiscardButtonKey,
+                    onPressed: () => _discardSession(context, ref),
+                    icon: const Icon(Icons.delete_outline, size: 18),
+                    label: Text(l10n.discardSession),
+                    style: TextButton.styleFrom(
+                      foregroundColor: context.colors.danger,
+                    ),
+                  ),
+              ],
+            );
+            final details = Column(
+              children: [
+                Padding(
+                  padding: const EdgeInsets.only(top: 24),
+                  child: Card(
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(
+                        vertical: 16,
+                        horizontal: 12,
+                      ),
+                      child: Column(
+                        children: [
+                          IntrinsicHeight(
+                            child: Row(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Expanded(
+                                  child: _Metric(
+                                    icon: Icons.restaurant,
+                                    label: l10n.thisSession,
+                                    value: '${counterState.count}',
+                                    valueKey: counterSessionTotalKey,
+                                  ),
+                                ),
+                                const VerticalDivider(width: 16),
+                                Expanded(
+                                  child: _Metric(
+                                    icon: Icons.all_inclusive,
+                                    label: l10n.lifetimeTotal,
+                                    value: '$lifetimeTaps',
+                                    valueKey: counterLifetimeTotalKey,
+                                  ),
+                                ),
+                                if (counterState.count > 0 &&
+                                    startedAt != null) ...[
+                                  const VerticalDivider(width: 16),
+                                  Expanded(
+                                    child: SessionElapsedTimer(
+                                      startedAt: startedAt,
+                                    ),
+                                  ),
+                                ],
+                              ],
+                            ),
+                          ),
+                          if (error != null) ...[
+                            const SizedBox(height: 12),
+                            Semantics(
+                              liveRegion: true,
+                              child: Text(
+                                counterErrorMessage(l10n, error),
+                                textAlign: TextAlign.center,
+                                style: TextStyle(color: context.colors.danger),
+                              ),
+                            ),
+                          ],
+                        ],
+                      ),
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 12),
+                const TableSection(),
+              ],
+            );
+            const padding = EdgeInsets.fromLTRB(16, 8, 16, 16);
+            if (wide) {
+              return Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Expanded(
+                    child: SingleChildScrollView(padding: padding, child: hero),
+                  ),
+                  Expanded(
+                    child: SingleChildScrollView(
+                      padding: padding,
+                      child: Column(children: [actions, details]),
+                    ),
+                  ),
+                ],
+              );
+            }
+            return SingleChildScrollView(
+              padding: padding,
+              child: Column(children: [hero, actions, details]),
             );
           },
         ),
@@ -334,6 +372,60 @@ class _Metric extends StatelessWidget {
 }
 
 /// How close the session is to the best one of this lifetime.
+class _GoalProgress extends StatelessWidget {
+  const _GoalProgress({required this.count, required this.goal});
+
+  final int count;
+  final int goal;
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = context.l10n;
+    final colors = context.colors;
+    final reached = count >= goal;
+    final label = reached
+        ? l10n.goalReached(goal)
+        : l10n.goalToGo(goal, goal - count);
+    return ConstrainedBox(
+      constraints: const BoxConstraints(maxWidth: 320),
+      child: Column(
+        children: [
+          Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Icon(
+                reached ? Icons.check_circle : Icons.flag_outlined,
+                size: 16,
+                color: colors.accent,
+              ),
+              const SizedBox(width: 6),
+              Flexible(
+                child: Text(
+                  label,
+                  textAlign: TextAlign.center,
+                  style: TextStyle(
+                    color: reached ? colors.accent : colors.textMuted,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 8),
+          ClipRRect(
+            borderRadius: BorderRadius.circular(8),
+            child: LinearProgressIndicator(
+              value: (count / goal).clamp(0.0, 1.0),
+              minHeight: 8,
+              semanticsLabel: label,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
 class _RecordProgress extends StatelessWidget {
   const _RecordProgress({required this.count, required this.best});
 

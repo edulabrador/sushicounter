@@ -12,6 +12,8 @@ import 'package:sushiscore/shared/art/sushi_art.dart';
 import 'package:intl/intl.dart';
 import 'package:sushiscore/features/history/history_entries.dart';
 import 'package:sushiscore/features/stats/stats_logic.dart';
+import 'package:sushiscore/features/history/widgets/edit_session_dialog.dart';
+import 'package:sushiscore/features/history/widgets/share_session_dialog.dart';
 
 /// Watches the session list so a price change shows up immediately.
 class SessionDetailsSheet extends ConsumerWidget {
@@ -70,6 +72,50 @@ class SessionDetailsSheet extends ConsumerWidget {
     }
   }
 
+  Future<void> _editSession(
+    BuildContext context,
+    WidgetRef ref,
+    Session session,
+  ) async {
+    final l10n = context.l10n;
+    final messenger = ScaffoldMessenger.of(context);
+    final result = await showDialog<SessionEdit>(
+      context: context,
+      builder: (_) => EditSessionDialog(session: session),
+    );
+    if (result == null) return;
+    try {
+      await ref
+          .read(storageProvider)
+          .editSession(id, count: result.count, startedAt: result.startedAt);
+      ref.read(globalStateProvider.notifier).reload();
+      ref.read(sessionListProvider.notifier).reload();
+    } catch (_) {
+      messenger.showSnackBar(SnackBar(content: Text(l10n.couldNotSaveSession)));
+    }
+  }
+
+  Future<void> _share(
+    BuildContext context,
+    Session session, {
+    required bool isRecord,
+  }) async {
+    final l10n = context.l10n;
+    final messenger = ScaffoldMessenger.of(context);
+    final result = await showDialog<ShareResult>(
+      context: context,
+      builder: (_) => ShareSessionDialog(session: session, isRecord: isRecord),
+    );
+    final message = switch (result) {
+      ShareResult.copied => l10n.summaryCopied,
+      ShareResult.failed => l10n.couldNotShare,
+      ShareResult.shared || null => null,
+    };
+    if (message != null) {
+      messenger.showSnackBar(SnackBar(content: Text(message)));
+    }
+  }
+
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final l10n = context.l10n;
@@ -125,6 +171,16 @@ class SessionDetailsSheet extends ConsumerWidget {
                     ],
                   ),
                 ),
+                IconButton(
+                  onPressed: () => _share(context, session, isRecord: isRecord),
+                  tooltip: l10n.shareSession,
+                  icon: const Icon(Icons.share_outlined),
+                ),
+                IconButton(
+                  onPressed: () => _editSession(context, ref, session),
+                  tooltip: l10n.editSession,
+                  icon: const Icon(Icons.edit_outlined),
+                ),
               ],
             ),
             const SizedBox(height: 12),
@@ -177,6 +233,10 @@ class SessionDetailsSheet extends ConsumerWidget {
                 );
               },
             ),
+            if (session.companions.isNotEmpty) ...[
+              const SizedBox(height: 12),
+              _TableList(session: session),
+            ],
             if (!inLifetime) ...[
               const SizedBox(height: 12),
               Text(
@@ -215,6 +275,81 @@ class SessionDetailsSheet extends ConsumerWidget {
             ),
           ],
         ),
+      ),
+    );
+  }
+}
+
+/// Everyone at the table, most pieces first, with the table total.
+class _TableList extends StatelessWidget {
+  const _TableList({required this.session});
+
+  final Session session;
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = context.l10n;
+    final colors = context.colors;
+    final people = [
+      (name: l10n.you, count: session.count, isYou: true),
+      for (final c in session.companions)
+        (name: c.name, count: c.count, isYou: false),
+    ]..sort((a, b) => b.count.compareTo(a.count));
+    final total = people.fold(0, (sum, p) => sum + p.count);
+    return Container(
+      padding: const EdgeInsets.fromLTRB(12, 10, 12, 6),
+      decoration: BoxDecoration(
+        color: colors.background,
+        borderRadius: BorderRadius.circular(16),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          Row(
+            children: [
+              Icon(Icons.group_outlined, size: 20, color: colors.accent),
+              const SizedBox(width: 10),
+              Expanded(
+                child: Text(
+                  l10n.tableTitle,
+                  style: const TextStyle(fontWeight: FontWeight.w600),
+                ),
+              ),
+              Text(
+                l10n.tableTotal(l10n.piecesCount(total)),
+                style: TextStyle(color: colors.textMuted, fontSize: 13),
+              ),
+            ],
+          ),
+          const SizedBox(height: 6),
+          for (final person in people)
+            MergeSemantics(
+              child: Padding(
+                padding: const EdgeInsets.symmetric(vertical: 4),
+                child: Row(
+                  children: [
+                    Expanded(
+                      child: Text(
+                        person.name,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: TextStyle(
+                          fontWeight: person.isYou
+                              ? FontWeight.w700
+                              : FontWeight.w500,
+                          color: person.isYou ? colors.accent : colors.text,
+                        ),
+                      ),
+                    ),
+                    Text(
+                      l10n.piecesCount(person.count),
+                      style: const TextStyle(fontWeight: FontWeight.w700),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+        ],
       ),
     );
   }

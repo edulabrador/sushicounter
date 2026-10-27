@@ -681,4 +681,161 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get appearanceSystem => 'Sistema';
+
+  @override
+  String get editSession => 'Editar sesión';
+
+  @override
+  String get sessionStart => 'Inicio';
+
+  @override
+  String countInvalid(int max) {
+    return 'Escribe un número entero del 1 al $max.';
+  }
+
+  @override
+  String get sessionInFuture => 'Una sesión no puede terminar en el futuro.';
+
+  @override
+  String get couldNotSaveSession => 'No se pudieron guardar los cambios.';
+
+  @override
+  String get recordBurst => '¡Nuevo récord!';
+
+  @override
+  String get shareSession => 'Compartir sesión';
+
+  @override
+  String get share => 'Compartir';
+
+  @override
+  String shareText(String pieces, String date) {
+    return 'Me comí $pieces de sushi el $date. Contado con Sushi Tracker.';
+  }
+
+  @override
+  String shareTextAt(String pieces, String place, String date) {
+    return 'Me comí $pieces de sushi en $place el $date. Contado con Sushi Tracker.';
+  }
+
+  @override
+  String piecesLabel(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'piezas',
+      one: 'pieza',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get summaryCopied => 'Resumen copiado al portapapeles.';
+
+  @override
+  String get couldNotShare => 'No se pudo compartir la sesión.';
+
+  @override
+  String get tableTitle => 'En la mesa';
+
+  @override
+  String tableTotal(String pieces) {
+    return 'Total de la mesa: $pieces';
+  }
+
+  @override
+  String get addCompanion => 'Añadir a alguien de tu mesa';
+
+  @override
+  String get addCompanionShort => 'Añadir a alguien';
+
+  @override
+  String get companionDialogTitle => '¿Quién come contigo?';
+
+  @override
+  String get companionNameHint => 'Nombre';
+
+  @override
+  String get companionDuplicate => 'Ese nombre ya está en la mesa.';
+
+  @override
+  String companionAddOne(String name) {
+    return 'Sumar una a $name';
+  }
+
+  @override
+  String companionTakeOne(String name) {
+    return 'Restar una a $name';
+  }
+
+  @override
+  String companionRemove(String name) {
+    return 'Quitar a $name';
+  }
+
+  @override
+  String companionRemoveConfirm(String name, String pieces) {
+    return '¿Quitar a $name y sus $pieces?';
+  }
+
+  @override
+  String companionCountSemantics(String name, String pieces) {
+    return '$name: $pieces';
+  }
+
+  @override
+  String get remove => 'Quitar';
+
+  @override
+  String get add => 'Añadir';
+
+  @override
+  String get you => 'Tú';
+
+  @override
+  String tablePeople(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count personas más en la mesa',
+      one: '1 persona más en la mesa',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get sessionGoalTitle => 'Objetivo por sesión';
+
+  @override
+  String get sessionGoalOff => 'Desactivado';
+
+  @override
+  String get sessionGoalDialogTitle => 'Piezas que quieres alcanzar';
+
+  @override
+  String goalToGo(int goal, int remaining) {
+    return 'Objetivo $goal · te faltan $remaining';
+  }
+
+  @override
+  String goalReached(int goal) {
+    return '¡Objetivo de $goal conseguido!';
+  }
+
+  @override
+  String get turnOff => 'Desactivar';
+
+  @override
+  String get calendarTitle => 'Calendario';
+
+  @override
+  String calendarSemantics(int weeks) {
+    return 'Piezas por día en las últimas $weeks semanas';
+  }
+
+  @override
+  String get calendarLess => 'Menos';
+
+  @override
+  String get calendarMore => 'Más';
 }
