@@ -3,8 +3,8 @@
 Current release candidate:
 - App name: Sushi Tracker
 - Package / application ID: `dev.edulabrador.sushiscore`
-- Version name: `0.6.0`
-- Version code: `11`
+- Version name: `0.7.0`
+- Version code: `12`
 - Target SDK: 36
 - Release AAB path: `build/app/outputs/bundle/release/app-release.aab`
 - Privacy policy: https://edulabrador.github.io/sushicounter/privacy-policy.html
@@ -20,9 +20,9 @@ Count sushi with one tap. Save sessions and track your progress offline.
 ### Full description
 Sushi Tracker is a simple offline counter for sushi and anything else you want to count.
 
-Tap the sushi to add one. Use Undo or long-press to correct a count. See how long your current session has lasted, then end it to save the session.
+Tap the sushi to add one. Use Undo or long-press to correct a count. See how long your current session has lasted, aim for a goal, then end it to save the session. Counting for friends at the same table? Add them and count everyone on one phone.
 
-Review saved sessions in History and note the restaurant and what each meal cost. Check lifetime totals, averages, records, weekly streaks, cost per piece, a trend chart, per-restaurant stats and achievements in Statistics. Long-press the app icon to add a sushi straight away, and keep the screen on while you count.
+Review saved sessions in History and note the restaurant and what each meal cost. Share a session as an image. Check lifetime totals, averages, records, weekly streaks, cost per piece, a trend chart, a calendar, per-restaurant stats and achievements in Statistics. Add a sushi from the home screen widget or by long-pressing the app icon, and keep the screen on while you count.
 
 Back up your history to a file and restore it on another phone. Available in English and Spanish. Your counts stay on your device. No account or ads, and no internet connection is required.
 
@@ -40,9 +40,9 @@ Cuenta sushi con un toque. Guarda sesiones y sigue tu progreso sin conexión.
 ### Descripción completa
 Sushi Tracker es un contador sencillo y sin conexión para sushi y cualquier otra cosa que quieras contar.
 
-Toca el sushi para sumar uno. Usa Deshacer o mantén pulsado para corregir. Mira cuánto dura la sesión actual y termínala para guardarla.
+Toca el sushi para sumar uno. Usa Deshacer o mantén pulsado para corregir. Mira cuánto dura la sesión actual, ponte un objetivo y termínala para guardarla. ¿Vas con amigos? Añádelos y cuenta a toda la mesa en un solo móvil.
 
-Revisa tus sesiones en el Historial y anota el restaurante y cuánto costó cada comida. Consulta totales, medias, récords, rachas semanales, coste por pieza, la evolución, estadísticas por restaurante y logros en Estadísticas. Mantén pulsado el icono de la app para sumar un sushi al momento, y deja la pantalla encendida mientras cuentas.
+Revisa tus sesiones en el Historial y anota el restaurante y cuánto costó cada comida. Comparte una sesión como imagen. Consulta totales, medias, récords, rachas semanales, coste por pieza, la evolución, un calendario, estadísticas por restaurante y logros en Estadísticas. Suma un sushi desde el widget de la pantalla de inicio o manteniendo pulsado el icono de la app, y deja la pantalla encendida mientras cuentas.
 
 Guarda una copia de tu historial en un archivo y recupérala en otro móvil. Disponible en español e inglés. Tus datos se quedan en tu dispositivo. Sin cuentas ni anuncios, y no necesita internet.
 
@@ -68,7 +68,8 @@ Based on the current release:
 - Advertising/tracking: No
 - Backend/cloud transmission: No
 - Counts, sessions and totals are stored on-device. The app leaves Android Auto Backup enabled, so they can be included in the user's own Google backup. Check Play's current Data safety guidance on Android backup before answering, and keep the answers consistent with the privacy policy.
-- Export/import uses the Android document picker (no storage permission) and only runs when the user asks; the user chooses where the file goes. The app itself sends nothing anywhere.
+- Export/import uses the Android document picker (no storage permission) and only runs when the user asks; the user chooses where the file goes. Sharing a session image goes through the Android share sheet, only when the user asks, to the app the user picks. The app itself sends nothing anywhere.
+- Names typed for people at the table stay on the device with the session, like restaurant names.
 
 The release manifest contains AndroidX's app-scoped `DYNAMIC_RECEIVER_NOT_EXPORTED_PERMISSION`.
 It does not request INTERNET, location, contacts, camera, microphone or storage-access runtime permissions.
@@ -189,7 +190,7 @@ After installing the Play-distributed build, verify:
 ## Suggested publication sequence
 
 1. Confirm/create the Play Console app with package `dev.edulabrador.sushiscore`.
-2. Confirm version code 11 has never been uploaded. If it has, increment it.
+2. Confirm version code 12 has never been uploaded. If it has, increment it.
 3. Build the production AAB with the real upload key.
 4. Upload to Internal testing.
 5. Install from Google Play and smoke-test.
