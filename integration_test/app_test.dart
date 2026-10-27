@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/scheduler.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -74,22 +75,52 @@ void main() {
     expect(find.text('No sessions yet.'), findsNothing);
     step('history shown');
 
-    // Frame timings for 100 quick taps, kept in the test report and printed
-    // to the CI log. Emulator numbers are only comparable run to run.
+    // Frame timings for 100 quick taps, printed to the CI log. Collected
+    // with a timings callback, which needs no VM service connection.
+    // Emulator numbers are only comparable from run to run.
     await tester.tap(find.text('Counter'));
     await tester.pumpAndSettle();
-    await binding.watchPerformance(() async {
-      for (var i = 0; i < 100; i++) {
-        await tester.tap(find.byType(SushiButton));
-        await tester.pump(const Duration(milliseconds: 80));
-      }
-      await tester.pumpAndSettle();
-    }, reportKey: 'tap_frames');
-    step('benchmark done');
+    final frames = <FrameTiming>[];
+    void collect(List<FrameTiming> timings) => frames.addAll(timings);
+    SchedulerBinding.instance.addTimingsCallback(collect);
+    for (var i = 0; i < 100; i++) {
+      await tester.tap(find.byType(SushiButton));
+      await tester.pump(const Duration(milliseconds: 80));
+    }
+    await tester.pumpAndSettle();
+    // Timings arrive in batches; give the last one time to land.
+    await Future<void>.delayed(const Duration(seconds: 1));
+    SchedulerBinding.instance.removeTimingsCallback(collect);
     expect(count(tester), '100');
-    debugPrint('tap_frames: ${binding.reportData?['tap_frames']}');
+    final summary = frameSummary(frames);
+    binding.reportData = {'tap_frames': summary};
+    debugPrint('tap_frames: $summary');
+    step('benchmark done');
     await container.read(counterProvider.notifier).resetCurrent();
     await tester.pumpAndSettle();
     expect(repository.getOngoingCount(), 0);
   });
+}
+
+/// Build and raster times in milliseconds: frames, average, 90th percentile
+/// and worst.
+Map<String, num> frameSummary(List<FrameTiming> frames) {
+  Map<String, num> stats(String name, List<double> ms) {
+    if (ms.isEmpty) return {'${name}_frames': 0};
+    ms.sort();
+    return {
+      '${name}_avg_ms': double.parse(
+        (ms.reduce((a, b) => a + b) / ms.length).toStringAsFixed(2),
+      ),
+      '${name}_p90_ms': ms[(ms.length * 0.9).floor().clamp(0, ms.length - 1)],
+      '${name}_worst_ms': ms.last,
+    };
+  }
+
+  double ms(Duration d) => d.inMicroseconds / 1000;
+  return {
+    'frames': frames.length,
+    ...stats('build', [for (final f in frames) ms(f.buildDuration)]),
+    ...stats('raster', [for (final f in frames) ms(f.rasterDuration)]),
+  };
 }
