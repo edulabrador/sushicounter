@@ -34,8 +34,6 @@ class MainActivity : FlutterActivity() {
 
     private val pendingLaunchActions = mutableListOf<String>()
     private var launchChannel: MethodChannel? = null
-    private var pendingFileResult: MethodChannel.Result? = null
-    private var pendingExport: String? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         // Read before super.onCreate, which attaches the Flutter engine.
@@ -106,6 +104,13 @@ class MainActivity : FlutterActivity() {
                     else -> result.notImplemented()
                 }
             }
+
+        // The engine outlives activities: when this activity is a new one
+        // attaching to a running app (say the widget's +1 after the old one was
+        // destroyed), Dart drained its queue long ago and will not ask again.
+        if (pendingLaunchActions.isNotEmpty()) {
+            launchChannel?.invokeMethod("actionAvailable", null)
+        }
     }
 
     /** Opens the share sheet with a session image served by ShareImageProvider. */
@@ -216,6 +221,15 @@ class MainActivity : FlutterActivity() {
 
     private companion object {
         var processEngine: FlutterEngine? = null
+
+        /**
+         * The open file request lives as long as the engine, not the activity:
+         * Android may destroy the activity while its document picker is in
+         * front, and the result then arrives in a new one. Left on the old
+         * activity, the Dart call would never complete.
+         */
+        var pendingFileResult: MethodChannel.Result? = null
+        var pendingExport: String? = null
         const val EXPORT_REQUEST = 4101
         const val IMPORT_REQUEST = 4102
     }
