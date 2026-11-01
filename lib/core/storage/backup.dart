@@ -75,17 +75,18 @@ BackupData decodeBackup(String source) {
     }
   }
   final resetAt = global['resetAt'];
-  if (resetAt != null && resetAt is! int) {
-    throw const FormatException('Invalid totals');
+  final epoch = _nonNegative(global['epoch']);
+  // A session from a later lifetime than the totals would stay hidden now
+  // and be miscounted after the next reset.
+  if (parsed.any((session) => session.contributionEpoch > epoch)) {
+    throw const FormatException('Invalid session');
   }
   return BackupData(
     global: GlobalState(
       lifetimeTotalTaps: _nonNegative(global['taps']),
       lifetimeTotalSessions: _nonNegative(global['sessions']),
-      epoch: _int(global['epoch']),
-      lastResetAt: resetAt == null
-          ? null
-          : DateTime.fromMillisecondsSinceEpoch(resetAt as int),
+      epoch: epoch,
+      lastResetAt: resetAt == null ? null : _date(resetAt),
     ),
     sessions: parsed,
   );
@@ -96,19 +97,23 @@ Session _session(Map<dynamic, dynamic> raw) {
   if (id is! String || id.isEmpty) {
     throw const FormatException('Invalid session');
   }
-  final startedAt = _int(raw['startedAt']);
-  final endedAt = _int(raw['endedAt']);
+  final startedAt = _date(raw['startedAt']);
+  final endedAt = _date(raw['endedAt']);
   final count = _nonNegative(raw['count']);
-  if (count == 0 || endedAt < startedAt) {
+  final durationSeconds = _nonNegative(raw['durationSeconds']);
+  final epoch = _int(raw['epoch']);
+  if (count == 0 ||
+      endedAt.isBefore(startedAt) ||
+      epoch < Session.unattributedEpoch) {
     throw const FormatException('Invalid session');
   }
   return Session(
     id: id,
-    startedAt: DateTime.fromMillisecondsSinceEpoch(startedAt),
-    endedAt: DateTime.fromMillisecondsSinceEpoch(endedAt),
+    startedAt: startedAt,
+    endedAt: endedAt,
     count: count,
-    durationSeconds: _nonNegative(raw['durationSeconds']),
-    contributionEpoch: _int(raw['epoch']),
+    durationSeconds: durationSeconds,
+    contributionEpoch: epoch,
     priceCents: raw['priceCents'] == null
         ? null
         : _nonNegative(raw['priceCents']),
@@ -138,6 +143,15 @@ int _int(Object? value) {
   if (value is int) return value;
   throw const FormatException('Invalid number');
 }
+
+/// Milliseconds since the epoch, within what [DateTime] can represent.
+DateTime _date(Object? value) {
+  final millis = _int(value);
+  if (millis.abs() > _maxMillis) throw const FormatException('Invalid date');
+  return DateTime.fromMillisecondsSinceEpoch(millis);
+}
+
+const _maxMillis = 8640000000000000;
 
 int _nonNegative(Object? value) {
   final number = _int(value);

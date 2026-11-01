@@ -1,4 +1,5 @@
 import 'package:clock/clock.dart';
+import 'package:flutter/widgets.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:sushiscore/core/models/session.dart';
 
@@ -17,6 +18,32 @@ class StatsFilterNotifier extends Notifier<StatsFilter> {
 
 final statsFilterProvider = NotifierProvider<StatsFilterNotifier, StatsFilter>(
   StatsFilterNotifier.new,
+);
+
+/// The local calendar day the Stats screen is about. The app can stay in
+/// memory for days, so it moves on when the app comes back to the
+/// foreground instead of keeping the day the stats were first computed.
+class StatsDayNotifier extends Notifier<DateTime> {
+  @override
+  DateTime build() {
+    final listener = AppLifecycleListener(onResume: refresh);
+    ref.onDispose(listener.dispose);
+    return _today();
+  }
+
+  static DateTime _today() {
+    final now = clock.now();
+    return DateTime(now.year, now.month, now.day);
+  }
+
+  void refresh() {
+    final today = _today();
+    if (today != state) state = today;
+  }
+}
+
+final statsDayProvider = NotifierProvider<StatsDayNotifier, DateTime>(
+  StatsDayNotifier.new,
 );
 
 /// Everything the Stats screen derives from saved sessions.
@@ -46,6 +73,8 @@ final statsDataProvider = Provider<StatsData>((ref) {
   final epoch = ref.watch(globalStateProvider.select((g) => g.epoch));
   final sessions = ref.watch(sessionListProvider);
   final filter = ref.watch(statsFilterProvider);
+  // Recomputed when the day changes, not only when history does.
+  ref.watch(statsDayProvider);
   final now = clock.now();
   final lifetime = lifetimeSessions(sessions, epoch);
   return StatsData(

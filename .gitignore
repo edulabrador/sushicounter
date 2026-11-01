@@ -42,3 +42,6 @@ SushiTracker-PlayStore/
 Icono SushiCounter.png
 
 # Exceptions to above rules.
+
+# Golden test failure output
+test/failures/
