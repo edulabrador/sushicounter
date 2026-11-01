@@ -10,11 +10,7 @@ import '../views/counter_timer.dart';
 const counterElapsedTimeKey = ValueKey<String>('elapsed-time');
 
 class SessionElapsedTimer extends StatefulWidget {
-  const SessionElapsedTimer({
-    required this.startedAt,
-    this.now,
-    super.key,
-  });
+  const SessionElapsedTimer({required this.startedAt, this.now, super.key});
 
   final DateTime startedAt;
 
@@ -53,10 +49,7 @@ class _SessionElapsedTimerState extends State<SessionElapsedTimer>
   void _restart() {
     _timer?.cancel();
     _timer = null;
-    _base = elapsedSince(
-      widget.startedAt,
-      now: (widget.now ?? clock.now)(),
-    );
+    _base = elapsedSince(widget.startedAt, now: (widget.now ?? clock.now)());
     _elapsed = _base;
     if (!_isForeground) return;
     // Timer.tick counts every elapsed period, including ones skipped while
