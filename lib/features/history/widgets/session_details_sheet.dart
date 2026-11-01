@@ -42,9 +42,13 @@ class SessionDetailsSheet extends ConsumerWidget {
       ),
     );
     if (result == null) return;
+    // Read before the write: this sheet may close while it runs, and its ref
+    // cannot be used after that even though the save went through.
+    final storage = ref.read(storageProvider);
+    final sessions = ref.read(sessionListProvider.notifier);
     try {
-      await ref.read(storageProvider).setSessionRestaurant(id, result.name);
-      ref.read(sessionListProvider.notifier).reload();
+      await storage.setSessionRestaurant(id, result.name);
+      sessions.reload();
     } catch (_) {
       messenger.showSnackBar(
         SnackBar(content: Text(l10n.couldNotSaveRestaurant)),
@@ -64,9 +68,11 @@ class SessionDetailsSheet extends ConsumerWidget {
       builder: (_) => _PriceDialog(initialCents: session.priceCents),
     );
     if (result == null) return;
+    final storage = ref.read(storageProvider);
+    final sessions = ref.read(sessionListProvider.notifier);
     try {
-      await ref.read(storageProvider).setSessionPrice(id, result.cents);
-      ref.read(sessionListProvider.notifier).reload();
+      await storage.setSessionPrice(id, result.cents);
+      sessions.reload();
     } catch (_) {
       messenger.showSnackBar(SnackBar(content: Text(l10n.couldNotSavePrice)));
     }
@@ -84,12 +90,17 @@ class SessionDetailsSheet extends ConsumerWidget {
       builder: (_) => EditSessionDialog(session: session),
     );
     if (result == null) return;
+    final storage = ref.read(storageProvider);
+    final global = ref.read(globalStateProvider.notifier);
+    final sessions = ref.read(sessionListProvider.notifier);
     try {
-      await ref
-          .read(storageProvider)
-          .editSession(id, count: result.count, startedAt: result.startedAt);
-      ref.read(globalStateProvider.notifier).reload();
-      ref.read(sessionListProvider.notifier).reload();
+      await storage.editSession(
+        id,
+        count: result.count,
+        startedAt: result.startedAt,
+      );
+      global.reload();
+      sessions.reload();
     } catch (_) {
       messenger.showSnackBar(SnackBar(content: Text(l10n.couldNotSaveSession)));
     }

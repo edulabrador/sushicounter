@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:clock/clock.dart';
 import 'package:hive_ce_flutter/hive_flutter.dart';
 
 import '../models/global_state.dart';
@@ -90,7 +91,7 @@ class HiveRepository {
           lifetimeTotalTaps: 0,
           lifetimeTotalSessions: 0,
           epoch: current.epoch + 1,
-          lastResetAt: DateTime.now(),
+          lastResetAt: clock.now(),
         ),
       ),
     });
@@ -374,7 +375,7 @@ class HiveRepository {
       'count': count,
       // Legacy installs could hold a count without a start time.
       'startedAt': count > 0
-          ? (startedAt ?? DateTime.now()).millisecondsSinceEpoch
+          ? (startedAt ?? clock.now()).millisecondsSinceEpoch
           : null,
     });
   }

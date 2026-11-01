@@ -276,8 +276,8 @@ class CounterView extends ConsumerWidget {
                                     valueKey: counterLifetimeTotalKey,
                                   ),
                                 ),
-                                if (counterState.count > 0 &&
-                                    startedAt != null) ...[
+                                // Runs while anyone at the table has pieces.
+                                if (startedAt != null) ...[
                                   const VerticalDivider(width: 16),
                                   Expanded(
                                     child: SessionElapsedTimer(
@@ -371,7 +371,7 @@ class _Metric extends StatelessWidget {
   );
 }
 
-/// How close the session is to the best one of this lifetime.
+/// How close the session is to the goal set in Settings.
 class _GoalProgress extends StatelessWidget {
   const _GoalProgress({required this.count, required this.goal});
 
@@ -426,6 +426,7 @@ class _GoalProgress extends StatelessWidget {
   }
 }
 
+/// How close the session is to the best one of this lifetime.
 class _RecordProgress extends StatelessWidget {
   const _RecordProgress({required this.count, required this.best});
 

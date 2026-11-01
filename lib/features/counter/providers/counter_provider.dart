@@ -169,7 +169,9 @@ class CounterNotifier extends Notifier<CounterState> {
   }
 
   void increment() {
-    if (!state.canEdit) return;
+    // The same ceiling as editing a saved session, so every session saved
+    // from here can be edited later.
+    if (!state.canEdit || state.count >= Session.maxCount) return;
     state = state.copyWith(
       count: state.count + 1,
       startedAt: state.startedAt ?? clock.now(),
