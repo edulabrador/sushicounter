@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:clock/clock.dart';
 import 'package:flutter/material.dart';
 
 import '../../../core/theme/app_colors.dart';
@@ -11,12 +12,14 @@ const counterElapsedTimeKey = ValueKey<String>('elapsed-time');
 class SessionElapsedTimer extends StatefulWidget {
   const SessionElapsedTimer({
     required this.startedAt,
-    DateTime Function()? now,
+    this.now,
     super.key,
-  }) : now = now ?? DateTime.now;
+  });
 
   final DateTime startedAt;
-  final DateTime Function() now;
+
+  /// The current time; the app's [clock] when null, so tests can fix it.
+  final DateTime Function()? now;
 
   @override
   State<SessionElapsedTimer> createState() => _SessionElapsedTimerState();
@@ -50,7 +53,10 @@ class _SessionElapsedTimerState extends State<SessionElapsedTimer>
   void _restart() {
     _timer?.cancel();
     _timer = null;
-    _base = elapsedSince(widget.startedAt, now: widget.now());
+    _base = elapsedSince(
+      widget.startedAt,
+      now: (widget.now ?? clock.now)(),
+    );
     _elapsed = _base;
     if (!_isForeground) return;
     // Timer.tick counts every elapsed period, including ones skipped while

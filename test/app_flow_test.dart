@@ -1,3 +1,4 @@
+import 'package:clock/clock.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter/services.dart';
@@ -231,7 +232,9 @@ void main() {
     final repo = FakeRepository();
     await repo.saveOngoingSession(
       2,
-      DateTime.now().subtract(const Duration(seconds: 5)),
+      // The test's fake clock, which the timer reads; DateTime.now() keeps
+      // running while that clock stands still.
+      clock.now().subtract(const Duration(seconds: 5)),
     );
     await tester.pumpWidget(
       ProviderScope(
