@@ -29,6 +29,9 @@ class _HistoryViewState extends ConsumerState<HistoryView> {
   /// stay undoable instead of the newest snackbar dropping the older ones.
   final List<DeletedSession> _undoable = [];
 
+  /// Which Undo snackbar is the latest; only that one carries [_undoable].
+  int _undoGeneration = 0;
+
   @override
   Widget build(BuildContext context) {
     final l10n = context.l10n;
@@ -127,6 +130,7 @@ class _HistoryViewState extends ConsumerState<HistoryView> {
 
   void _showUndo() {
     final batch = List<DeletedSession>.of(_undoable);
+    final generation = ++_undoGeneration;
     final messenger = ScaffoldMessenger.of(context)..hideCurrentSnackBar();
     messenger
         .showSnackBar(
@@ -139,9 +143,11 @@ class _HistoryViewState extends ConsumerState<HistoryView> {
           ),
         )
         .closed
-        .then((reason) {
-          // A newer snackbar replaced this one and carries the same batch.
-          if (reason == SnackBarClosedReason.hide) return;
+        .then((_) {
+          // A newer Undo snackbar replaced this one and carries the same
+          // batch. Any other close, including another screen hiding it to
+          // show its own message, ends the chance to undo these deletes.
+          if (generation != _undoGeneration) return;
           _undoable.removeWhere(batch.contains);
         });
   }
