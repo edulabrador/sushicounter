@@ -1,6 +1,8 @@
 import 'dart:convert';
 import 'dart:io';
 
+import 'package:clock/clock.dart';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -18,7 +20,9 @@ import 'package:sushiscore/features/counter/providers/counter_provider.dart';
 import 'package:sushiscore/features/counter/views/counter_view.dart';
 import 'package:sushiscore/features/counter/widgets/session_timer.dart';
 import 'package:sushiscore/features/counter/widgets/sushi_button.dart';
+import 'package:sushiscore/features/history/views/history_view.dart';
 import 'package:sushiscore/features/settings/views/settings_view.dart';
+import 'package:sushiscore/features/stats/providers/stats_provider.dart';
 import 'package:sushiscore/features/stats/views/stats_view.dart';
 import 'package:sushiscore/main.dart';
 
@@ -205,6 +209,57 @@ void main() {
       expect(backup.global.lifetimeTotalTaps, 3);
     });
 
+    test('rejects dates DateTime cannot hold as a format error', () {
+      final data = jsonDecode(valid) as Map<String, dynamic>;
+      final session = (data['sessions'] as List).single as Map;
+      for (final input in [
+        {
+          ...data,
+          'sessions': [
+            {...session, 'endedAt': 9000000000000000},
+          ],
+        },
+        {
+          ...data,
+          'sessions': [
+            {...session, 'startedAt': -9000000000000000},
+          ],
+        },
+        {
+          ...data,
+          'global': {...data['global'] as Map, 'resetAt': 9000000000000000},
+        },
+      ]) {
+        expect(() => decodeBackup(jsonEncode(input)), throwsFormatException);
+      }
+    });
+
+    test('rejects sessions from a lifetime after the totals', () {
+      final data = jsonDecode(valid) as Map<String, dynamic>;
+      final session = (data['sessions'] as List).single as Map;
+      Map<String, dynamic> withEpoch(int epoch) => {
+        ...data,
+        'sessions': [
+          {...session, 'epoch': epoch},
+        ],
+      };
+      expect(
+        () => decodeBackup(jsonEncode(withEpoch(1))),
+        throwsFormatException,
+      );
+      expect(
+        () => decodeBackup(jsonEncode(withEpoch(-2))),
+        throwsFormatException,
+      );
+      // Legacy history whose totals could not be attributed is valid.
+      expect(
+        decodeBackup(
+          jsonEncode(withEpoch(Session.unattributedEpoch)),
+        ).sessions.single.contributionEpoch,
+        Session.unattributedEpoch,
+      );
+    });
+
     test('rejects malformed input', () {
       final data = jsonDecode(valid) as Map<String, dynamic>;
       final duplicate = {
@@ -228,6 +283,14 @@ void main() {
   });
 
   group('counter', () {
+    test('your own count stops at the most a session can hold', () async {
+      final repo = FakeRepository();
+      await repo.saveOngoingSession(Session.maxCount, DateTime(2026));
+      final container = makeContainer(repo);
+      container.read(counterProvider.notifier).increment();
+      expect(container.read(counterProvider).count, Session.maxCount);
+    });
+
     test('a restored count without a start time gets one', () async {
       final repo = FakeRepository();
       await repo.saveOngoingSession(3, null);
@@ -405,6 +468,39 @@ void main() {
       expect(repo.getGlobalState().lifetimeTotalSessions, 2);
     });
 
+    testWidgets('an Undo hidden by another message does not come back', (
+      tester,
+    ) async {
+      final repo = FakeRepository();
+      await repo.completeSession(_session('a', 3));
+      await repo.completeSession(
+        _session('b', 2, endedAt: DateTime(2026, 1, 2)),
+      );
+      await openHistory(tester, repo);
+
+      Future<void> deleteFirst() async {
+        await tester.tap(find.byTooltip('Delete session').first);
+        await tester.pumpAndSettle();
+        await tester.tap(find.text('Delete'));
+        await tester.pumpAndSettle();
+      }
+
+      await deleteFirst();
+      // Another screen (Settings) hides the Undo to show its own message.
+      ScaffoldMessenger.of(
+        tester.element(find.byType(HistoryView)),
+      ).hideCurrentSnackBar();
+      await tester.pumpAndSettle();
+
+      await deleteFirst();
+      expect(find.text('Session deleted'), findsOneWidget);
+      await tester.tap(find.text('Undo'));
+      await tester.pumpAndSettle();
+      // Only the delete the visible Undo was offered for comes back.
+      expect(repo.sessions.keys, ['a']);
+      expect(repo.getGlobalState().lifetimeTotalTaps, 3);
+    });
+
     testWidgets('session details show pace and allow deleting', (tester) async {
       final repo = FakeRepository();
       await repo.completeSession(_session('a', 30, durationSeconds: 600));
@@ -419,6 +515,29 @@ void main() {
       await tester.tap(find.text('Delete'));
       await tester.pumpAndSettle();
       expect(repo.sessions, isEmpty);
+    });
+  });
+
+  group('stats', () {
+    testWidgets('weekly figures move on when the app resumes another day', (
+      tester,
+    ) async {
+      final repo = FakeRepository();
+      await repo.completeSession(
+        _session('a', 3, endedAt: DateTime(2026, 1, 4)),
+      );
+      final container = makeContainer(repo);
+      var now = DateTime(2026, 1, 4, 23, 50); // A Sunday.
+      withClock(Clock(() => now), () {
+        expect(container.read(statsDataProvider).records.weeklyStreak, 1);
+        expect(container.read(statsDataProvider).weekly.last.pieces, 3);
+
+        // Past midnight it is Monday: a new week with nothing in it yet.
+        now = DateTime(2026, 1, 5, 0, 10);
+        container.read(statsDayProvider.notifier).refresh();
+        expect(container.read(statsDataProvider).weekly.last.pieces, 0);
+        expect(container.read(statsDataProvider).records.weeklyStreak, 1);
+      });
     });
   });
 
